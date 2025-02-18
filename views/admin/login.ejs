@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Pendent Store - Admin Login</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="/css/bootstrap.css" rel="stylesheet" type="text/css" media="all">
+    <link href="/css/style.css" rel="stylesheet" type="text/css" media="all">
+
+    <!-- jQuery -->
+    <script src="/js/jquery-1.11.1.min.js"></script>
+
+    <!-- Google Fonts -->
+    <link href='//fonts.googleapis.com/css?family=Monda:400,700' rel='stylesheet' type='text/css'>
+
+    <style>
+        /* Header Styling */
+        .header_top {
+            background: #fff;
+            padding: 15px 0;
+            border-bottom: 2px solid #ddd;
+        }
+        .logo {
+            text-align: center;
+            font-size: 24px;
+            font-weight: bold;
+            color: #007bff;
+        }
+        .logo img {
+            height: 40px;
+            margin-right: 10px;
+        }
+
+        /* Login Page Styling */
+        .login {
+            padding: 60px 0;
+            display: flex;
+            justify-content: center;
+        }
+        .login-grids {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-wrap: wrap;
+            max-width: 500px;
+            width: 100%;
+        }
+        .log {
+            background: #f9f9f9;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            text-align: center;
+        }
+        .log h3 {
+            color: #333;
+        }
+        .log input[type="text"], .log input[type="password"] {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .log input[type="submit"] {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            cursor: pointer;
+            border-radius: 5px;
+            width: 100%;
+            font-size: 16px;
+            font-weight: bold;
+        }
+        .log input[type="submit"]:hover {
+            background: #0056b3;
+        }
+        .log a {
+            color: #007bff;
+            text-decoration: none;
+            display: block;
+            margin-top: 10px;
+        }
+        .log a:hover {
+            color: #0056b3;
+        }
+
+        /* Footer */
+        footer {
+            width: 100%;
+            height: 50px;
+            background-color: #f8f9fa;
+            position: absolute;
+            bottom: 0;
+            left: 0;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .login {
+                padding: 30px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header -->
+    <div class="header_top">
+        <div class="container">
+            <div class="logo">
+                <img src="/images/gems.png" alt="Gems Icon">
+                Gems Of Elegance
+            </div>
+        </div>
+    </div>
+
+    <!-- Login Form -->
+    <div class="login">
+        <div class="container">
+            <div class="login-grids">
+                <div class="log">
+                    <h3>Admin Login</h3>
+                    <div class="strip"></div>
+                    <p>Welcome, please enter your credentials to continue.</p>
+                    <% if (error) { %>
+                        <div class="alert alert-danger">
+                            <%= error %>
+                        </div>
+                    <% } %>
+                    <form method="post" action="/admin/login">
+                        <h5>Email:</h5>    
+                        <input type="text" name="email" id="email" required>
+                        <h5>Password:</h5>
+                        <input type="password" name="password" id="password" required>                    
+                        <input type="submit" value="Login">
+                    </form>
+                    <a href="#">Forgot Password?</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Empty Footer -->
+    <footer></footer>
+
+</body>
+</html>

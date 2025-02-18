@@ -1,0 +1,130 @@
+<%- include("../../views/partials/user/header", { user: user }) %>
+
+<link href="css/otp.css" rel="stylesheet" type="text/css" media="all" />
+
+<form id="otpForm" class="otp-container" action="/verify_otp" method="post" onsubmit="return validate_otp_Form()">
+    <h2 class="otp-title">OTP Verification</h2>
+
+    <label for="otpInput" class="otp-label">Enter OTP:</label>
+    <input type="text" id="otpInput" class="otp-input" maxlength="6" placeholder="Enter 6-digit OTP">
+
+    <p class="resend-text">
+        <button id="resendbtn" class="resend-btn" disabled onclick="resendOTP(event)">
+            Resend OTP (<span id="countdown">01:59</span>)
+        </button>
+    </p>
+
+    <button type="submit" class="verify-btn">Verify OTP</button>
+
+    <p class="terms-text">
+        By clicking continue, you agree to our <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>
+    </p>
+</form>
+
+<!-- SweetAlert Library -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        startCountdown(); // Start countdown when page loads
+    });
+
+    // Countdown Timer Function
+    let countdownTime = 119; // 1 minute 59 seconds
+    let timerInterval;
+    
+    function startCountdown() {
+        countdownTime = 119; 
+        document.getElementById("resendbtn").disabled = true;
+
+        function updateCountdown() {
+            const minutes = Math.floor(countdownTime / 60);
+            const seconds = countdownTime % 60;
+            document.getElementById("countdown").textContent =
+                minutes + ":" + (seconds < 10 ? "0" : "") + seconds;
+
+            if (countdownTime > 0) {
+                countdownTime--;
+                timerInterval = setTimeout(updateCountdown, 1000);
+            } else {
+                document.getElementById("countdown").textContent = "Resend Now";
+                document.getElementById("resendbtn").disabled = false;
+            }
+        }
+        updateCountdown();
+    }
+
+    function validate_otp_Form() {
+        const otpInput = document.getElementById("otpInput").value.trim();
+        $.ajax({
+            type: "POST",
+            url: "/verify_otp",
+            data: { otp: otpInput },
+            success: function(response) {
+                if (response.success) {
+                    Swal.fire({
+                        icon: "success",
+                        title: "OTP Verified Successfully",
+                        showConfirmButton: false,
+                        timer: 1500
+                    }).then(() => {
+                        window.location.href = response.redirectUrl;
+                    });
+                } else {
+                    Swal.fire({
+                        icon: "error",
+                        title: "Error",
+                        text: response.message,
+                    });
+                }
+            },
+            error: function() {
+                Swal.fire({
+                    icon: "error",
+                    title: "Invalid OTP",
+                    text: "Please try again"
+                });
+            }
+        });
+        return false;
+    }
+
+    function resendOTP(event) {
+        event.preventDefault(); // Prevent default button action
+
+        $.ajax({
+            type: "POST",
+            url: "/resend_otp",
+            success: function(response) {
+                if (response.success) {
+                    Swal.fire({
+                        icon: "success",
+                        title: "New OTP Sent!",
+                        text: response.message,
+                        showConfirmButton: false,
+                        timer: 1500
+                    });
+
+                    clearTimeout(timerInterval); // Stop previous timer
+                    startCountdown(); // Restart timer
+                } else {
+                    Swal.fire({
+                        icon: "error",
+                        title: "Error",
+                        text: response.message
+                    });
+                }
+            },
+            error: function() {
+                Swal.fire({
+                    icon: "error",
+                    title: "Failed to Resend OTP",
+                    text: "Please try again later."
+                });
+            }
+        });
+    }
+</script>
+
+<%- include("../../views/partials/user/footer") %>

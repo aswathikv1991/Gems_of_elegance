@@ -1,0 +1,162 @@
+<!-- reg-form -->
+<style>
+    .error {
+        color: red;
+        font-size: 14px;
+        margin-top: 5px;
+    }
+</style>
+
+<%- include("../../views/partials/user/header") %>
+<% if (typeof message !== "undefined" && message) { %>
+    <div class="error" style="color: red; font-weight: bold; margin-bottom: 10px; text-align: center;">
+        <%= message %>
+    </div>
+<% } %>
+<div class="reg-form">
+    <div class="container">
+        <div class="reg">
+            <h3>Register Now</h3>
+            <p>Welcome, please enter the following details to continue.</p>
+            <p>If you have previously registered with us, <a href="#">click here</a></p>
+            
+            <form id="signupform" method="post" action="/signup">
+                <ul>
+                    <li class="text-info">Full Name: </li>
+                    <li>
+                        <input type="text" id="name" name="name">
+                        <div class="error" id="nameError"></div>
+                    </li>
+                </ul>
+
+                <ul>
+                    <li class="text-info">Email: </li>
+                    <li>
+                        <input type="text" id="email" name="email">
+                        <div class="error" id="emailError"></div>
+                    </li>
+                </ul>
+
+                <ul>
+                    <li class="text-info">Password: </li>
+                    <li>
+                        <input type="password" id="password" name="password">
+                        <div class="error" id="passwordError"></div>
+                    </li>
+                </ul>
+
+                <ul>
+                    <li class="text-info">Re-enter Password:</li>
+                    <li>
+                        <input type="password" id="confirmPassword" name="confirmPassword">
+                        <div class="error" id="confirmPasswordError"></div>
+                    </li>
+                </ul>
+
+                <ul>
+                    <li class="text-info">Phone Number:</li>
+                    <li>
+                        <input type="text" id="phone" name="phone">
+                        <div class="error" id="phoneError"></div>
+                    </li>
+                </ul>
+
+                <!-- Register Now Button & Google Sign-In -->
+<!-- Register Now Button & Google Sign-In -->
+<div style="display: flex; flex-direction: column; align-items: center; gap: 10px; margin-top: 10px;">
+    <input type="submit" value="Register Now" style="width: 100%; max-width: 200px;">
+
+    <a href="/auth/google" style="display: flex; align-items: center; background-color: #4285F4; color: white; padding: 10px 15px; border-radius: 5px; cursor: pointer; font-size: 14px; font-weight: bold; text-decoration: none;">
+        <img src="https://developers.google.com/identity/images/g-logo.png" style="width: 20px; height: 20px; margin-right: 10px;" alt="Google Logo">
+        Sign in with Google
+    </a>
+</div>
+
+                <p class="click">By clicking this button, you agree to our <a href="#">Policy Terms and Conditions.</a></p>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.getElementById("signupform").addEventListener("submit", function(event) {
+        if (!validateForm()) {
+            event.preventDefault();
+        }
+    });
+
+    function validateForm() {
+        let isValid = true;
+
+        // Full Name Validation
+        let name = document.getElementById("name").value.trim();
+        let namePattern = /^[A-Za-z\s]+$/;
+        if (name === "") {
+            document.getElementById("nameError").innerText = "Full name is required.";
+            isValid = false;
+        } else if (!namePattern.test(name)) {
+            document.getElementById("nameError").innerText = "Name can only contain alphabets and spaces.";
+            isValid = false;
+        } else if (/\s{2,}/.test(name)) {
+            document.getElementById("nameError").innerText = "Name cannot have multiple spaces.";
+            isValid = false;
+        } else {
+            document.getElementById("nameError").innerText = "";
+        }
+
+        // Email Validation
+        let email = document.getElementById("email").value.trim();
+        let emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (email === "") {
+            document.getElementById("emailError").innerText = "Email is required.";
+            isValid = false;
+        } else if (!emailPattern.test(email)) {
+            document.getElementById("emailError").innerText = "Enter a valid email address.";
+            isValid = false;
+        } else {
+            document.getElementById("emailError").innerText = "";
+        }
+
+        // Password Validation
+        let password = document.getElementById("password").value;
+        let passwordPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+        if (password === "") {
+            document.getElementById("passwordError").innerText = "Password is required.";
+            isValid = false;
+        } else if (!passwordPattern.test(password)) {
+            document.getElementById("passwordError").innerText = "Password must be at least 8 characters long, contain one uppercase letter, one lowercase letter, one number, and one special character.";
+            isValid = false;
+        } else {
+            document.getElementById("passwordError").innerText = "";
+        }
+
+        // Confirm Password Validation
+        let confirmPassword = document.getElementById("confirmPassword").value;
+        if (confirmPassword === "") {
+            document.getElementById("confirmPasswordError").innerText = "Please confirm your password.";
+            isValid = false;
+        } else if (confirmPassword !== password) {
+            document.getElementById("confirmPasswordError").innerText = "Passwords do not match.";
+            isValid = false;
+        } else {
+            document.getElementById("confirmPasswordError").innerText = "";
+        }
+
+        // Phone Number Validation
+        let phone = document.getElementById("phone").value.trim();
+        let phonePattern = /^[0-9]{10}$/;
+        if (phone === "") {
+            document.getElementById("phoneError").innerText = "Phone number is required.";
+            isValid = false;
+        } else if (!phonePattern.test(phone)) {
+            document.getElementById("phoneError").innerText = "Enter a valid 10-digit phone number.";
+            isValid = false;
+        } else {
+            document.getElementById("phoneError").innerText = "";
+        }
+
+        return isValid;
+    }
+</script>
+
+<%- include("../../views/partials/user/footer") %>
