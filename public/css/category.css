@@ -1,0 +1,229 @@
+
+.col-md-3 {
+  padding: 20px;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  margin: 10px;
+}
+
+.form-label {
+  margin-bottom: 8px;
+}
+
+.form-control {
+  width: 100%;
+  padding: 8px;
+  margin-bottom: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  box-sizing: border-box;
+}
+
+.d-grid {
+  margin-top: 20px;
+}
+
+.btn-primary {
+  background-color: #204056;
+  color: #fff;
+  border: 1px solid #007bff;
+  border-radius: 5px;
+  padding: 10px 20px;
+  cursor: pointer;
+}
+
+.btn-primary:hover {
+  background-color: #0056b3;
+  border-color: #0056b3;
+}
+
+.pagination-container {
+  text-align: center;
+}
+
+.pagination {
+  display: inline-block;
+}
+
+.pagination a,
+.pagination .current-page {
+  display: inline-block;
+  padding: 5px 10px;
+  margin: 0 2px;
+  border: 1px solid #ddd;
+  text-decoration: none;
+  color: #333;
+}
+
+.pagination a:hover {
+  background-color: #f5f5f5;
+}
+
+.error-message {
+  color: red;
+}
+/* General Styles */
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f8f9fa;
+  }
+  
+  /* Main Content Section */
+  .content-main {
+    margin-left: 250px; /* Adjusted to prevent sidebar overlap */
+    padding: 20px;
+  }
+  
+  /* Header */
+  .content-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 15px;
+  }
+  
+  .content-title {
+    font-size: 24px;
+    font-weight: bold;
+    color: #204056;
+  }
+  
+  /* Search Bar */
+  .card-header {
+    background-color: #fff;
+    padding: 15px;
+  }
+  
+  .input-group {
+    max-width: 500px;
+    margin: 0 auto;
+  }
+  
+  .input-group input {
+    height: 40px;
+  }
+  
+  /* Form Section */
+  .card {
+    background: #fff;
+    border-radius: 8px;
+    padding: 20px;
+  }
+  
+  .col-md-3 {
+    background: #f8f9fa;
+    padding: 20px;
+    border-radius: 8px;
+  }
+  
+  label {
+    font-weight: bold;
+    margin-top: 10px;
+  }
+  
+  .btn-primary {
+    width: 100%;
+    margin-top: 10px;
+  }
+  
+  /* Table */
+  .table-responsive {
+    margin-top: 20px;
+  }
+  
+  .table {
+    width: 100%;
+    background: #fff;
+    border-radius: 8px;
+  }
+  
+  .table thead {
+    background: #204056;
+    color: white;
+  }
+  
+  .table th, .table td {
+    padding: 10px;
+    text-align: left;
+  }
+  
+  .table th {
+    font-size: 16px;
+  }
+  
+  .table td {
+    font-size: 14px;
+  }
+  
+  /* Buttons */
+  .btn-info {
+    background: #4287cb;
+    border: none;
+  }
+  
+  .btn-danger {
+    background: #dc3545;
+    border: none;
+  }
+  
+  /* Pagination */
+  .pagination-container {
+    text-align: center;
+    margin-top: 20px;
+  }
+  
+  .pagination-container a {
+    padding: 8px 15px;
+    margin: 0 5px;
+    text-decoration: none;
+    color: #007bff;
+    border: 1px solid #007bff;
+    border-radius: 5px;
+  }
+  
+  .pagination-container a:hover {
+    background: #007bff;
+    color: white;
+  }
+  
+  .pagination-container .current-page {
+    padding: 8px 15px;
+    margin: 0 5px;
+    font-weight: bold;
+    color: white;
+    background: #007bff;
+    border-radius: 5px;
+  }
+  .input-group {
+    display: flex;
+    align-items: center;
+    background-color: #f8f9fa; /* Light gray background */
+    border-radius: 50px;
+    padding: 5px;
+    width: 500px;
+    margin: 0 auto; /* Centering */
+}
+
+.input-group input {
+    flex: 1;
+    border: none;
+    outline: none;
+    border-radius: 50px;
+    padding: 10px;
+    font-size: 14px;
+    background-color: transparent; 
+}
+
+.input-group button {
+    background-color: #007bff; 
+    color: white;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 50px;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+.input-group button:hover {
+    background-color: #0056b3; 
+}

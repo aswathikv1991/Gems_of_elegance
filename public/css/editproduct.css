@@ -1,0 +1,81 @@
+/* General Page Styling */
+.content-main {
+    max-width: 800px;
+    margin: auto;
+    background: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Form Styling */
+form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+label {
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+input, textarea {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 16px;
+}
+
+/* Image Display */
+div img {
+    margin: 5px;
+    border-radius: 5px;
+    border: 1px solid #ddd;
+}
+
+/* Checkbox Alignment */
+input[type="checkbox"] {
+    margin-left: 10px;
+}
+
+/* Submit Button */
+button {
+    background-color: #007bff;
+    color: white;
+    padding: 10px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+button:hover {
+    background-color: #0056b3;
+}
+/* Ensures images and checkboxes align properly */
+.image-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px; /* Space between images */
+    align-items: center;
+}
+
+.image-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+.image-item img {
+    width: 70px; /* Adjust image size */
+    height: 70px;
+    object-fit: cover;
+    border-radius: 5px; /* Optional rounded corners */
+}
+
+.image-item input {
+    margin-top: 5px; /* Space between image and checkbox */
+}

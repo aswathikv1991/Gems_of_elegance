@@ -1,0 +1,60 @@
+<%- include("../../views/partials/admin/header") %>
+<link href="/css/editproduct.css" rel="stylesheet" type="text/css">
+
+<section class="content-main">
+    <div class="content-header">
+        <h2 class="content-title">Edit Product</h2>
+    </div>
+
+    <form action="/admin/editproduct/<%= product._id %>" method="POST" enctype="multipart/form-data">
+        <label>Product Name:</label>
+        <input type="text" name="name" value="<%= product.name %>" required>
+
+        <label for="category">Category</label>
+        <select name="category" id="category">
+            <% categories.forEach(category => { %>
+                <option value="<%= category._id %>" <%= product.categoryId.toString() === category._id.toString() ? 'selected' : '' %>>
+                    <%= category.name %>
+                </option>
+            <% }) %>
+        </select>
+        
+
+        <label>Material:</label>
+        <input type="text" name="material" value="<%= product.material %>" required>
+
+        <label>SKU:</label>
+        <input type="text" name="sku" value="<%= product.sku %>" required>
+
+        <label>Price:</label>
+        <input type="number" name="price" value="<%= product.price %>" required>
+
+        <label>Description:</label>
+        <textarea name="description" required><%= product.description %></textarea>
+
+        <label>Color:</label>
+        <input type="text" name="color" value="<%= product.color %>" required>
+
+        <label>Quantity:</label>
+        <input type="number" name="quantity" value="<%= product.quantity %>" required>
+
+      
+        <label>Current Images:</label>
+        <div class="image-container">
+    <% product.image.forEach((img, index) => { %>
+        <div class="image-item">
+            <img src="<%= img %>" alt="Product Image">
+            <input type="checkbox" name="deleteImages" value="<%= img %>"> Remove
+        </div>
+    <% }) %>
+</div>
+
+        
+        <label>Upload New Images:</label>
+        <input type="file" name="newImages" multiple>
+
+        <button type="submit">Update Product</button>
+    </form>
+</section>
+
+<%- include("../../views/partials/admin/footer") %>

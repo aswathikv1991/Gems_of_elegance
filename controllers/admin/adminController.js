@@ -14,36 +14,7 @@ const loadLogin=(req,res)=>{
     }
 
 }
-/*const login=async(req,res)=>{
-    try{
-        const {email,password}=req.body
-        const admin=await User.findOne({email,isAdmin:true})
-        if(admin){
-            const passwordMatch= await bcrypt.compare(password,admin.password)
-            if(passwordMatch){
-                console.log("admin enterd")
-                req.session.admin=admin._id
-                return res.redirect("/admin/dashboard")
 
-            }
-            else{
-                return res.redirect("/admin/login")
-            }
-
-        }
-        else{
-            return res.redirect("/admin/login")
-        }
-    }
-    catch(error)
-    {
-        console.log("login error",error)
-        return res.redirect("/admin/pageError")
-    }
-}
-*/
-
-// Example: Admin Login
 const login = async (req, res) => {
     try {
         const { email, password } = req.body;
@@ -58,10 +29,10 @@ const login = async (req, res) => {
             return res.render("admin/login", { error: "Invalid credentials!" });
         }
 
-        // Store the user ID in session
+       
         req.session.admin = adminUser._id;
 
-        // Redirect to dashboard
+      
         return res.redirect("/admin/dashboard");
     } 
     catch (error) {
@@ -84,6 +55,7 @@ res.redirect("/admin/pageError")
    }
 }
 const pageError=async(req,res)=>{
+    
     res.render("admin/pageError")
 }
 const logout=async(req,res)=>{

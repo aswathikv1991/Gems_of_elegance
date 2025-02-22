@@ -1,0 +1,43 @@
+
+.auth-links {
+    display: flex;
+    gap: 10px;
+    font-size: 16px;
+    font-weight: bold;
+    align-items: center;
+}
+.user-info {
+    display: flex;
+    gap: 20px; /* Adjust spacing between items */
+    font-size: 16px;
+    font-weight: bold;
+    align-items: center;
+}
+
+.user-info a {
+    text-decoration: none;
+    color: #007bff; /* Use the same blue as 'Pendent Store' */
+    transition: color 0.3s ease-in-out;
+}
+
+.user-text, .user-link {
+    color: #007bff; /* Blue color */
+    text-decoration: none; /* Remove underlines */
+}
+
+/* Ensure images/icons also get the blue tint */
+.user-link img {
+    filter: invert(20%) sepia(60%) saturate(300%) hue-rotate(200deg); /* Blue tint for icons */
+    transition: transform 0.3s; /* Smooth hover effect */
+}
+
+/* Hover effect for better UX */
+.user-link:hover, .user-text:hover {
+    color: #0056b3; /* Darker blue on hover */
+}
+
+/* Hover effect on icons */
+.user-link img:hover {
+    transform: scale(1.1); /* Slight zoom on hover */
+}
+

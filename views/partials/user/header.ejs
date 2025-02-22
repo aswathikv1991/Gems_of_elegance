@@ -13,6 +13,7 @@ Smartphone Compatible web template, free webdesigns for Nokia, Samsung, LG, Sony
 <!-- //for-mobile-apps -->
 <link href="css/bootstrap.css" rel="stylesheet" type="text/css" media="all" />
 <link href="css/style.css" rel="stylesheet" type="text/css" media="all" /> 
+<link href="/css/userheader.css" rel="stylesheet" type="text/css">
 <!-- js -->
 <script src="js/jquery-1.11.1.min.js"></script>
 <!-- //js -->
@@ -35,57 +36,11 @@ Smartphone Compatible web template, free webdesigns for Nokia, Samsung, LG, Sony
 <script src="js/menu_jquery.js"></script>
 <script src="js/simpleCart.min.js"> </script>
 <link href='//fonts.googleapis.com/css?family=Monda:400,700' rel='stylesheet' type='text/css'>
-<style>
-.auth-links {
-    display: flex;
-    gap: 10px;
-    font-size: 16px;
-    font-weight: bold;
-    align-items: center;
-}
-.user-info {
-    display: flex;
-    gap: 20px; /* Adjust spacing between items */
-    font-size: 16px;
-    font-weight: bold;
-    align-items: center;
-}
 
-.user-info a {
-    text-decoration: none;
-    color: #007bff; /* Use the same blue as 'Pendent Store' */
-    transition: color 0.3s ease-in-out;
-}
-
-.user-text, .user-link {
-    color: #007bff; /* Blue color */
-    text-decoration: none; /* Remove underlines */
-}
-
-/* Ensure images/icons also get the blue tint */
-.user-link img {
-    filter: invert(20%) sepia(60%) saturate(300%) hue-rotate(200deg); /* Blue tint for icons */
-    transition: transform 0.3s; /* Smooth hover effect */
-}
-
-/* Hover effect for better UX */
-.user-link:hover, .user-text:hover {
-    color: #0056b3; /* Darker blue on hover */
-}
-
-/* Hover effect on icons */
-.user-link img:hover {
-    transform: scale(1.1); /* Slight zoom on hover */
-}
-
-</style>
 </head>
 	
 <body>
-<!-- header -->
-	
-<!-- //header -->
-<!-- top-header -->
+
 <div class="top_bg">
 	<div class="container">
 		<div class="header_top-sec">
@@ -95,32 +50,12 @@ Smartphone Compatible web template, free webdesigns for Nokia, Samsung, LG, Sony
 					<li><a href="login.html"></a></li>
 				</ul>
 			</div>
-			<!--<div class="top_left">
-				<ul>
-					<li class="top_link"><a href="/signup">Signup</a></li>|
-					<li class="top_link"><a href="/login">Login</a></li>					
-				</ul>
-			</div>-->
+			
 			<div class="clearfix"> </div>
 		</div>
 	</div>
 </div>
-<!-- top-header -->
-<!-- logo-cart -->
-<!--<div class="header_top">
-	<div class="container">
-		<div class="logo">
-		 	<a href="index.html">Pendent Store</a>			 
-		</div>
-		<div class="header_right">
-			<div class="auth-links">
-				<a href="/signup">Signup</a> |
-				<a href="/login">Login</a>
-			</div>				 
-		</div>
-		<div class="clearfix"></div>	
-	</div>
-</div>-->
+
 <div class="header_top">
     <div class="container">
         <div class="logo">
@@ -148,22 +83,7 @@ Smartphone Compatible web template, free webdesigns for Nokia, Samsung, LG, Sony
 </div>
 
 		
-		<!--<div class="header_right">
-			<div class="cart box_1">
-				<a href="checkout.html">
-				<h3> <div class="total">
-					<span class="simpleCart_total"></span> (<span id="simpleCart_quantity" class="simpleCart_quantity"></span> items)</div>
-					<img src="images/cart1.png" alt=""/></h3>
-				</a>
-				<p><a href="javascript:;" class="simpleCart_empty">Empty Cart</a></p>
-				<div class="clearfix"> </div>
-			</div>				 
-		</div>
-		<div class="clearfix"></div>	
-	</div>
-</div>-->
-<!-- //logo-cart -->
-<!------>
+	
 <div class="mega_nav">
 	 <div class="container">
 		 <div class="menu_sec">
@@ -172,7 +92,7 @@ Smartphone Compatible web template, free webdesigns for Nokia, Samsung, LG, Sony
 			<li class="active grid"><a class="color1" href="/">Home</a></li>
 			<li class="grid"><a class="color1" href="#">jewellery</a>
 			</li>
-			<li><a class="color1" href="#">catalog</a>
+			<li><a class="color1" href="/products">catalog</a>
 				
 			</li>				
 			<li><a class="color1" href="#">Sale</a>

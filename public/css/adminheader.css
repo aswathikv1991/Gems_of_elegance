@@ -179,10 +179,24 @@
 }
 
 /* Block & Unblock Buttons */
-.btn-success a, .btn-danger a {
-    color: rgb(220, 35, 35);
-    text-decoration: none;
+.btn-success {
+    background-color: #28a745 !important; /* Green */
+    border-color: #28a745 !important;
 }
+
+.btn-danger {
+    background-color: #dc3545 !important; /* Red */
+    border-color: #dc3545 !important;
+}
+
+.btn-success a, .btn-danger a {
+    display: block; /* Make the entire button clickable */
+    width: 100%;
+    height: 100%;
+    text-align: center;
+    padding: 5px 0;
+}
+
 /* Search Bar Styling */
 .search-container {
     display: flex;
@@ -216,4 +230,48 @@
 
 
 
-   
+.dropdown-item.text-danger {
+    font-weight: bold; /* Make text bold */
+    color: #4a1199 !important; /* Red color */
+}
+
+.dropdown-item.text-danger:hover {
+    background-color: #ffcccc !important; /* Light red background on hover */
+    color: #29168a !important; /* Darker red text on hover */
+}
+
+.material-icons.md-exit_to_app {
+    color: #dc3545; /* Make the icon red */
+    font-size: 18px; /* Adjust icon size */
+    vertical-align: middle; /* Align icon with text */
+    margin-right: 5px; /* Add space between icon and text */
+}
+.pagination {
+    display: flex;
+    justify-content: center; /* Center pagination */
+    align-items: center;
+    gap: 8px; /* Add spacing between page numbers */
+}
+
+.pagination .page-item {
+    list-style: none; /* Remove default list styles */
+}
+
+.pagination .page-link {
+    color: #007bff !important; /* Bootstrap primary color */
+    font-weight: bold;
+    border-radius: 5px; /* Rounded corners */
+    padding: 8px 12px; /* Adjust padding */
+    transition: all 0.3s ease-in-out; /* Smooth hover effect */
+}
+
+.pagination .page-link:hover {
+    background-color: #007bff !important;
+    color: white !important;
+}
+
+.pagination .page-item.active .page-link {
+    background-color: #007bff !important;
+    color: white !important;
+    border-color: #007bff !important;
+}

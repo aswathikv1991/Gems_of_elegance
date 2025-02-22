@@ -1,0 +1,25 @@
+<%- include("../../views/partials/admin/header") %>
+<link href="/css/viewproduct.css" rel="stylesheet" type="text/css">
+<div class="view-product-container">
+    <h2>Product Details</h2>
+    <table class="view-product-table">
+        <tr><th>Name:</th><td><%= product.name %></td></tr>
+        <tr><th>Category:</th><td><%= product.categoryId ? product.categoryId.name : 'No Category' %></td></tr>
+        <tr><th>Material:</th><td><%= product.material %></td></tr>
+        <tr><th>SKU:</th><td><%= product.sku %></td></tr>
+        <tr><th>Price:</th><td>₹<%= product.price %></td></tr>
+        <tr><th>Description:</th><td><%= product.description ? product.description : 'No description available' %></td></tr>
+        <tr><th>Color:</th><td><%= product.color %></td></tr>
+        <tr><th>Quantity:</th><td><%= product.quantity %></td></tr>
+        <tr><th>Images:</th>
+            <td class="product-images">
+                <% product.image.forEach(img => { %>
+                    <img src="<%= img %>" alt="Product Image">
+                <% }) %>
+            </td>
+        </tr>
+    </table>
+    <a href="/admin/getproduct" class="btn-back">Back</a>
+</div>
+
+<%- include("../../views/partials/admin/footer") %>

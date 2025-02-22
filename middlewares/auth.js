@@ -22,15 +22,15 @@ const userAuth = async (req, res, next) => {
 
 const adminAuth = async (req, res, next) => {
     try {
-        console.log("Session user ID:", req.session.admin); 
+       // console.log("Session user ID:", req.session.admin); 
         if (!req.session.admin) {
             return res.redirect("/admin/login");  
         }
-       // Log the session ID to ensure it's correct
+      
 
        
         const adminUser = await User.findById(req.session.admin);
-        console.log("Found admin user:", adminUser)
+       // console.log("Found admin user:", adminUser)
         if (adminUser && adminUser.isAdmin) {
            return  next(); 
         } else {

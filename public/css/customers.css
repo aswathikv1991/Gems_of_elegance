@@ -1,0 +1,40 @@
+.input-group {
+    display: flex;
+    align-items: center;
+    background-color: #f8f9fa; /* Light gray background */
+    border-radius: 50px;
+    padding: 5px;
+    width: 500px;
+    margin: 0 auto; /* Centering */
+}
+
+.input-group input {
+    flex: 1;
+    border: none;
+    outline: none;
+    border-radius: 50px;
+    padding: 10px;
+    font-size: 14px;
+    background-color: transparent; /* Match background */
+}
+
+.input-group button {
+    background-color: #007bff; /* Bootstrap Primary Blue */
+    color: white;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 50px;
+    cursor: pointer;
+    transition: background 0.3s;
+    display: flex;
+    align-items: center;
+    gap: 5px; /* Space between icon and text */
+}
+
+.input-group button i {
+    font-size: 14px;
+}
+
+.input-group button:hover {
+    background-color: #0056b3; /* Darker blue on hover */
+}

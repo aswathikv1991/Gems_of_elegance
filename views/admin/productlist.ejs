@@ -1,0 +1,104 @@
+<%- include("../../views/partials/admin/header") %>
+<link href="/css/productlist.css" rel="stylesheet" type="text/css">
+
+<section class="content-main">
+    <div class="content-header">
+        <h2 class="content-title">Product Management</h2>
+    </div>
+
+    <div class="header-actions">
+        <form action="/admin/getproduct" method="GET" class="search-form">
+            <input type="text" name="search" value="<%= searchQuery %>" placeholder="Search by Name or SKU..." class="search-input">
+            <button type="submit" class="btn btn-primary">Search</button>
+        </form>
+        <a href="/admin/addproduct" class="btn add-product-btn">Add Product</a>
+    </div>
+    
+
+    <div class="card">
+        <div class="card-body">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Product ID</th> 
+                        <th>Image</th>
+                        <th>Name</th>
+                        <th>Category</th>
+                        <th>Price</th>
+                        <th>Stock</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% products.forEach(product => { %>
+                        <tr>
+                            <td><%= product.productId %></td>
+                            <td>
+                                <% if (product.image && product.image.length > 0) { %>
+                                    <img src="<%= product.image[0] %>" width="50">
+                                <% } else { %>
+                                    <span>No Image</span>
+                                <% } %>
+                            </td>
+                            <td><%= product.name %></td>
+                            <td><%= product.categoryId ? product.categoryId.name : 'Uncategorized' %></td>
+                            <td>₹<%= product.price %></td>
+                            <td>
+                                <% if (product.quantity > 0) { %>
+                                    <span class="text-success">In Stock (<%= product.quantity %>)</span>
+                                <% } else { %>
+                                    <span class="text-danger">Out of Stock</span>
+                                <% } %>
+                            </td>
+                            <td>
+                                <a href="/admin/viewproduct/<%= product._id %>" class="btn btn-primary">View</a>
+                                <a href="/admin/editproduct/<%= product._id %>" class="btn btn-info">Edit</a>
+                                <button class="btn btn-danger delete-btn" data-id="<%= product._id %>">Delete</button>
+                                
+                            </td>
+                            
+                        </tr>
+                    <% }) %>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Pagination -->
+    <div class="pagination-container">
+        <% if (currentPage > 1) { %>
+            <a href="/admin/getproduct?page=<%= currentPage - 1 %>&search=<%= searchQuery %>" class="btn btn-light">Previous</a>
+        <% } %>
+        <span>Page <%= currentPage %> of <%= totalPages %></span>
+        <% if (currentPage < totalPages) { %>
+            <a href="/admin/getproduct?page=<%= currentPage + 1 %>&search=<%= searchQuery %>" class="btn btn-light">Next</a>
+        <% } %>
+    </div>
+</section>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    $(document).ready(function () {
+    $(".delete-btn").click(function () {
+        let productId = $(this).data("id");
+        let row = $(this).closest("tr"); 
+        if (confirm("Are you sure you want to delete this product?")) {
+            $.ajax({
+                url: `/admin/deleteproduct/${productId}`,
+                type: "DELETE",
+                success: function (response) {
+                    alert(response.message);
+                    row.remove(); 
+                },
+                error: function (xhr) {
+                    alert("Error: " + xhr.responseText);
+                }
+            });
+        }
+    });
+});
+
+</script>
+
+
+<%- include("../../views/partials/admin/footer") %>
+

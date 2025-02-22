@@ -6,7 +6,7 @@ const customerInfo = async (req, res) => {
         let page = parseInt(req.query.page) || 1;
         const limit = 3;
 
-        // Fetch customers with pagination and search
+      
         const userData = await User.find({
             isAdmin: false,
             $or: [
@@ -18,7 +18,7 @@ const customerInfo = async (req, res) => {
         .skip((page - 1) * limit)
         .exec();
 
-        // Count total number of documents (for pagination)
+       
         const count = await User.countDocuments({
             isAdmin: false,
             $or: [
@@ -27,7 +27,7 @@ const customerInfo = async (req, res) => {
             ],
         });
 
-        // Calculate total pages
+   
         const totalPages = Math.ceil(count / limit);
 
         // Render page and pass data
@@ -44,4 +44,29 @@ const customerInfo = async (req, res) => {
     }
 };
 
-module.exports = { customerInfo };
+const customerBlocked=async(req,res)=>{
+    try{
+        let id=req.query.id
+        await User.updateOne({_id:id},{$set:{isBlocked:true}})
+        res.redirect("/admin/users")
+    }
+    catch(error){
+        res.redirect("/pageError")
+    }
+    
+}
+
+const customerunBlocked=async(req,res)=>{
+    try{
+        let id=req.query.id
+        await User.updateOne({_id:id},{$set:{isBlocked:false}})
+        res.redirect("/admin/users")
+    }
+    catch(error){
+        res.redirect("/pageError")
+    }
+    
+}
+
+
+module.exports = { customerInfo,customerBlocked,customerunBlocked };

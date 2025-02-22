@@ -1,6 +1,7 @@
 const express=require("express")
 const router=express.Router()
 const userController= require("../controllers/user/userController")
+const ProductController=require("../controllers/user/ProductController")
 const passport = require("passport")
 
 
@@ -20,5 +21,8 @@ router.get("/auth/google/callback",passport.authenticate('google',{failureRedire
 router.get("/login",userController.loadLogin)
 router.post("/login",userController.login)
 router.get("/logout", userController.logout);
+router.get("/products",ProductController.getAllProducts);
+router.get("/productdetail/:id", ProductController.getProductDetail);
+
 
 module.exports=router

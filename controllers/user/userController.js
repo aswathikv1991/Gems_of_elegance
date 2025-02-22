@@ -32,9 +32,9 @@ const loadSignup = async (req, res) => {
         if (req.session.user) {
             // Fetch the full user object from the database
             const user = await User.findById(req.session.user);
-            return res.redirect("/"); // If the user is already logged in, redirect to homepage
+            return res.redirect("/"); 
         }
-        return res.render("user/signup", { user: null, message: "" }); // Pass user as null for non-logged-in users
+        return res.render("user/signup", { user: null, message: "" }); 
     } catch (error) {
         console.log("Signup page not loading", error);
         res.status(500).send("Server error");
@@ -237,15 +237,15 @@ const login = async (req, res) => {
         const findUser = await User.findOne({ isAdmin: 0, email: email });
 
         if (!findUser) {
-            return res.render("user/login", { message: "User not found" });
+            return res.render("user/login", { user:null,message: "User not found" });
         }
         if (findUser.isBlocked) {
-            return res.render("user/login", { message: "User is blocked by admin" });
+            return res.render("user/login", { user:null,message: "User is blocked by admin" });
         }
 
         const passwordMatch = await bcrypt.compare(password, findUser.password);
         if (!passwordMatch) {
-            return res.render("user/login", { message: "Incorrect password" });
+            return res.render("user/login", { user:null,message: "Incorrect password" });
         }
 
         req.session.user = findUser._id;
@@ -254,7 +254,7 @@ const login = async (req, res) => {
         res.redirect("/");
     } catch (error) {
         console.error("Login error", error);
-        res.render("user/login", { message: "Login failed, please try again later" });
+        res.render("user/login", {user:null, message: "Login failed, please try again later" });
     }
 };
 
