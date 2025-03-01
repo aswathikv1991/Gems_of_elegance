@@ -2,7 +2,9 @@ const express=require("express")
 const router=express.Router()
 const userController= require("../controllers/user/userController")
 const ProductController=require("../controllers/user/ProductController")
+const ProfileController=require("../controllers/user/profileController")
 const passport = require("passport")
+const {userAuth,adminAuth}=require("../middlewares/auth")
 
 
 router.get("/",userController.loadHomepage)
@@ -20,9 +22,29 @@ router.get("/auth/google/callback",passport.authenticate('google',{failureRedire
 })
 router.get("/login",userController.loadLogin)
 router.post("/login",userController.login)
-router.get("/logout", userController.logout);
+router.get("/logout",userAuth,userController.logout);
 router.get("/products",ProductController.getAllProducts);
 router.get("/productdetail/:id", ProductController.getProductDetail);
-
-
+router.get("/reviews/:productId",ProductController.getReview)
+router.get("/myaccount", userAuth, ProfileController.loadMyAccount);
+router.get("/forgot_password",ProfileController.getForgotPassword);
+router.post("/forgot_password",ProfileController.forgotEmailValid);
+router.post("/resend_forgot_otp",ProfileController.resendForgotOtp);
+router.post("/verify_forgot_otp", ProfileController.verifyForgotOtp);
+router.get("/reset_password", ProfileController.resetPasswordPage);
+router.post("/reset_password", ProfileController.resetPassword);
+router.get("/editprofile", userAuth, ProfileController.loadEditProfile);
+router.post("/editprofile", ProfileController.editProfile);
+router.post("/sendotp", ProfileController.sendProfileOtp);
+router.post("/verify_profile_otp", ProfileController.verifyProfileOtp);
+router.get("/addnewaddress",userAuth,ProfileController.addAddress)
+router.post("/addnewaddress",userAuth, ProfileController.postaddAddress);
+router.get("/getaddresses", userAuth, ProfileController.getAddresses)
+router.delete("/deleteaddress/:id", userAuth, ProfileController.deleteAddress);
+router.get("/editaddress/:id", userAuth, ProfileController.editAddressPage);
+router.put("/updateaddress/:id", userAuth, ProfileController.updateAddress);
+router.get("/wishlist", userAuth,ProductController.getWishlist );
+router.get("/check-login-status",ProductController.loginstatus)
+router.post("/wishlist/add",userAuth, ProductController.addToWishlist);
+router.delete("/wishlist/remove/:id", userAuth,ProductController.removeFromWishlist);
 module.exports=router

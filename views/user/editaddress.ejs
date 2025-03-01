@@ -1,0 +1,96 @@
+<%- include("../../views/partials/user/header") %>
+<link href="/css/editaddress.css" rel="stylesheet" type="text/css">
+
+<div class="account-container">
+    <h2>Edit Address</h2>
+
+    <form id="editAddressForm">
+        <input type="hidden" id="addressId" value="<%= address._id %>">
+
+        <label>House Number:</label>
+        <input type="text" id="houseNumber" value="<%= address.houseNumber %>" required>
+
+        <label>Street:</label>
+        <input type="text" id="street" value="<%= address.street %>" required>
+
+        <label>City:</label>
+        <input type="text" id="city" value="<%= address.city %>" required>
+
+        <label>State:</label>
+        <input type="text" id="state" value="<%= address.state %>" required>
+
+        <label>Pincode:</label>
+        <input type="text" id="pincode" value="<%= address.pincode %>" required>
+
+        <div id="message"></div>
+
+        <button type="button" onclick="updateAddress()">Update</button>
+        <button type="button" onclick="cancelEdit()">Cancel</button>
+    </form>
+</div>
+
+<script>
+function updateAddress() {
+    const addressId = document.getElementById("addressId").value;
+    let houseNumber = document.getElementById("houseNumber").value.trim();
+    let street = document.getElementById("street").value.trim();
+    let city = document.getElementById("city").value.trim();
+    let state = document.getElementById("state").value.trim();
+    let pincode = document.getElementById("pincode").value.trim();
+    let messageDiv = document.getElementById("message");
+
+    // Validation checks
+    if (!houseNumber || !street || !city || !state || !pincode) {
+        messageDiv.innerHTML = `<span style="color: red;">All fields are required.</span>`;
+        return;
+    }
+
+    if (!/^[a-zA-Z0-9\s\-\/]+$/.test(houseNumber)) {
+        messageDiv.innerHTML = `<span style="color: red;">House Number can contain letters, numbers, spaces, '-' and '/'.</span>`;
+        return;
+    }
+
+    if (!/^[a-zA-Z\s]+$/.test(city)) {
+        messageDiv.innerHTML = `<span style="color: red;">City should contain only letters.</span>`;
+        return;
+    }
+
+    if (!/^[a-zA-Z\s]+$/.test(state)) {
+        messageDiv.innerHTML = `<span style="color: red;">State should contain only letters.</span>`;
+        return;
+    }
+
+    if (!/^\d{6}$/.test(pincode)) {
+        messageDiv.innerHTML = `<span style="color: red;">Pincode must be exactly 6 digits.</span>`;
+        return;
+    }
+
+    // Prepare JSON data
+    let formData = { houseNumber, street, city, state, pincode };
+
+    fetch(`/updateaddress/${addressId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            messageDiv.innerHTML = `<span style="color: green;">Address updated successfully!</span>`;
+            setTimeout(() => { window.location.href = "/myaccount"; }, 2000);
+        } else {
+            messageDiv.innerHTML = `<span style="color: red;">Failed to update address: ${data.message}</span>`;
+        }
+    })
+    .catch(error => {
+        console.error("Error updating address:", error);
+        messageDiv.innerHTML = `<span style="color: red;">Something went wrong. Please try again.</span>`;
+    });
+}
+
+function cancelEdit() {
+    window.location.href = "/myaccount"; // Redirect to My Account
+}
+</script>
+
+<%- include("../../views/partials/user/footer") %>

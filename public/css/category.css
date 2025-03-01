@@ -1,229 +1,254 @@
+/* General Styles */
+body {
+  font-family: Arial, sans-serif;
+  background-color: #f8f9fa;
+}
 
+/* Main Content Section */
+.content-main {
+  margin-left: 250px; /* Adjusted to prevent sidebar overlap */
+  padding: 20px;
+}
+
+/* Header */
+.content-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 15px;
+}
+
+.content-title {
+  font-size: 24px;
+  font-weight: bold;
+  color: #204056;
+}
+
+
+/* Search Bar Container */
+.card-header {
+  background-color: #fff;
+  padding: 15px;
+  text-align: center;
+}
+
+/* Search Bar Group */
+.input-group {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  max-width: 400px; /* Controls width */
+  margin: 10px auto;
+  border-radius: 50px;
+  overflow: hidden; /* Ensures elements align properly */
+  border: 1px solid #ddd;
+  background-color: white;
+}
+
+/* Search Input */
+.input-group input {
+  flex: 1;
+  height: 42px; /* Match button */
+  border: none !important;
+  outline: none;
+  padding: 10px 15px;
+  font-size: 14px;
+  border-radius: 50px 0 0 50px !important; /* Left side rounded */
+  background-color: transparent;
+  text-align: center; /* Center align placeholder */
+}
+
+/* Force Placeholder Center */
+.input-group input::placeholder {
+  text-align: center;
+  font-size: 14px;
+}
+
+/* Search Button */
+.input-group button {
+  height: 42px; /* Match input height */
+  min-width: 100px; /* Ensure button is large enough */
+  background-color: #007bff !important;
+  color: white !important;
+  border: none !important;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background 0.3s;
+  border-radius: 0 50px 50px 0 !important; /* Right side rounded */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 15px;
+}
+
+/* Button Hover Effect */
+.input-group button:hover {
+  background-color: #0056b3 !important;
+}
+
+
+/* Fix label size issue */
+label {
+  font-weight: bold;
+  font-size: 14px; /* Reduced size */
+  display: block;
+  text-align: left;
+  margin-top: 10px;
+}
+
+/* Category Form */
 .col-md-3 {
+  background: #fff;
   padding: 20px;
   border: 1px solid #ddd;
   border-radius: 10px;
-  margin: 10px;
+  margin: 10px auto;
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+  text-align: center;
 }
 
-.form-label {
-  margin-bottom: 8px;
+h3.add-category-title {
+  font-size: 22px;
+  font-weight: bold;
+  color: #204056;
+  margin-bottom: 15px;
+  text-align: center;
 }
 
 .form-control {
   width: 100%;
-  padding: 8px;
+  padding: 10px;
   margin-bottom: 10px;
   border: 1px solid #ccc;
   border-radius: 5px;
   box-sizing: border-box;
 }
 
-.d-grid {
-  margin-top: 20px;
+/* Fix dropdown arrow in select */
+select.form-control {
+  appearance: none; /* Removes default styling */
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="black"><path d="M7 10l5 5 5-5z"/></svg>');
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  background-size: 12px;
+  padding-right: 30px;
 }
 
+/* Add Category Button */
 .btn-primary {
   background-color: #204056;
   color: #fff;
-  border: 1px solid #007bff;
+  border: none;
   border-radius: 5px;
   padding: 10px 20px;
+  width: 100%;
   cursor: pointer;
+  transition: 0.3s;
 }
 
 .btn-primary:hover {
   background-color: #0056b3;
-  border-color: #0056b3;
 }
 
+/* Category List Table */
+.col-md-9 {
+  background: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+h3.category-list-title {
+  font-size: 22px;
+  font-weight: bold;
+  color: #204056;
+  text-align: center;
+  margin-bottom: 15px;
+}
+
+.table-responsive {
+  margin-top: 20px;
+}
+
+.table {
+  width: 100%;
+  background: #fff;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.table thead {
+  background: #204056;
+  color: white;
+}
+
+.table th,
+.table td {
+  padding: 12px;
+  text-align: left;
+  border-bottom: 1px solid #ddd;
+}
+
+.table th {
+  font-size: 16px;
+}
+
+.table td {
+  font-size: 14px;
+}
+
+/* Buttons */
+.btn-info {
+  background: #4287cb;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 5px;
+  transition: 0.3s;
+}
+
+.btn-info:hover {
+  background: #357ab8;
+}
+
+.btn-danger {
+  background: #dc3545;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 5px;
+  transition: 0.3s;
+}
+
+.btn-danger:hover {
+  background: #b02a37;
+}
+
+/* Pagination */
 .pagination-container {
   text-align: center;
+  margin-top: 20px;
 }
 
-.pagination {
-  display: inline-block;
-}
-
-.pagination a,
-.pagination .current-page {
-  display: inline-block;
-  padding: 5px 10px;
-  margin: 0 2px;
-  border: 1px solid #ddd;
+.pagination-container a {
+  padding: 8px 15px;
+  margin: 0 5px;
   text-decoration: none;
-  color: #333;
+  color: #007bff;
+  border: 1px solid #007bff;
+  border-radius: 5px;
 }
 
-.pagination a:hover {
-  background-color: #f5f5f5;
+.pagination-container a:hover {
+  background: #007bff;
+  color: white;
 }
 
-.error-message {
-  color: red;
-}
-/* General Styles */
-body {
-    font-family: Arial, sans-serif;
-    background-color: #f8f9fa;
-  }
-  
-  /* Main Content Section */
-  .content-main {
-    margin-left: 250px; /* Adjusted to prevent sidebar overlap */
-    padding: 20px;
-  }
-  
-  /* Header */
-  .content-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding-bottom: 15px;
-  }
-  
-  .content-title {
-    font-size: 24px;
-    font-weight: bold;
-    color: #204056;
-  }
-  
-  /* Search Bar */
-  .card-header {
-    background-color: #fff;
-    padding: 15px;
-  }
-  
-  .input-group {
-    max-width: 500px;
-    margin: 0 auto;
-  }
-  
-  .input-group input {
-    height: 40px;
-  }
-  
-  /* Form Section */
-  .card {
-    background: #fff;
-    border-radius: 8px;
-    padding: 20px;
-  }
-  
-  .col-md-3 {
-    background: #f8f9fa;
-    padding: 20px;
-    border-radius: 8px;
-  }
-  
-  label {
-    font-weight: bold;
-    margin-top: 10px;
-  }
-  
-  .btn-primary {
-    width: 100%;
-    margin-top: 10px;
-  }
-  
-  /* Table */
-  .table-responsive {
-    margin-top: 20px;
-  }
-  
-  .table {
-    width: 100%;
-    background: #fff;
-    border-radius: 8px;
-  }
-  
-  .table thead {
-    background: #204056;
-    color: white;
-  }
-  
-  .table th, .table td {
-    padding: 10px;
-    text-align: left;
-  }
-  
-  .table th {
-    font-size: 16px;
-  }
-  
-  .table td {
-    font-size: 14px;
-  }
-  
-  /* Buttons */
-  .btn-info {
-    background: #4287cb;
-    border: none;
-  }
-  
-  .btn-danger {
-    background: #dc3545;
-    border: none;
-  }
-  
-  /* Pagination */
-  .pagination-container {
-    text-align: center;
-    margin-top: 20px;
-  }
-  
-  .pagination-container a {
-    padding: 8px 15px;
-    margin: 0 5px;
-    text-decoration: none;
-    color: #007bff;
-    border: 1px solid #007bff;
-    border-radius: 5px;
-  }
-  
-  .pagination-container a:hover {
-    background: #007bff;
-    color: white;
-  }
-  
-  .pagination-container .current-page {
-    padding: 8px 15px;
-    margin: 0 5px;
-    font-weight: bold;
-    color: white;
-    background: #007bff;
-    border-radius: 5px;
-  }
-  .input-group {
-    display: flex;
-    align-items: center;
-    background-color: #f8f9fa; /* Light gray background */
-    border-radius: 50px;
-    padding: 5px;
-    width: 500px;
-    margin: 0 auto; /* Centering */
-}
-
-.input-group input {
-    flex: 1;
-    border: none;
-    outline: none;
-    border-radius: 50px;
-    padding: 10px;
-    font-size: 14px;
-    background-color: transparent; 
-}
-
-.input-group button {
-    background-color: #007bff; 
-    color: white;
-    border: none;
-    padding: 8px 15px;
-    border-radius: 50px;
-    cursor: pointer;
-    transition: background 0.3s;
-}
-
-.input-group button:hover {
-    background-color: #0056b3; 
+.pagination-container .current-page {
+  padding: 8px 15px;
+  margin: 0 5px;
+  font-weight: bold;
+  color: white;
+  background: #007bff;
+  border-radius: 5px;
 }

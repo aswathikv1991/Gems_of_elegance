@@ -1,0 +1,95 @@
+<%- include("../../views/partials/user/header") %>
+<link href="/css/address.css" rel="stylesheet" type="text/css">
+
+<div class="account-container">
+    <h2>Add New Address</h2>
+
+    <form id="addressForm">
+        <label>House Number:</label>
+        <input type="text" name="houseNumber" required>
+
+        <label>Street:</label>
+        <input type="text" name="street" required>
+
+        <label>City:</label>
+        <input type="text" name="city" required>
+
+        <label>State:</label>
+        <input type="text" name="state" required>
+
+        <label>Pincode:</label>
+        <input type="text" name="pincode" required>
+
+        <button type="submit">Save Address</button>
+    </form>
+
+    <p id="message"></p>
+
+    <a href="/myaccount" class="back-btn">Back to My Account</a>
+</div>
+
+<script>
+    document.getElementById("addressForm").addEventListener("submit", async function(event) {
+    event.preventDefault();
+    
+    let houseNumber = document.querySelector("[name='houseNumber']").value.trim();
+    let street = document.querySelector("[name='street']").value.trim();
+    let city = document.querySelector("[name='city']").value.trim();
+    let state = document.querySelector("[name='state']").value.trim();
+    let pincode = document.querySelector("[name='pincode']").value.trim();
+    let messageDiv = document.getElementById("message");
+
+    // Validation checks
+    if (!houseNumber || !street || !city || !state || !pincode) {
+        messageDiv.innerHTML = `<span style="color: red;">All fields are required.</span>`;
+        return;
+    }
+
+    if (!/^[a-zA-Z0-9\s\-\/]+$/.test(houseNumber)) {
+    messageDiv.innerHTML = `<span style="color: red;">House Number can contain letters, numbers, spaces, '-' and '/'.</span>`;
+    return;
+}
+
+
+    if (!/^[a-zA-Z\s]+$/.test(city)) {
+        messageDiv.innerHTML = `<span style="color: red;">City should contain only letters.</span>`;
+        return;
+    }
+
+    if (!/^[a-zA-Z\s]+$/.test(state)) {
+        messageDiv.innerHTML = `<span style="color: red;">State should contain only letters.</span>`;
+        return;
+    }
+
+    if (!/^\d{6}$/.test(pincode)) {
+        messageDiv.innerHTML = `<span style="color: red;">Pincode must be exactly 6 digits.</span>`;
+        return;
+    }
+
+    // Prepare JSON data
+    let formData = { houseNumber, street, city, state, pincode };
+
+    try {
+        const response = await fetch("/addnewaddress", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(formData)
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            messageDiv.innerHTML = `<span style="color: green;">Address added successfully!</span>`;
+            setTimeout(() => { window.location.href = "/addnewaddress"; }, 3500);
+        } else {
+            messageDiv.innerHTML = `<span style="color: red;">${data.message}</span>`;
+        }
+    } catch (error) {
+        console.error("Error adding address:", error);
+        messageDiv.innerHTML = `<span style="color: red;">Something went wrong. Please try again.</span>`;
+    }
+});
+
+</script>
+
+<%- include("../../views/partials/user/footer") %>

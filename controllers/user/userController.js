@@ -224,7 +224,9 @@ const loadLogin = async (req, res) => {
         if (req.session.user) {
             return res.redirect("/"); // If the user is already logged in, redirect to homepage
         }
-        return res.render("user/login", { user: null, message: "" });
+        const successMessage = req.session.successMessage || "";
+        req.session.successMessage = null;
+        return res.render("user/login", { user: null, message: successMessage });
     } catch (error) {
         console.log("Login page not loading", error);
         res.status(500).send("Server error");
@@ -264,7 +266,7 @@ const logout = async (req, res) => {
             if (err) {
                 console.error("Logout error", err);
             }
-            res.redirect("/");
+            res.redirect("/login");
         });
     } catch (error) {
         console.error("Error logging out", error);

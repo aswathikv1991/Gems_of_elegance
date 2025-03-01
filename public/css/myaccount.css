@@ -1,0 +1,154 @@
+
+.account-container {
+    display: flex;
+    max-width: 900px;
+    margin: 40px auto;
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+}
+
+.sidebar {
+    width: 30%;
+    background: #204056;
+    color: white;
+    padding: 20px;
+}
+
+.sidebar ul {
+    list-style: none;
+    padding: 0;
+}
+
+.sidebar ul li {
+    padding: 12px;
+    cursor: pointer;
+    border-radius: 5px;
+    transition: background 0.3s;
+}
+.sidebar ul li a {
+    color: white !important; /* Ensures the logout link is white */
+    text-decoration: none; /* Removes underline */
+}
+
+.sidebar ul li a:hover {
+    color: #f8f8f8; /* Slightly lighter white on hover */
+}
+
+
+.sidebar ul li:hover,
+.sidebar ul li.active {
+    background: #f65a5b;
+}
+
+.account-content {
+    width: 70%;
+    padding: 20px;
+}
+
+h2 {
+    color: #333;
+}
+
+.profile-info p {
+    font-size: 16px;
+    margin: 8px 0;
+}
+
+.profile-actions {
+    margin-top: 10px;
+}
+
+button {
+    padding: 10px 15px;
+    border: none;
+    cursor: pointer;
+    border-radius: 5px;
+    font-size: 14px;
+}
+
+
+
+.edit-btn {
+    display: inline-block;
+    padding: 10px 20px;
+    background-color: #f65a5b; /* Adjust color as needed */
+    color: white;
+    text-decoration: none;
+    border-radius: 5px;
+    border: none;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background 0.3s ease-in-out;
+}
+
+.edit-btn:hover {
+    background-color: #b3003c; /* Darker shade on hover */
+}
+/* General styling for the address section */
+#address {
+    padding: 20px;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+}
+
+/* Style for the address list container */
+#addressList {
+    margin-top: 15px;
+    padding: 15px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background-color: #fff;
+}
+
+/* Address card styling */
+.address-card {
+    background: #fff;
+    padding: 15px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.address-card p {
+    margin: 5px 0;
+    font-size: 14px;
+}
+
+/* Add New Address Button */
+.add-btn {
+    display: inline-block;
+    margin-top: 15px;
+    padding: 10px 15px;
+    background-color: #007bff;
+    color: #fff;
+    text-align: center;
+    font-size: 16px;
+    border-radius: 5px;
+    text-decoration: none;
+    transition: background 0.3s;
+}
+
+.add-btn:hover {
+    background-color: #0056b3;
+}
+.address-item {
+    border: 1px solid #ddd;
+    padding: 10px;
+    margin: 10px 0;
+    border-radius: 5px;
+    background-color: #f9f9f9;
+}
+.address-actions {
+    margin-top: 10px;
+}
+.edit-btn, .delete-btn {
+    padding: 5px 10px;
+    margin-right: 5px;
+    border: none;
+    cursor: pointer;
+}
+.edit-btn { background-color: #007bff; color: white; }
+.delete-btn { background-color: #dc3545; color: white; }

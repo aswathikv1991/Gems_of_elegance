@@ -14,6 +14,9 @@ const productSchema = new mongoose.Schema(
       categoryId: { type: mongoose.Schema.Types.ObjectId, ref: "Category", required: true },
       isFeatured: { type: Boolean, default: false },
       stockStatus: { type: String, enum: ["In Stock", "Out of Stock"], default: "In Stock" },
+      reviews: [{ type: mongoose.Schema.Types.ObjectId, ref: "Review" }],
+      status: { type: String, enum: ["Listed", "Unlisted", "Blocked"], default: "Listed" },
+
     },
     { timestamps: true }
   );

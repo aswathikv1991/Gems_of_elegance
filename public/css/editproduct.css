@@ -79,3 +79,19 @@ button:hover {
 .image-item input {
     margin-top: 5px; /* Space between image and checkbox */
 }
+select {
+    width: 100%;  /* Match other input fields */
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 16px;
+    background-color: white;
+    appearance: none; /* Removes default styling */
+    -webkit-appearance: none; /* For Safari */
+    -moz-appearance: none; /* For Firefox */
+    position: relative;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' width='16' height='16' fill='%23000000'><path d='M7 10l5 5 5-5z'/></svg>"); 
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    background-size: 16px;
+}

@@ -1,0 +1,171 @@
+<%- include("../../views/partials/user/header") %>
+<link href="/css/prodetail.css" rel="stylesheet" type="text/css" media="all" />
+
+<div class="product-detail-container">
+    <div class="row">
+        <div class="col-md-6">
+            <div class="image-slider">
+                <% product.image.forEach((image, index) => { %>
+                    <img src="<%= image %>" class="product-image <%= index === 0 ? 'active' : '' %>">
+                <% }) %>
+            </div>
+        </div>
+
+        <div class="col-md-6 product-info">
+            <h2><%= product.name %></h2>
+            <p>Price: ₹<%= product.price %></p>
+            <p><strong>Material:</strong> <%= product.material %></p>
+            <p><strong>Color:</strong> <%= product.color %></p>
+            <p><strong>Description:</strong> <%= product.description %></p>
+            <p><strong>Stock Status:</strong> <%= product.stockStatus %></p>
+            <button class="btn-primary" <%= product.stockStatus === 'Out of Stock' ? 'disabled' : '' %>>
+                Add to Cart
+            </button>
+            <button class="btn-secondary add-to-wishlist" data-product-id="<%= product._id %>">
+                Add to Wishlist
+            </button>
+            
+        </div>
+    </div>
+</div>
+
+<!-- Reviews Section -->
+<div class="reviews-section">
+    <h3>Customer Reviews</h3>
+    <div id="reviews-container">
+        <p>Loading reviews...</p>
+    </div>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        // Image Slider
+        const images = document.querySelectorAll(".image-slider img");
+        let index = 0;
+        if (images.length > 0) {
+            images.forEach(img => img.classList.remove("active"));
+            images[index].classList.add("active");
+            setInterval(() => {
+                images.forEach(img => img.classList.remove("active"));
+                index = (index + 1) % images.length;
+                images[index].classList.add("active");
+            }, 2000);
+        }
+
+        // Zoom functionality
+        const zoomedImg = document.createElement("img");
+        zoomedImg.classList.add("zoomed-img");
+        document.body.appendChild(zoomedImg);
+
+        const overlay = document.createElement("div");
+        overlay.classList.add("zoom-overlay");
+        document.body.appendChild(overlay);
+
+        images.forEach(img => {
+            img.addEventListener("click", () => {
+                zoomedImg.src = img.src;
+                zoomedImg.style.display = "block";
+                overlay.style.display = "block";
+            });
+        });
+
+        overlay.addEventListener("click", () => {
+            zoomedImg.style.display = "none";
+            overlay.style.display = "none";
+        });
+
+            
+        document.addEventListener("click", function (event) {
+    if (event.target.classList.contains("add-to-wishlist")) {
+        console.log("Wishlist button clicked!"); // Debugging
+        const productId = event.target.getAttribute("data-product-id");
+        console.log("Product ID:", productId);
+
+        fetch("/check-login-status")
+            .then(response => response.json())
+            .then(data => {
+                console.log("Login Status Response:", data); 
+                if (!data.loggedIn) {
+                    Swal.fire({
+                        title: "Login Required",
+                        text: "You need to log in to add items to your wishlist.",
+                        icon: "warning",
+                        showCancelButton: true,
+                        confirmButtonText: "Login",
+                        cancelButtonText: "Cancel"
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            window.location.href = "/login"; // Redirect to login
+                        }
+                    });
+                } else {
+                    // User is logged in, proceed to add to wishlist
+                    fetch("/wishlist/add", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ productId })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            Swal.fire("Success", "Item added to wishlist!", "success");
+                        } else {
+                            Swal.fire("Info", data.message, "info");
+                        }
+                    })
+                    .catch(error => {
+                        console.error("Error adding to wishlist:", error);
+                        Swal.fire("Error", "Something went wrong", "error");
+                    });
+                }
+            })
+            .catch(error => console.error("Error checking login status:", error));
+    }
+});
+
+
+
+
+        const productId = "<%= product._id %>";
+        const reviewsContainer = document.getElementById("reviews-container");
+
+        function loadReviews() {
+            reviewsContainer.innerHTML = "<p>Loading reviews...</p>";
+            fetch(`/reviews/${productId}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        reviewsContainer.innerHTML = "";
+                        if (data.reviews.length > 0) {
+                            data.reviews.forEach(review => {
+                                const reviewElement = document.createElement("div");
+                                reviewElement.classList.add("review");
+                                reviewElement.innerHTML = `
+                                    <p><strong>${review.user.name}</strong> (${new Date(review.createdAt).toLocaleDateString()})</p>
+                                    <p>Rating: ⭐${review.rating}</p>
+                                    <p>${review.comment}</p>
+                                `;
+                                reviewsContainer.appendChild(reviewElement);
+                            });
+                        } else {
+                            reviewsContainer.innerHTML = "<p>No reviews yet.</p>";
+                        }
+                    } else {
+                        reviewsContainer.innerHTML = "<p>Failed to load reviews.</p>";
+                    }
+                })
+                .catch(error => {
+                    console.error("Error fetching reviews:", error);
+                    reviewsContainer.innerHTML = "<p>Error loading reviews.</p>";
+                });
+        }
+
+        loadReviews(); 
+        
+   
+
+
+    });
+</script>
+
+<%- include("../../views/partials/user/footer") %>

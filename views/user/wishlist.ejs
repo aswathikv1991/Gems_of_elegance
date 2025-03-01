@@ -1,0 +1,90 @@
+<%- include("../../views/partials/user/header") %> <!-- Include the header -->
+
+<link href="/css/wishlist.css" rel="stylesheet" type="text/css" media="all" />  <!-- Link to your CSS -->
+
+<div class="wishlist-container">
+    <h2 class="wishlist-title">Your Wishlist</h2>
+  
+    <% if (wishlistItems && wishlistItems.length > 0) { %>
+      <div class="wishlist-items">
+        <% wishlistItems.forEach(item => { %>
+          <div class="wishlist-item">
+            <div class="wishlist-item-image">
+                <img src="<%= item.productId.image[0] %>" alt="<%= item.productId.name %>">
+
+
+            </div>
+            <div class="wishlist-item-details">
+              <h3><%= item.productId.name %></h3>
+            
+              <p>Price: ₹<%= item.productId.price %></p>
+              <button>Add to Cart</button>
+              <button class="delete-btn" data-id="<%= item._id %>">Delete</button>
+
+            </div>
+          </div>
+        <% }); %>
+      </div>
+    <% } else { %>
+      <div class="no-items-found">No items found in your wishlist.</div>
+    <% } %>
+  </div>
+  
+  <div class="pagination">
+    <% if (currentPage > 1) { %>
+      <a href="?page=<%= currentPage - 1 %>">Previous</a>
+    <% } %>
+    
+    <span>Page <%= currentPage %> of <%= totalPages %></span>
+  
+    <% if (currentPage < totalPages) { %>
+      <a href="?page=<%= currentPage + 1 %>">Next</a>
+    <% } %>
+  </div>
+
+
+<%- include("../../views/partials/user/footer") %> <!-- Include the footer -->
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+      const deleteButtons = document.querySelectorAll(".delete-btn");
+  
+      deleteButtons.forEach(button => {
+        button.addEventListener("click", function () {
+          const wishlistItemId = button.getAttribute("data-id");
+  
+          // Show SweetAlert confirmation
+          Swal.fire({
+            title: "Are you sure?",
+            text: "You won't be able to undo this action!",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#d33",
+            cancelButtonColor: "#3085d6",
+            confirmButtonText: "Yes, delete it!"
+          }).then((result) => {
+            if (result.isConfirmed) {
+              fetch(`/wishlist/remove/${wishlistItemId}`, {
+                method: "DELETE",
+                headers: { "Content-Type": "application/json" }
+              })
+              .then(response => response.json())
+              .then(data => {
+                if (data.success) {
+                  Swal.fire("Deleted!", "Your item has been removed from the wishlist.", "success");
+                  button.closest(".wishlist-item").remove(); // Remove item from DOM
+                } else {
+                  Swal.fire("Error!", "Failed to remove item.", "error");
+                }
+              })
+              .catch(error => {
+                console.error("Error removing item from wishlist:", error);
+                Swal.fire("Error!", "Something went wrong.", "error");
+              });
+            }
+          });
+        });
+      });
+    });
+  </script>
+  

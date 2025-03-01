@@ -21,21 +21,26 @@
       
       <div class="card">
         <div class="card-body">
-          <div class="row">
-            <!-- Category Form -->
-            <div class="col-md-3">
-              <form method="post" action="/admin/addCategory" onsubmit="return handleFormSubmit(event)">
-                  <label for="product_name">Name</label>
-                  <input type="text" name="name" id="product_name" class="form-control" required/>
-                  <div id="product_name-error" class="error-message" style="color:red;"></div>
-              
-                  <label for="descriptionId">Description</label>
-                  <textarea name="description" id="descriptionId" class="form-control" required></textarea>
-                  <div id="descriptionId-error" class="error-message" style="color:red;"></div>
-              
-                  <button type="submit" class="btn btn-primary">Add Category</button>
-              </form>
+            <div class="row">
+                <!-- Category Form -->
+                <div class="col-md-3">
+                    <h3 class="add-category-title" style="text-align: center; margin-bottom: 15px;">Add Category</h3>
+                    <form method="post" action="/admin/addCategory" onsubmit="return handleFormSubmit(event)">
+                        <label for="product_name">Name</label>
+                        <input type="text" name="name" id="product_name" class="form-control" required />
+                        <div id="product_name-error" class="error-message" style="color:red;"></div>
+    
+                        <label for="descriptionId">Description</label>
+                        <textarea name="description" id="descriptionId" class="form-control" required></textarea>
+                        <div id="descriptionId-error" class="error-message" style="color:red;"></div>
+    
+                        <button type="submit" class="btn btn-primary">Add Category</button>
+                    </form>
+                </div>
             </div>
+        </div>
+    </div>
+    
   
             <!-- Category Table -->
             <div class="col-md-9">

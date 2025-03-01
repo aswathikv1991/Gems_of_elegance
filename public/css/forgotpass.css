@@ -1,0 +1,132 @@
+/* General Styles */
+.error-message {
+    color: red;
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
+}
+.is-invalid {
+    border-color: red;
+}
+
+/* Center Content & Make It Spacious */
+/*.content-main {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh; 
+    width: 100%; 
+    padding: 20px;
+    background-color: #f8f9fa; 
+}*/
+
+.content-main {
+flex: 1;
+display: flex;
+justify-content: center;
+align-items: center;
+min-height: calc(100vh - 120px); /* Adjusted height to prevent overlap */
+padding-top: 80px; /* Move it slightly up */
+}
+/* Bigger, More Balanced Card */
+.card-login {
+    width: 100%;
+    max-width: 500px; /* Increased width */
+    padding: 40px; /* More padding for better spacing */
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+    border-radius: 12px;
+    background: #fff;
+    text-align: center;
+}
+
+/* Improve Heading */
+.card-title {
+    font-size: 26px;
+    font-weight: bold;
+    color: #204056;
+    margin-bottom: 15px;
+}
+
+.card-title::after {
+    content: '';
+    width: 60%;
+    height: 4px;
+    background: #007bff;
+    display: block;
+    margin: 8px auto 12px;
+    border-radius: 3px;
+}
+
+/* Improve Input Fields */
+.form-control {
+    width: 100%;
+    height: 48px;
+    padding: 10px;
+    font-size: 16px;
+    margin-bottom: 15px; /* More spacing */
+    border-radius: 5px;
+}
+
+/* Adjust Error Message */
+.error-message {
+    margin-top: -5px;
+    margin-bottom: 10px;
+}
+
+/* Improve Button Styling */
+.btn-primary {
+    background-color: #f65a5b;
+    border: none;
+    height: 50px;
+    font-size: 17px;
+    font-weight: bold;
+    transition: 0.3s ease;
+    width: 90%;
+    border-radius: 6px;
+    margin-bottom: 15px;
+}
+
+.btn-primary:hover {
+    background-color: #d94344;
+}
+
+/* Resend OTP Button */
+.resend-text {
+    margin-top: 12px;
+}
+
+.resend-btn {
+    background: none;
+    border: none;
+    color: #007bff;
+    font-size: 15px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.3s ease;
+}
+
+.resend-btn:hover {
+    color: #ff5733;
+}
+
+/* Make It Mobile Responsive */
+@media (max-width: 480px) {
+    .card-login {
+        max-width: 90%;
+        padding: 25px;
+    }
+
+    .btn-primary {
+        width: 100%;
+    }
+}
+.back-to-login {
+    color: #007bff;
+    font-weight: bold;
+    text-decoration: none;
+    transition: color 0.3s ease, text-decoration 0.3s ease;
+}
+
+.back-to-login:hover {
+    color: #ff5733;
+    text-decoration: underline;
+}

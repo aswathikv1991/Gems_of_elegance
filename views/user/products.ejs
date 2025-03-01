@@ -45,54 +45,73 @@
             <!-- Pagination -->
             <div class="pagination">
                 <% if (currentPage > 1) { %>
-                    <a href="?page=<%= currentPage - 1 %>">Previous</a>
+                  <a href="?page=<%= currentPage - 1 %>">Previous</a>
                 <% } %>
+                
                 <span>Page <%= currentPage %> of <%= totalPages %></span>
+              
                 <% if (currentPage < totalPages) { %>
-                    <a href="?page=<%= currentPage + 1 %>">Next</a>
+                  <a href="?page=<%= currentPage + 1 %>">Next</a>
                 <% } %>
-            </div>
-        </div>
-    </div>
-</div>
-
+              </div>
+              
 <script>
     document.addEventListener("DOMContentLoaded", function() {
-        const sliders = document.querySelectorAll(".image-slider");
-        
-        sliders.forEach(slider => {
-            let images = slider.querySelectorAll("img");
-            let index = 0;
+    // Image Slider
+    const sliders = document.querySelectorAll(".image-slider");
 
-            setInterval(() => {
-                images[index].style.display = "none";
-                index = (index + 1) % images.length;
-                images[index].style.display = "block";
-            }, 2000);
-        });
+    sliders.forEach(slider => {
+        let images = slider.querySelectorAll("img");
+        let index = 0;
+
+        setInterval(() => {
+            images[index].style.display = "none";
+            index = (index + 1) % images.length;
+            images[index].style.display = "block";
+        }, 2000);
     });
-    
-    document.getElementById("filter-form").addEventListener("submit", function (e) {
-    e.preventDefault(); // Prevent default form submission
 
-    const categories = Array.from(document.querySelectorAll('input[name="category"]:checked'))
-        .map(checkbox => checkbox.value);
-    const minPrice = document.querySelector('input[name="minPrice"]').value;
-    const maxPrice = document.querySelector('input[name="maxPrice"]').value;
+    // Search Functionality
+    const searchForm = document.getElementById("search-form"); // Ensure form exists
 
-    let query = "/products?";
-    if (categories.length > 0) query += `category=${categories.join(",")}&`;
-    if (minPrice) query += `minPrice=${minPrice}&`;
-    if (maxPrice) query += `maxPrice=${maxPrice}&`;
+    if (searchForm) {
+        const searchInput = searchForm.querySelector("input[name='search']"); // Correctly select input inside form
 
-    // Debugging: Log query before redirecting
-    console.log("Redirecting to:", query);
+        searchForm.addEventListener("submit", function (e) {
+            e.preventDefault(); // Prevent default form submission
 
-    window.location.href = query; // Redirect with query params
+            const searchQuery = searchInput.value.trim();
+            let query = "/products?";
+            if (searchQuery) query += `search=${encodeURIComponent(searchQuery)}`;
+
+            console.log("Redirecting to:", query); // Debugging
+            window.location.href = query; // Redirect with search query
+        });
+    }
+
+    // Filter Form Submission
+    const filterForm = document.getElementById("filter-form");
+    if (filterForm) {
+        filterForm.addEventListener("submit", function (e) {
+            e.preventDefault(); // Prevent default form submission
+
+            const categories = Array.from(document.querySelectorAll('input[name="category"]:checked'))
+                .map(checkbox => checkbox.value);
+            const minPrice = document.querySelector('input[name="minPrice"]').value;
+            const maxPrice = document.querySelector('input[name="maxPrice"]').value;
+
+            let query = "/products?";
+            if (categories.length > 0) query += `category=${categories.join(",")}&`;
+            if (minPrice) query += `minPrice=${minPrice}&`;
+            if (maxPrice) query += `maxPrice=${maxPrice}&`;
+
+            console.log("Redirecting to:", query); // Debugging
+            window.location.href = query; // Redirect with query params
+        });
+    }
 });
 
-
-
+  
 </script>
 
 <%- include("../../views/partials/user/footer") %>

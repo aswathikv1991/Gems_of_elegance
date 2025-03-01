@@ -1,0 +1,251 @@
+<%- include("../../views/partials/user/header") %>
+<link href="/css/ediprofile.css" rel="stylesheet" type="text/css">
+
+<div class="container">
+    <div class="edit-profile-container">
+        <h2>Edit Profile</h2>
+        <form id="editProfileForm" action="/editprofile" method="POST" class="edit-profile-form">
+            
+            <!-- Name Field -->
+            <label for="name">Full Name:</label>
+            <input type="text" id="name" name="name" value="<%= user.name %>" required />
+            <span id="nameError" class="error-message"></span>
+
+            <!-- Email Field (Editable with OTP verification) -->
+            <label for="email">Email:</label>
+            <input type="email" id="email" name="email" value="<%= user.email %>" required />
+            <button type="button" id="sendOtpBtn">Send OTP</button>
+            <span id="emailError" class="error-message"></span>
+
+            <!-- OTP Field (Initially Hidden) -->
+            <div id="otp-section" style="display: none;">
+                <label for="otp">Enter OTP:</label>
+                <input type="text" id="otp" name="otp" />
+                <button type="button" id="verifyOtpBtn">Verify OTP</button>
+                <span id="otpError" class="error-message"></span>
+            </div>
+
+            <!-- Phone Field -->
+            <label for="phone">Phone Number:</label>
+            <input type="text" id="phone" name="phone" value="<%= user.phone %>" required />
+            <span id="phoneError" class="error-message"></span>
+
+            <!-- Password Fields -->
+            <label for="current-password">Current Password:</label>
+            <input type="password" id="current-password" name="currentPassword" />
+            <span id="currentPasswordError" class="error-message"></span> 
+
+            <label for="new-password">New Password:</label>
+            <input type="password" id="new-password" name="newPassword" />
+            <span id="newPasswordError" class="error-message"></span>
+
+            <label for="confirm-password">Confirm New Password:</label>
+            <input type="password" id="confirm-password" name="confirmPassword" />
+            <span id="confirmPasswordError" class="error-message"></span>
+
+            <!-- Buttons -->
+            <div id="profileMessage" style="margin-top: 10px;"></div>
+
+            <div class="button-group">
+                <button type="submit" class="save-btn" id="saveChangesBtn" disabled>Save Changes</button>
+                <button type="button" class="cancel-btn" onclick="window.location.href='/myaccount'">Cancel</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+    let sendOtpBtn = document.getElementById("sendOtpBtn");
+    let verifyOtpBtn = document.getElementById("verifyOtpBtn");
+    let saveChangesBtn = document.getElementById("saveChangesBtn");
+    let editProfileForm = document.getElementById("editProfileForm");
+
+    let otpVerified = false;
+    let initialData = {
+        name: "<%= user.name %>",
+        email: "<%= user.email %>",
+        phone: "<%= user.phone %>",
+    };
+
+    function showError(id, message) {
+        let errorElement = document.getElementById(id);
+        if (errorElement) {
+            errorElement.innerText = message;
+        }
+    }
+
+    function validateField(id, value, pattern, errorMessage) {
+        let errorElement = document.getElementById(id + "Error");
+        if (!pattern.test(value.trim())) {
+            errorElement.innerText = errorMessage;
+            return false;
+        } else {
+            errorElement.innerText = ""; // Clear error when valid
+            return true;
+        }
+    }
+
+    function validatePasswordFields() {
+    let currentPassword = document.getElementById("current-password").value.trim();
+    let newPassword = document.getElementById("new-password").value.trim();
+    let confirmPassword = document.getElementById("confirm-password").value.trim();
+    let valid = true;
+
+    // Clear error messages when user starts typing valid input
+    document.getElementById("newPasswordError").innerText = "";
+    document.getElementById("confirmPasswordError").innerText = "";
+    document.getElementById("currentPasswordError").innerText = "";
+
+    if ((newPassword || confirmPassword) && !currentPassword) {
+        showError("currentPasswordError", "Enter current password.");
+        valid = false;
+    }
+
+    if (newPassword && !/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/.test(newPassword)) {
+        showError("newPasswordError", "Password must be at least 8 characters, include 1 uppercase, 1 lowercase, 1 number & 1 special character.");
+        valid = false;
+    }
+
+    if (!confirmPassword) { 
+        showError("confirmPasswordError", "Please confirm your new password.");
+        valid = false;
+    } else if (confirmPassword !== newPassword) {
+        showError("confirmPasswordError", "Passwords do not match.");
+        valid = false;
+    }
+
+    return valid;
+}
+
+function hasChanges() {
+    let nameChanged = document.getElementById("name").value.trim() !== initialData.name;
+    let emailChanged = document.getElementById("email").value.trim() !== initialData.email;
+    let phoneChanged = document.getElementById("phone").value.trim() !== initialData.phone;
+    
+    let currentPassword = document.getElementById("current-password").value.trim();
+    let newPassword = document.getElementById("new-password").value.trim();
+    let confirmPassword = document.getElementById("confirm-password").value.trim();
+
+    // Check if all three password fields are provided together
+    let passwordFieldsFilled = currentPassword && newPassword && confirmPassword;
+    let passwordFieldsPartiallyFilled = (currentPassword || newPassword || confirmPassword) && !passwordFieldsFilled;
+
+    // Ensure user can update name, email, or phone alone, but passwords require all three fields
+    if (passwordFieldsPartiallyFilled) {
+        return false; // Prevent update if passwords are incomplete
+    }
+
+    return nameChanged || emailChanged || phoneChanged || passwordFieldsFilled;
+}
+
+
+function enableSaveButton() {
+    let validName = validateField("name", document.getElementById("name").value, /^[A-Za-z\s]+$/, "Name can only contain alphabets and spaces.");
+    let validEmail = validateField("email", document.getElementById("email").value, /^[^\s@]+@[^\s@]+\.[^\s@]+$/, "Enter a valid email address.");
+    let validPhone = validateField("phone", document.getElementById("phone").value, /^[0-9]{10}$/, "Enter a valid 10-digit phone number.");
+    let validPasswords = validatePasswordFields(); // Ensures passwords are valid
+
+    // Enable Save button if there are changes and all fields are valid
+    saveChangesBtn.disabled = !(validName && validEmail && validPhone && hasChanges());
+}
+
+    document.querySelectorAll("input").forEach(input => {
+        input.addEventListener("input", enableSaveButton);
+    });
+
+    sendOtpBtn.addEventListener("click", function () {
+        let newEmail = document.getElementById("email").value.trim();
+        if (newEmail === initialData.email) {
+            showError("emailError", "Email is unchanged.");
+            return;
+        }
+        fetch("/sendotp", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email: newEmail })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert("OTP sent to " + newEmail);
+                document.getElementById("otp-section").style.display = "block";
+            } else {
+                showError("emailError", data.message || "Failed to send OTP.");
+            }
+        })
+        .catch(error => {
+            showError("emailError", "Error sending OTP. Please try again.");
+        });
+    });
+
+    verifyOtpBtn.addEventListener("click", function () {
+        let otp = document.getElementById("otp").value.trim();
+        fetch("/verify_profile_otp", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ otp })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                otpVerified = true;
+                document.getElementById("otp-section").innerHTML = "<span style='color: green;'>OTP Verified ✔</span>";
+                enableSaveButton();
+            } else {
+                showError("otpError", "Invalid OTP.");
+            }
+        })
+        .catch(error => {
+            showError("otpError", "Error verifying OTP.");
+        });
+    });
+
+    document.getElementById("editProfileForm").addEventListener("submit", async function (event) {
+    event.preventDefault(); // Prevent form submission
+
+    if (!hasChanges()) {
+        document.getElementById("profileMessage").innerHTML = 
+            `<span style="color: red;">No changes detected. Please update at least one field before saving.</span>`;
+        return;
+    }
+
+    // Convert form data to JSON
+    let formData = new FormData(this);
+    let jsonData = {};
+    formData.forEach((value, key) => {
+        jsonData[key] = value;
+    });
+    console.log("Form data being sent:");
+for (let [key, value] of formData.entries()) {
+    console.log(`${key}: ${value}`);
+}
+    try {
+        const response = await fetch("/editprofile", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(jsonData),
+        });
+
+        const data = await response.json(); // Convert response to JSON
+
+        let messageDiv = document.getElementById("profileMessage");
+        messageDiv.innerHTML = `<span style="color: ${data.success ? "green" : "red"};">${data.message}</span>`;
+        if (data.success) {
+            // Reset form fields (only clear sensitive fields)
+            document.getElementById("editProfileForm").reset();
+        }
+    } catch (error) {
+        console.error("Error updating profile:", error);
+        document.getElementById("profileMessage").innerHTML = 
+            `<span style="color: red;">Something went wrong. Please try again.</span>`;
+    }
+});
+
+});
+
+</script>
+
+<%- include("../../views/partials/user/footer") %>

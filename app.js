@@ -5,6 +5,7 @@ const db=require("./config/db")
 const path=require("path")
 const session=require("express-session")
 const passport=require("./config/passport")
+const setUser = require("./middlewares/setUserMiddleware")
 const userRouter=require("./routes/userRouter")
 const adminRouter=require("./routes/adminRouter")
 
@@ -34,7 +35,7 @@ app.use(express.static("public"))
 
 
 
-app.use("/",userRouter)
+app.use("/",setUser,userRouter)
 app.use("/admin",adminRouter)
 
 

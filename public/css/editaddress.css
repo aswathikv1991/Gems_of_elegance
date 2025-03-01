@@ -1,0 +1,87 @@
+.account-container {
+    max-width: 500px;
+    margin: 50px auto;
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    text-align: center;
+}
+
+h2 {
+    font-size: 24px;
+    margin-bottom: 20px;
+    color: #333;
+}
+
+form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+label {
+    align-self: flex-start;
+    font-weight: bold;
+    margin: 10px 0 5px;
+    color: #444;
+}
+
+input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 16px;
+}
+
+input:focus {
+    border-color: #007bff;
+    outline: none;
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+}
+
+#message {
+    margin: 10px 0;
+    font-size: 14px;
+}
+
+button {
+    width: 100%;
+    padding: 12px;
+    margin: 10px 0;
+    font-size: 16px;
+    font-weight: bold;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+button:first-of-type {
+    background-color: #007bff;
+    color: white;
+}
+
+button:first-of-type:hover {
+    background-color: #0056b3;
+}
+
+button:last-of-type {
+    background-color: #dc3545;
+    color: white;
+}
+
+button:last-of-type:hover {
+    background-color: #b52b38;
+}
+
+@media (max-width: 600px) {
+    .account-container {
+        width: 90%;
+        padding: 15px;
+    }
+
+    input, button {
+        font-size: 14px;
+    }
+}

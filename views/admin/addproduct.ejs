@@ -1,95 +1,158 @@
 <%- include("../../views/partials/admin/header") %>
-<link href="/css/addproduct.css" rel="stylesheet" type="text/css" >
+<link href="/css/addproduct.css" rel="stylesheet" type="text/css">
+<!-- Include Cropper.js CSS & JS -->
+<link href="https://unpkg.com/cropperjs/dist/cropper.min.css" rel="stylesheet">
+<script src="https://unpkg.com/cropperjs/dist/cropper.min.js"></script>
 
 <div class="add-product-container">
-    <div class="container mt-5">
-        <h2 class="text-center mb-4">Add New Product</h2>
-
-        <form id="addProductForm" action="/admin/addproduct" method="POST" enctype="multipart/form-data" class="p-4 bg-light shadow rounded">
-            <div class="mb-3">
-                <label for="productName" class="form-label">Product Name</label>
-                <input type="text" name="name" class="form-control" required>
-            </div>
-
-            <div class="mb-3">
-                <label for="categoryId" class="form-label">Category</label>
-                <select name="categoryId" class="form-control" required>
-                    <option value="" disabled selected>Select Category</option>
-                    <% categories.forEach(category => { %>
-                        <option value="<%= category._id %>"><%= category.name %></option>
-                    <% }) %>
-                </select>
-            </div>
-
-            <div class="mb-3">
-                <label for="material" class="form-label">Material</label>
-                <input type="text" name="material" class="form-control" required>
-            </div>
-
-            <div class="mb-3">
-                <label for="color" class="form-label">Color</label>
-                <input type="text" name="color" class="form-control" required>
-            </div>
-
-            <div class="mb-3">
-                <label for="description" class="form-label">Description</label>
-                <textarea name="description" class="form-control" rows="3" required></textarea>
-            </div>
-
-            <div class="mb-3">
-                <label for="price" class="form-label">Price</label>
-                <input type="number" name="price" class="form-control" required min="1">
-            </div>
-
-            <div class="mb-3">
-                <label for="sku" class="form-label">SKU</label>
-                <input type="text" name="sku" class="form-control" required pattern="^[a-zA-Z0-9-_]+$" title="SKU should contain only letters, numbers, hyphens, and underscores.">
-            </div>
-
-            <div class="mb-3">
-                <label for="quantity" class="form-label">Quantity</label>
-                <input type="number" name="quantity" class="form-control" required min="1">
-            </div>
-
-            <div class="mb-3">
-                <label class="form-label">Is Featured?</label>
-                <div class="form-check">
-                    <input type="checkbox" name="isFeatured" class="form-check-input">
-                    <label class="form-check-label">Yes</label>
-                </div>
-            </div>
-
-            <div class="mb-3">
-                <label for="images" class="form-label">Product Images (Upload up to 3)</label>
-                <input type="file" name="images" class="form-control" multiple required accept="image/*">
-            </div>
-
-            <button type="submit" class="btn btn-primary w-100">Add Product</button>
-        </form>
-    </div>
+  <div class="container mt-5">
+    <h2 class="text-center mb-4">Add New Product</h2>
+    <form id="addProductForm" action="/admin/addproduct" method="POST" enctype="multipart/form-data" class="p-4 bg-light shadow rounded">
+      <div class="mb-3">
+        <label for="productName" class="form-label">Product Name</label>
+        <input type="text" name="name" class="form-control" required>
+      </div>
+      <div class="mb-3">
+        <label for="categoryId" class="form-label">Category</label>
+        <select name="categoryId" class="form-control" required>
+          <option value="" disabled selected>Select Category</option>
+          <% categories.forEach(category => { %>
+            <option value="<%= category._id %>"><%= category.name %></option>
+          <% }) %>
+        </select>
+      </div>
+      <div class="mb-3">
+        <label for="material" class="form-label">Material</label>
+        <input type="text" name="material" class="form-control" required>
+      </div>
+      <div class="mb-3">
+        <label for="color" class="form-label">Color</label>
+        <input type="text" name="color" class="form-control" required>
+      </div>
+      <div class="mb-3">
+        <label for="description" class="form-label">Description</label>
+        <textarea name="description" class="form-control" rows="3" required></textarea>
+      </div>
+      <div class="mb-3">
+        <label for="price" class="form-label">Price</label>
+        <input type="number" name="price" class="form-control" required min="1">
+      </div>
+      <div class="mb-3">
+        <label for="sku" class="form-label">SKU</label>
+        <input type="text" name="sku" class="form-control" required>
+      </div>
+      <div class="mb-3">
+        <label for="quantity" class="form-label">Quantity</label>
+        <input type="number" name="quantity" class="form-control" required min="1">
+      </div>
+      <div class="mb-3">
+        <label for="images" class="form-label">Product Images (Upload up to 3)</label>
+        <input type="file" id="imageInput" name="images" class="form-control" multiple required accept="image/*">
+      </div>
+      <button type="submit" class="btn btn-primary w-100">Add Product</button>
+    </form>
+  </div>
 </div>
 
+<!-- Cropping Modal -->
+<!-- Cropping Modal -->
+<div id="cropModal">
+    <div class="crop-container">
+      <h4>Crop and Resize Image</h4>
+      <div class="cropper-wrapper">
+        <img id="cropImage">
+      </div>
+      <div class="modal-buttons">
+        <button id="cropBtn" class="btn btn-primary">Crop & Save</button>
+        <button id="cancelCropBtn" class="btn btn-secondary">Skip</button>
+      </div>
+    </div>
+  </div>
+  
+
 <script>
-    document.getElementById("addProductForm").addEventListener("submit", function(event) {
-        let price = document.querySelector('input[name="price"]').value;
-        let quantity = document.querySelector('input[name="quantity"]').value;
-        let images = document.querySelector('input[name="images"]').files;
+document.addEventListener("DOMContentLoaded", function () {
+  let cropper;
+  const cropModal = document.getElementById("cropModal");
+  const cropImage = document.getElementById("cropImage");
+  const fileInput = document.getElementById("imageInput");
 
-        if (price <= 0) {
-            alert("Price must be a positive number.");
-            event.preventDefault();
-        }
-        
-        if (quantity <= 0 || isNaN(quantity)) {
-            alert("Quantity must be a valid positive number.");
-            event.preventDefault();
-        }
+  let filesToProcess = [];
+  let croppedFiles = [];
+  let currentFileIndex = 0;
 
-        if (images.length > 3) {
-            alert("You can upload up to 3 images only.");
-            event.preventDefault();
-        }
-    });
+  fileInput.addEventListener("change", function(event) {
+    if (fileInput.files.length > 3) {
+      alert("You can only upload up to 3 images.");
+      fileInput.value = ""; // Reset file input
+      return;
+    }
+
+    filesToProcess = Array.from(fileInput.files);
+    croppedFiles = [];
+    currentFileIndex = 0;
+    if (filesToProcess.length > 0) {
+      processNextFile();
+    }
+  });
+
+  function processNextFile() {
+    if (currentFileIndex < filesToProcess.length) {
+      const file = filesToProcess[currentFileIndex];
+      const objectUrl = URL.createObjectURL(file);
+      cropImage.src = objectUrl;
+      cropModal.style.display = "flex";
+
+      if (cropper) { cropper.destroy(); }
+      cropper = new Cropper(cropImage, {
+        aspectRatio: 1,
+        viewMode: 1,
+      });
+
+      setTimeout(() => { URL.revokeObjectURL(objectUrl); }, 1000);
+    } else {
+      const dataTransfer = new DataTransfer();
+      croppedFiles.forEach(file => dataTransfer.items.add(file));
+      fileInput.files = dataTransfer.files;
+    }
+  }
+
+  document.getElementById("cropBtn").addEventListener("click", function () {
+    if (!cropper || !cropImage.src) {
+      alert("Please wait for the image to load before cropping.");
+      return;
+    }
+    const canvas = cropper.getCroppedCanvas({ width: 500, height: 500 });
+    canvas.toBlob(function (blob) {
+      if (!blob) {
+        alert("Something went wrong with cropping.");
+        return;
+      }
+      const croppedFile = new File([blob], "cropped_" + Date.now() + ".png", { type: "image/png" });
+      croppedFiles.push(croppedFile);
+      cropper.destroy();
+      cropper = null;
+      currentFileIndex++;
+
+      if (currentFileIndex < filesToProcess.length) {
+        processNextFile();
+      } else {
+        cropModal.style.display = "none";
+      }
+    }, "image/png");
+  });
+
+  document.getElementById("cancelCropBtn").addEventListener("click", function () {
+    croppedFiles.push(filesToProcess[currentFileIndex]);
+    currentFileIndex++;
+
+    if (currentFileIndex < filesToProcess.length) {
+      processNextFile();
+    } else {
+      cropModal.style.display = "none";
+    }
+  });
+});
 </script>
 
 <%- include("../../views/partials/admin/footer") %>

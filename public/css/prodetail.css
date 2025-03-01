@@ -1,0 +1,186 @@
+.product-detail-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 30px; /* Adds space between image and text */
+  padding: 40px 0; /* Moves content down */
+}
+
+.image-slider {
+  padding-left: 50px;
+  flex: 1;
+  display: flex;
+  justify-content: flex-start; /* Align images to the left */
+  align-items: center;
+  max-width: 60%; /* Increase container width */
+}
+
+
+.image-slider {
+  position: relative;
+  width: 550px; /* Adjust width */
+  height: auto;
+  overflow: hidden; /* Hide other images */
+}
+
+.product-image {
+  width: 100%;
+  height: auto;
+  display: none; /* Hide all images initially */
+}
+
+.product-image.active {
+  display: block; /* Show only active image */
+}
+
+
+
+.product-info {
+ 
+  flex: 1;
+  max-width: 50%;
+  margin-left: -70px;
+}
+.btn-primary:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+.image-slider img.active {
+  display: block;
+}
+
+
+.product-info h2, 
+.product-info p {
+  margin-bottom: 5px !important; /* Slightly reduced spacing */
+}
+
+.row {
+  display: flex;
+  align-items: flex-start;
+}
+
+.col-md-6 {
+  padding: 10px;
+}
+
+.btn-secondary {
+  background-color:blueviolet; /* Nice pinkish-red color */
+  color: white;
+  border: none;
+  padding: 6px 6px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background 0.3s ease-in-out;
+}
+
+.btn-secondary:hover {
+  background-color: #e63950; /* Darker shade on hover */
+}
+.btn-primary {
+  background-color:#B03060; /* Nice pinkish-red color */
+  color: white;
+  border: none;
+  padding: 8px 8px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background 0.3s ease-in-out;
+}
+
+.btn-primary:hover {
+  background-color: #e63950; /* Darker shade on hover */
+}
+.zoomed-img {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 80%;
+  max-width: 600px;
+  height: auto;
+  z-index: 9999;
+  display: none;
+  border: 2px solid #ddd;
+  background: white;
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.2);
+}
+
+.zoom-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: none;
+  z-index: 9998;
+}
+
+.reviews-section {
+  margin-top: 20px;
+  border-top: 1px solid #ddd;
+  padding-top: 10px;
+}
+
+.review {
+  background: #f9f9f9;
+  padding: 10px;
+  border-radius: 5px;
+  margin-bottom: 10px;
+}
+
+.review p {
+  margin: 5px 0;
+}
+
+.add-review {
+  margin-top: 20px;
+  padding: 15px;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  max-width: 500px;
+}
+
+.add-review h4 {
+  font-size: 20px;
+  margin-bottom: 10px;
+}
+
+.add-review label {
+  font-weight: bold;
+  display: block;
+  margin-top: 10px;
+}
+
+.add-review select,
+.add-review textarea {
+  width: 100%;
+  padding: 8px;
+  margin-top: 5px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-size: 14px;
+}
+
+.add-review textarea {
+  height: 100px;
+  resize: none;
+}
+
+.add-review button {
+  margin-top: 10px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: background-color 0.3s ease-in-out;
+}
+
+.add-review button:hover {
+  background-color: #0056b3;
+}

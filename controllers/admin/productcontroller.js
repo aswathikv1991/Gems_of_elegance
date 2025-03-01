@@ -52,7 +52,7 @@ const getAddProduct = async (req, res) => {
 };
 
 
-module.exports = { getAddProduct };
+
 
 const addProduct = async (req, res) => {
     try {
@@ -61,7 +61,8 @@ const addProduct = async (req, res) => {
 
         const { name, categoryId, material, color, description, price, sku, quantity, isFeatured } = req.body;
 
-    
+        console.log("Received files:", req.files);
+
         if (!req.files || req.files.length === 0) {
             return res.status(400).json({ error: "At least one image is required" });
         }
@@ -135,7 +136,7 @@ const postEditProduct = async (req, res) => {
         console.log("Received files:", req.files);
 
         const productId = req.params.id;
-        const { name, category, material, sku, price, description, color, quantity, deleteImages } = req.body;
+        const { name, category, material, sku, price, description, color, quantity, deleteImages,status } = req.body;
 
         let product = await Product.findById(productId);
         if (!product) {
@@ -185,7 +186,7 @@ const postEditProduct = async (req, res) => {
         product.description = description;
         product.color = color;
         product.quantity = quantity;
-
+        product.status = status;
         console.log("Final product object before saving:", product);
 
         await product.save();

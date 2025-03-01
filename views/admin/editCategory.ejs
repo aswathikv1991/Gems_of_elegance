@@ -20,6 +20,15 @@
                     <label for="description" class="form-label">Description</label>
                     <textarea name="description" id="description" class="form-control border" required><%= category.description %></textarea>
                 </div>
+                <div class="mb-4">
+                    <label for="status" class="form-label">Status</label>
+                    <select name="status" id="status" class="form-select border" required>
+                        <option value="Listed" <%= category.status === "Listed" ? "selected" : "" %>>Listed</option>
+                        <option value="Unlisted" <%= category.status === "Unlisted" ? "selected" : "" %>>Unlisted</option>
+                        <option value="Blocked" <%= category.status === "Blocked" ? "selected" : "" %>>Blocked</option>
+                    </select>
+                </div>
+                
 
                 <div class="d-grid text-end mt-30 col-md-5">
                     <button class="btn btn-primary" type="submit">Update Category</button>

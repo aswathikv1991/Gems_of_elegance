@@ -1,0 +1,129 @@
+<%- include("../../views/partials/user/header") %>
+
+<link href="/css/forgotpass.css" rel="stylesheet" type="text/css">
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<section class="content-main">
+   <div class="card mx-auto card-login">
+       <div class="card-body">
+           <h4 class="card-title">Verify OTP</h4>
+           <p class="text-muted">Enter the OTP sent to your email.</p>
+
+           <% if (message && message.length > 0) { %>
+            <div class="alert alert-danger"><%= message %></div>
+         <% } %>
+         
+
+           <form method="POST" action="/verify_forgot_otp" onsubmit="return validateOtpForm()">
+               <div class="mb-3">
+                   <input class="form-control" name="otp" placeholder="Enter OTP" type="text" id="otp">
+                   <div class="error-message" id="otp-error"></div>
+               </div>
+               <div class="mb-3">
+                   <button type="submit" class="btn btn-primary">Verify OTP</button>
+               </div>
+           </form>
+
+           <p class="resend-text">
+            <button id="resendbtn" class="resend-btn" disabled onclick="resendOTP(event)">
+                Resend OTP (<span id="countdown">01:59</span>)
+            </button>
+        </p>
+        
+       </div>
+   </div>
+</section>
+
+<script>
+
+    document.addEventListener("DOMContentLoaded", function () {
+        startCountdown(); 
+    });
+
+    let countdownTime = 119; 
+    let timerInterval;
+    
+    function startCountdown() {
+        countdownTime = 119; 
+        document.getElementById("resendbtn").disabled = true;
+
+        function updateCountdown() {
+            const minutes = Math.floor(countdownTime / 60);
+            const seconds = countdownTime % 60;
+            document.getElementById("countdown").textContent =
+                minutes + ":" + (seconds < 10 ? "0" : "") + seconds;
+
+            if (countdownTime > 0) {
+                countdownTime--;
+                timerInterval = setTimeout(updateCountdown, 1000);
+            } else {
+                document.getElementById("countdown").textContent = "Resend Now";
+                document.getElementById("resendbtn").disabled = false;
+            }
+        }
+        updateCountdown();
+    }
+
+
+   function validateOtpForm() {
+       const otpInput = document.getElementById('otp');
+       const otpError = document.getElementById('otp-error');
+       const otpValue = otpInput.value.trim();
+       const otpPattern = /^[0-9]{6}$/;
+
+       if (otpValue === '') {
+           otpError.textContent = 'Please enter the OTP.';
+           otpInput.classList.add('is-invalid');
+           return false;
+       } else if (!otpValue.match(otpPattern)) {
+           otpError.textContent = 'OTP must be a 6-digit number.';
+           otpInput.classList.add('is-invalid');
+           return false;
+       } else {
+           otpError.textContent = '';
+           otpInput.classList.remove('is-invalid');
+           return true;
+       }
+   }
+  
+
+    function resendOTP(event) {
+        event.preventDefault(); // Prevent default button action
+
+        $.ajax({
+            type: "POST",
+            url: "/resend_forgot_otp",  // New route to resend OTP
+            success: function(response) {
+                if (response.success) {
+                    Swal.fire({
+                        icon: "success",
+                        title: "New OTP Sent!",
+                        text: response.message,
+                        showConfirmButton: false,
+                        timer: 1500
+                    });
+
+                    clearTimeout(timerInterval); // Stop previous timer
+                    startCountdown(); // Restart timer
+                } else {
+                    Swal.fire({
+                        icon: "error",
+                        title: "Error",
+                        text: response.message
+                    });
+                }
+            },
+            error: function() {
+                Swal.fire({
+                    icon: "error",
+                    title: "Failed to Resend OTP",
+                    text: "Please try again later."
+                });
+            }
+        });
+    }
+</script>
+
+
+
+<%- include("../../views/partials/user/footer") %>
