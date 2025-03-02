@@ -1,227 +1,136 @@
-/* General Styles */
-body {
-  font-family: Arial, sans-serif;
-  background-color: #f8f9fa;
+/* General Reset */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
-/* Main Content Section */
+/* Main Content Layout */
 .content-main {
-  margin-left: 250px; /* Adjusted to prevent sidebar overlap */
+  display: flex;
+  flex-direction: column;
   padding: 20px;
+  margin-left: 250px; /* Adjust based on sidebar width */
+  width: calc(100% - 250px); /* Ensures it doesn't get hidden under sidebar */
+  transition: all 0.3s ease;
 }
 
-/* Header */
 .content-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding-bottom: 15px;
-}
-
-.content-title {
-  font-size: 24px;
-  font-weight: bold;
-  color: #204056;
-}
-
-
-/* Search Bar Container */
-.card-header {
-  background-color: #fff;
+  background: #ffffff;
   padding: 15px;
-  text-align: center;
+  border-radius: 8px;
+  box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);
+  margin-bottom: 20px;
 }
 
-/* Search Bar Group */
+/* Search Bar */
 .input-group {
   display: flex;
-  align-items: center;
-  justify-content: center;
-  max-width: 400px; /* Controls width */
-  margin: 10px auto;
+  max-width: 500px;
+  margin: auto;
   border-radius: 50px;
-  overflow: hidden; /* Ensures elements align properly */
-  border: 1px solid #ddd;
-  background-color: white;
+  overflow: hidden;
+  border: 1px solid #ccc;
 }
 
-/* Search Input */
-.input-group input {
-  flex: 1;
-  height: 42px; /* Match button */
-  border: none !important;
-  outline: none;
+.input-group .form-control {
+  border: none;
+  padding: 10px;
+  border-radius: 50px 0 0 50px;
+}
+
+.input-group .btn {
+  border: none;
+  background-color: #2778c4;
+  color: white;
+  border-radius: 0 50px 50px 0;
   padding: 10px 15px;
-  font-size: 14px;
-  border-radius: 50px 0 0 50px !important; /* Left side rounded */
-  background-color: transparent;
-  text-align: center; /* Center align placeholder */
 }
 
-/* Force Placeholder Center */
-.input-group input::placeholder {
-  text-align: center;
-  font-size: 14px;
-}
-
-/* Search Button */
-.input-group button {
-  height: 42px; /* Match input height */
-  min-width: 100px; /* Ensure button is large enough */
-  background-color: #007bff !important;
-  color: white !important;
-  border: none !important;
-  font-size: 14px;
-  cursor: pointer;
-  transition: background 0.3s;
-  border-radius: 0 50px 50px 0 !important; /* Right side rounded */
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0 15px;
-}
-
-/* Button Hover Effect */
-.input-group button:hover {
-  background-color: #0056b3 !important;
-}
-
-
-/* Fix label size issue */
-label {
-  font-weight: bold;
-  font-size: 14px; /* Reduced size */
-  display: block;
-  text-align: left;
-  margin-top: 10px;
-}
-
-/* Category Form */
-.col-md-3 {
-  background: #fff;
-  padding: 20px;
-  border: 1px solid #ddd;
+/* Form Section */
+.card {
+  background: #ffffff;
   border-radius: 10px;
-  margin: 10px auto;
-  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
-  text-align: center;
+  padding: 20px;
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+  margin-bottom: 20px;
 }
 
-h3.add-category-title {
-  font-size: 22px;
-  font-weight: bold;
-  color: #204056;
-  margin-bottom: 15px;
+.add-category-title {
   text-align: center;
+  font-size: 18px;
+  font-weight: bold;
+  margin-bottom: 15px;
 }
 
 .form-control {
-  width: 100%;
-  padding: 10px;
-  margin-bottom: 10px;
+  border-radius: 5px;
+  padding: 8px;
   border: 1px solid #ccc;
-  border-radius: 5px;
-  box-sizing: border-box;
-}
-
-/* Fix dropdown arrow in select */
-select.form-control {
-  appearance: none; /* Removes default styling */
-  -webkit-appearance: none;
-  -moz-appearance: none;
-  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="black"><path d="M7 10l5 5 5-5z"/></svg>');
-  background-repeat: no-repeat;
-  background-position: right 10px center;
-  background-size: 12px;
-  padding-right: 30px;
-}
-
-/* Add Category Button */
-.btn-primary {
-  background-color: #204056;
-  color: #fff;
-  border: none;
-  border-radius: 5px;
-  padding: 10px 20px;
   width: 100%;
-  cursor: pointer;
-  transition: 0.3s;
+  margin-bottom: 10px;
 }
 
-.btn-primary:hover {
-  background-color: #0056b3;
-}
-
-/* Category List Table */
-.col-md-9 {
-  background: #fff;
-  padding: 20px;
-  border-radius: 8px;
-  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
-}
-
-h3.category-list-title {
-  font-size: 22px;
+.btn-primary {
+  width: 100%;
+  background-color: #007bff;
+  border: none;
+  padding: 8px;
+  border-radius: 5px;
   font-weight: bold;
-  color: #204056;
-  text-align: center;
-  margin-bottom: 15px;
 }
-
+.btn-secondary{
+  width: 100%;
+  background-color: #f65a5b;
+  border: none;
+  padding: 8px;
+  border-radius: 5px;
+  font-weight: bold;
+}
+/* Table Styles */
 .table-responsive {
+  overflow-x: auto;
   margin-top: 20px;
 }
 
 .table {
   width: 100%;
-  background: #fff;
-  border-radius: 8px;
-  overflow: hidden;
+  border-collapse: collapse;
 }
 
-.table thead {
-  background: #204056;
-  color: white;
-}
-
-.table th,
-.table td {
+.table th, .table td {
   padding: 12px;
-  text-align: left;
-  border-bottom: 1px solid #ddd;
+  border: 1px solid #ddd;
+  text-align: center;
 }
 
 .table th {
-  font-size: 16px;
+  background-color: #2e4a66;
+  color: white;
 }
 
-.table td {
-  font-size: 14px;
+.table-hover tbody tr:hover {
+  background-color: #f1f1f1;
 }
 
 /* Buttons */
 .btn-info {
-  background: #4287cb;
+  background-color: #cca434;
   border: none;
   padding: 6px 12px;
-  border-radius: 5px;
-  transition: 0.3s;
-}
-
-.btn-info:hover {
-  background: #357ab8;
+  color: white;
+  font-size: 14px;
 }
 
 .btn-danger {
-  background: #dc3545;
+  background-color: #dc3545;
   border: none;
   padding: 6px 12px;
-  border-radius: 5px;
-  transition: 0.3s;
-}
-
-.btn-danger:hover {
-  background: #b02a37;
+  color: white;
+  font-size: 14px;
 }
 
 /* Pagination */
@@ -231,24 +140,23 @@ h3.category-list-title {
 }
 
 .pagination-container a {
-  padding: 8px 15px;
-  margin: 0 5px;
-  text-decoration: none;
-  color: #007bff;
+  padding: 8px 12px;
+  margin: 2px;
   border: 1px solid #007bff;
   border-radius: 5px;
+  color: #007bff;
+  text-decoration: none;
 }
 
 .pagination-container a:hover {
-  background: #007bff;
+  background-color: #007bff;
   color: white;
 }
 
-.pagination-container .current-page {
-  padding: 8px 15px;
-  margin: 0 5px;
-  font-weight: bold;
-  color: white;
-  background: #007bff;
+.current-page {
+  padding: 8px 12px;
+  margin: 2px;
   border-radius: 5px;
+  background-color: #007bff;
+  color: white;
 }

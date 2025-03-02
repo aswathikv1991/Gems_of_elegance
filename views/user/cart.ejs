@@ -1,0 +1,160 @@
+<%- include("../../views/partials/user/header") %>
+<link href="/css/cart.css" rel="stylesheet" type="text/css">
+
+<h1>Your Cart</h1>
+
+<div id="cart-items">
+  <% if (cartItems.length > 0) { %>
+    <% cartItems.forEach(item => { %>
+      <div class="cart-item" data-id="<%= item._id %>">
+        <img src="<%= item.productId.image[0] %>" alt="<%= item.productId.name %>" class="cart-item-image">
+        <div class="cart-item-details">
+          <h3><%= item.productId.name %></h3>
+          <p>Price: $<%= item.productId.price %></p>
+          <p>Status: <%= item.productId.stockStatus %></p>
+          <div class="quantity-controls">
+            <button class="decrease-quantity" data-id="<%= item._id %>">-</button>
+            <input type="number" value="<%= item.quantity %>" class="quantity-input" data-id="<%= item._id %>">
+            <button class="increase-quantity" data-id="<%= item._id %>">+</button>
+          </div>
+          <button class="delete-item" data-id="<%= item._id %>">Remove</button>
+        </div>
+      </div>
+    <% }); %>
+  <% } else { %>
+    <p>Your cart is empty.</p>
+  <% } %>
+</div>
+
+
+<div id="cart-total">
+    <p>Total: $<span id="total-price"><%= totalPrice %></span></p> <!-- ✅ Corrected ID -->
+    <button id="checkout">Proceed to Checkout</button>
+  </div>
+  
+<script>
+   
+    const decreaseBtns = document.querySelectorAll(".decrease-quantity");
+    decreaseBtns.forEach(button => {
+      button.addEventListener("click", function () {
+        const cartItemId = this.getAttribute("data-id");
+        const quantityInput = document.querySelector(`.quantity-input[data-id="${cartItemId}"]`);
+        let quantity = parseInt(quantityInput.value);
+  
+        if (quantity > 1) {
+          quantity -= 1;
+          updateCartItemQuantity(cartItemId, quantity);
+          quantityInput.value = quantity;
+        }
+      });
+    });
+  
+  
+    const increaseBtns = document.querySelectorAll(".increase-quantity");
+    increaseBtns.forEach(button => {
+      button.addEventListener("click", function () {
+        const cartItemId = this.getAttribute("data-id");
+        const quantityInput = document.querySelector(`.quantity-input[data-id="${cartItemId}"]`);
+        let quantity = parseInt(quantityInput.value);
+        
+        quantity += 1;
+        updateCartItemQuantity(cartItemId, quantity);
+        quantityInput.value = quantity;
+      });
+    });
+  
+ 
+    function updateCartItemQuantity(cartItemId, quantity) {
+  fetch("/update-cart-quantity", {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      cartItemId: cartItemId,
+      quantity: quantity,
+    }),
+  })
+  .then(response => response.json())
+  .then(data => {
+    console.log("Response from server:", data); // Debugging
+
+    if (data.success) {
+      Swal.fire("Success", "Cart quantity updated!", "success");
+
+    
+      const totalPriceElement = document.getElementById("total-price");
+      if (totalPriceElement) {
+        totalPriceElement.textContent = `$${data.newTotal}`;
+      }
+
+      const quantityInput = document.querySelector(`.quantity-input[data-id="${cartItemId}"]`);
+      if (quantityInput) {
+        quantityInput.value = quantity;
+      }
+
+    } else {
+      Swal.fire("Error", data.message, "error");
+    }
+  })
+  .catch(error => {
+    console.error("Error updating cart quantity:", error);
+    Swal.fire("Error", "Something went wrong while updating quantity.", "error");
+  });
+}
+
+   
+function deleteCartItem(cartItemId) {
+  fetch(`/cart/remove/${cartItemId}`, {
+    method: "DELETE",
+  })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        Swal.fire("Success", "Item removed from your cart!", "success");
+
+  
+        const cartItem = document.querySelector(`.cart-item[data-id="${cartItemId}"]`);
+        if (cartItem) cartItem.remove();
+
+     
+        const cartTotal = document.getElementById("cart-total");
+        if (cartTotal) {
+          cartTotal.innerHTML = `<p>Total: $${data.newTotal.toFixed(2)}</p><button id="checkout">Proceed to Checkout</button>`;
+        }
+
+     
+        const cartItems = document.querySelectorAll(".cart-item");
+        if (cartItems.length === 0) {
+          document.getElementById("cart-container").innerHTML = "<p>No items found</p>";
+        }
+      } else {
+        Swal.fire("Error", data.message, "error");
+      }
+    })
+    .catch(error => {
+      console.error("Error removing item:", error);
+      Swal.fire("Error", "Something went wrong while removing the item.", "error");
+    });
+}
+
+
+document.querySelectorAll(".delete-item").forEach(button => {
+  button.addEventListener("click", function () {
+    const cartItemId = this.getAttribute("data-id");
+    deleteCartItem(cartItemId);
+  });
+});
+
+  
+   
+    const checkoutBtn = document.getElementById("checkout");
+    if (checkoutBtn) {
+      checkoutBtn.addEventListener("click", function () {
+      
+        window.location.href = "/checkout";
+      });
+    }
+  </script>
+  
+<%- include("../../views/partials/user/footer") %>

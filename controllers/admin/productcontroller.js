@@ -193,7 +193,13 @@ const postEditProduct = async (req, res) => {
 
         console.log("Product updated successfully!");
 
-        res.redirect("/admin/getproduct"); // Redirect after update
+        //res.redirect("/admin/getproduct"); // Redirect after update
+        res.send(`<script>
+            alert("Product updated successfully!");
+            window.location.href = "/admin/getproduct";
+        </script>`)
+        
+
     } catch (error) {
         console.error("Error updating product:", error);
         res.status(500).send("Server Error");

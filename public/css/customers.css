@@ -38,3 +38,8 @@
 .input-group button:hover {
     background-color: #0056b3; /* Darker blue on hover */
 }
+.table-header-bg {
+    background-color: #204056;
+    color: white;
+     /* Light gray background, adjust as needed */
+}

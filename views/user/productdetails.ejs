@@ -39,6 +39,8 @@
 
 <script>
     document.addEventListener("DOMContentLoaded", function () {
+        const productId = "<%= product._id %>"; // Ensure productId is only declared once
+
         // Image Slider
         const images = document.querySelectorAll(".image-slider img");
         let index = 0;
@@ -74,61 +76,102 @@
             overlay.style.display = "none";
         });
 
-            
+        // Wishlist Functionality
         document.addEventListener("click", function (event) {
-    if (event.target.classList.contains("add-to-wishlist")) {
-        console.log("Wishlist button clicked!"); // Debugging
-        const productId = event.target.getAttribute("data-product-id");
-        console.log("Product ID:", productId);
+            if (event.target.classList.contains("add-to-wishlist")) {
+                console.log("Wishlist button clicked!");
+                const productId = event.target.getAttribute("data-product-id");
 
-        fetch("/check-login-status")
-            .then(response => response.json())
-            .then(data => {
-                console.log("Login Status Response:", data); 
-                if (!data.loggedIn) {
-                    Swal.fire({
-                        title: "Login Required",
-                        text: "You need to log in to add items to your wishlist.",
-                        icon: "warning",
-                        showCancelButton: true,
-                        confirmButtonText: "Login",
-                        cancelButtonText: "Cancel"
-                    }).then((result) => {
-                        if (result.isConfirmed) {
-                            window.location.href = "/login"; // Redirect to login
-                        }
-                    });
-                } else {
-                    // User is logged in, proceed to add to wishlist
-                    fetch("/wishlist/add", {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({ productId })
-                    })
+                fetch("/check-login-status")
                     .then(response => response.json())
                     .then(data => {
-                        if (data.success) {
-                            Swal.fire("Success", "Item added to wishlist!", "success");
+                        if (!data.loggedIn) {
+                            Swal.fire({
+                                title: "Login Required",
+                                text: "You need to log in to add items to your wishlist.",
+                                icon: "warning",
+                                showCancelButton: true,
+                                confirmButtonText: "Login",
+                                cancelButtonText: "Cancel"
+                            }).then((result) => {
+                                if (result.isConfirmed) {
+                                    window.location.href = "/login";
+                                }
+                            });
                         } else {
-                            Swal.fire("Info", data.message, "info");
+                            fetch("/wishlist/add", {
+                                method: "POST",
+                                headers: { "Content-Type": "application/json" },
+                                body: JSON.stringify({ productId })
+                            })
+                            .then(response => response.json())
+                            .then(data => {
+                                if (data.success) {
+                                    Swal.fire("Success", "Item added to wishlist!", "success");
+                                } else {
+                                    Swal.fire("Info", data.message, "info");
+                                }
+                            })
+                            .catch(error => {
+                                console.error("Error adding to wishlist:", error);
+                                Swal.fire("Error", "Something went wrong", "error");
+                            });
+                        }
+                    })
+                    .catch(error => console.error("Error checking login status:", error));
+            }
+        });
+
+        // Add to Cart Functionality
+        const addToCartBtn = document.querySelector(".btn-primary");
+        if (addToCartBtn) {
+            addToCartBtn.addEventListener("click", function () {
+                const quantity = 1; 
+                fetch("/check-login-status")
+                    .then(response => response.json())
+                    .then(data => {
+                        if (!data.loggedIn) {
+                            Swal.fire({
+                                title: "Login Required",
+                                text: "You need to log in to add items to your cart.",
+                                icon: "warning",
+                                showCancelButton: true,
+                                confirmButtonText: "Login",
+                                cancelButtonText: "Cancel"
+                            }).then((result) => {
+                                if (result.isConfirmed) {
+                                    window.location.href = "/login";
+                                }
+                            });
+                        } else {
+                            fetch("/cart/add", {
+                                method: "POST",
+                                headers: { "Content-Type": "application/json" },
+                                body: JSON.stringify({ productId, quantity })
+                            })
+                            .then(response => response.json())
+                            .then(data => {
+                                if (data.success) {
+                                    Swal.fire("Success", "Item added to your cart!", "success");
+                                } else {
+                                    Swal.fire("Error", data.message, "error");
+                                }
+                            })
+                            .catch(error => {
+                                console.error("Error adding to cart:", error);
+                                Swal.fire("Error", "Something went wrong while adding to the cart.", "error");
+                            });
                         }
                     })
                     .catch(error => {
-                        console.error("Error adding to wishlist:", error);
-                        Swal.fire("Error", "Something went wrong", "error");
+                        console.error("Error checking login status:", error);
+                        Swal.fire("Error", "Unable to check login status.", "error");
                     });
-                }
-            })
-            .catch(error => console.error("Error checking login status:", error));
-    }
-});
+            });
+        }
 
-
-
-
-        const productId = "<%= product._id %>";
+        // Load Reviews
         const reviewsContainer = document.getElementById("reviews-container");
-
         function loadReviews() {
             reviewsContainer.innerHTML = "<p>Loading reviews...</p>";
             fetch(`/reviews/${productId}`)
@@ -160,12 +203,9 @@
                 });
         }
 
-        loadReviews(); 
-        
-   
-
-
+        loadReviews();
     });
 </script>
+
 
 <%- include("../../views/partials/user/footer") %>

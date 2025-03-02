@@ -11,6 +11,7 @@
         <tr><th>Description:</th><td><%= product.description ? product.description : 'No description available' %></td></tr>
         <tr><th>Color:</th><td><%= product.color %></td></tr>
         <tr><th>Quantity:</th><td><%= product.quantity %></td></tr>
+        <tr><th>Current status:</th><td><%= product.status %></td></tr>
         <tr><th>Images:</th>
             <td class="product-images">
                 <% product.image.forEach(img => { %>

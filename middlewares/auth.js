@@ -3,7 +3,7 @@ const User=require("../models/userschema")
 const userAuth = async (req, res, next) => {
     try {
         if (!req.session.user) {
-            return res.redirect("/user/login"); 
+            return res.redirect("/login"); 
         }
 
      
@@ -12,7 +12,7 @@ const userAuth = async (req, res, next) => {
         if (user && !user.isBlocked) {
             next(); 
         } else {
-            res.redirect("/user/login"); 
+            res.redirect("/login"); 
         }
     } catch (error) {
         console.error("Error in user authentication middleware:", error);

@@ -101,10 +101,12 @@ const editedCategory = async (req, res) => {
         } else {
             res.status(404).json({ error: "Category not found" });
         }
-    } catch (error) {
-        console.error("Error updating category:", error);
-        res.status(500).json({ error: "Internal server error" });
-    }
+    
+            }catch (error) {
+            console.error("Error updating category:", error);
+            res.status(500).json({ error: "Internal server error" });
+        }
+
 };
 
 

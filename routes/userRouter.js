@@ -47,4 +47,11 @@ router.get("/wishlist", userAuth,ProductController.getWishlist );
 router.get("/check-login-status",ProductController.loginstatus)
 router.post("/wishlist/add",userAuth, ProductController.addToWishlist);
 router.delete("/wishlist/remove/:id", userAuth,ProductController.removeFromWishlist);
+router.post("/cart/add",userAuth,ProductController.addtocart)
+router.put('/update-cart-quantity',ProductController.updateQuantity)
+router.get("/cart", userAuth,ProductController.getcart)
+router.delete("/cart/remove/:cartItemId", ProductController.deleteCartItem);
+
+
+
 module.exports=router

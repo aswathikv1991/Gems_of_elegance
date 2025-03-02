@@ -19,7 +19,6 @@
             <% }) %>
         </select>
         
-
         <label>Material:</label>
         <input type="text" name="material" value="<%= product.material %>" required>
 
@@ -37,30 +36,43 @@
 
         <label>Quantity:</label>
         <input type="number" name="quantity" value="<%= product.quantity %>" required>
-            <!-- Status Dropdown -->
-            <label for="status">Product Status:</label>
-            <select name="status" id="status">
-                <option value="Listed" <%= product.status === "Listed" ? "selected" : "" %>>Listed</option>
-                <option value="Unlisted" <%= product.status === "Unlisted" ? "selected" : "" %>>Unlisted</option>
-                <option value="Blocked" <%= product.status === "Blocked" ? "selected" : "" %>>Blocked</option>
-            </select>
+
+        <!-- Status Dropdown -->
+        <label for="status">Product Status:</label>
+        <select name="status" id="status">
+            <option value="Listed" <%= product.status === "Listed" ? "selected" : "" %>>Listed</option>
+            <option value="Unlisted" <%= product.status === "Unlisted" ? "selected" : "" %>>Unlisted</option>
+            <option value="Blocked" <%= product.status === "Blocked" ? "selected" : "" %>>Blocked</option>
+        </select>
       
         <label>Current Images:</label>
         <div class="image-container">
-    <% product.image.forEach((img, index) => { %>
-        <div class="image-item">
-            <img src="<%= img %>" alt="Product Image">
-            <input type="checkbox" name="deleteImages" value="<%= img %>"> Remove
+            <% product.image.forEach((img, index) => { %>
+                <div class="image-item">
+                    <img src="<%= img %>" alt="Product Image">
+                    <input type="checkbox" name="deleteImages" value="<%= img %>"> Remove
+                </div>
+            <% }) %>
         </div>
-    <% }) %>
-</div>
 
-        
         <label>Upload New Images:</label>
         <input type="file" name="newImages" multiple>
 
         <button type="submit">Update Product</button>
+        <button type="button" onclick="window.location.href='/admin/getproduct'">Cancel</button>
     </form>
 </section>
+
+<script>
+    // Check if the URL contains the 'updated=true' parameter
+    if (window.location.search.includes("updated=true")) {
+        setTimeout(() => {
+            alert("Product updated successfully!");
+            window.location.href = "/admin/getproduct"; // Redirect after showing alert
+        }, 100); // Small delay ensures the alert appears before redirection
+    }
+</script>
+
+
 
 <%- include("../../views/partials/admin/footer") %>
