@@ -1,0 +1,78 @@
+<%- include("../../views/partials/admin/header") %>
+
+<link rel="stylesheet" href="/css/coupon.css">
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
+
+<div class="container">
+    <h2>Coupon Management</h2>
+
+    <!-- Add Coupon Button -->
+    <div style="text-align: right; margin-bottom: 15px;">
+        <div style="text-align: right; margin-bottom: 15px;">
+            <button onclick="location.href='/admin/coupons/add'" class="btn btn-primary">
+                Add New Coupon
+            </button>
+        </div>
+        
+    </div>
+
+    <h3>Existing Coupons</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>Code</th>
+                <th>Discount</th>
+                <th>Applies To</th>
+                <th>Expiry Date</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            <% coupons.forEach(coupon => { %>
+                <tr>
+                    <td><%= coupon.code %></td>
+                    <td><%= coupon.discountType === "percentage" ? coupon.discountValue + "%" : "₹" + coupon.discountValue %></td>
+                    <td><%= coupon.appliesTo === "cart" ? "Entire Cart" : coupon.category?.name || "N/A" %></td>
+                    <td><%= new Date(coupon.expiryDate).toLocaleDateString() %></td>
+                    <td>
+                        <a href="/admin/editcoupon/<%= coupon._id %>" class="btn edit">Edit</a>
+
+                        <button class="btn delete-coupon" data-id="<%= coupon._id %>">Delete</button>
+                    </td>
+                </tr>
+            <% }); %>
+        </tbody>
+    </table>
+</div>
+
+<script>
+    // Handle coupon deletion
+    document.querySelectorAll('.delete-coupon').forEach(button => {
+        button.addEventListener('click', function() {
+            const couponId = this.dataset.id;
+            Swal.fire({
+                title: "Are you sure?",
+                text: "This coupon will be deleted permanently!",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#d33",
+                cancelButtonColor: "#3085d6",
+                confirmButtonText: "Yes, delete it!"
+            }).then(result => {
+                if (result.isConfirmed) {
+                    fetch(`/admin/coupons/delete/${couponId}`, { method: "DELETE" })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                Swal.fire("Deleted!", "The coupon has been removed.", "success").then(() => {
+                                    location.reload();
+                                });
+                            } else {
+                                Swal.fire("Error!", "Unable to delete the coupon.", "error");
+                            }
+                        });
+                }
+            });
+        });
+    });
+</script>

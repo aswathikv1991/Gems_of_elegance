@@ -1,0 +1,170 @@
+<%- include("../../views/partials/admin/header") %>
+
+<link rel="stylesheet" href="/css/coupon.css">
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
+
+<div class="container">
+    <h2>Add New Coupon</h2>
+
+    <!-- Coupon Form -->
+    <form id="couponForm">
+        <div class="form-group">
+            <label for="code">Coupon Code:</label>
+            <input type="text" id="code" name="code" required>
+        </div>
+
+        <div class="form-group">
+            <label for="discountType">Discount Type:</label>
+            <select id="discountType" name="discountType" required>
+                <option value="percentage">Percentage</option>
+                <option value="fixed">Fixed Amount</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="discountValue">Discount Value:</label>
+            <input type="number" id="discountValue" name="discountValue" min="1" required>
+        </div>
+
+        <div class="form-group">
+            <label for="appliesTo">Applies To:</label>
+            <select id="appliesTo" name="appliesTo" required onchange="toggleCategoryField()">
+                <option value="cart">Entire Cart</option>
+                <option value="category">Specific Category</option>
+            </select>
+        </div>
+
+        <div class="form-group" id="categorySelect" style="display: none;">
+            <label for="category" id="categoryLabel">Select Category:</label>
+            <select id="category" name="category">
+                <% categories.forEach(category => { %>
+                    <option value="<%= category._id %>"><%= category.name %></option>
+                <% }); %>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="minPurchase">Minimum Purchase (optional):</label>
+            <input type="number" id="minPurchase" name="minPurchase" min="0">
+        </div>
+
+        <div class="form-group">
+            <label for="maxDiscount">Maximum Discount (optional):</label>
+            <input type="number" id="maxDiscount" name="maxDiscount" min="0">
+        </div>
+
+        <div class="form-group">
+            <label for="expiryDate">Expiry Date:</label>
+            <input type="date" id="expiryDate" name="expiryDate" required>
+        </div>
+
+        <div class="form-group">
+            <label for="usageLimit">Usage Limit (optional):</label>
+            <input type="number" id="usageLimit" name="usageLimit" min="1">
+        </div>
+
+        <div style="display: flex; justify-content: space-between; gap: 10px;">
+            <button type="submit" class="btn btn-primary" style="flex: 1;">Add Coupon</button>
+            <a href="/admin/coupons" class="btn btn-danger" style="flex: 1; text-align: center;">Exit</a>
+        </div>
+    </form>
+</div>
+
+<script>
+   
+   document.addEventListener("DOMContentLoaded", function () {
+    toggleCategoryField(); // Ensure correct initial state
+
+    document.getElementById("appliesTo").addEventListener("change", toggleCategoryField);
+});
+
+function toggleCategoryField() {
+    let appliesTo = document.getElementById("appliesTo").value;
+    let categoryField = document.getElementById("categorySelect");
+
+    if (appliesTo === "category") {
+        categoryField.style.display = "block";
+        document.getElementById("category").setAttribute("required", "true");
+    } else {
+        categoryField.style.display = "none";
+        document.getElementById("category").removeAttribute("required");
+        document.getElementById("category").value = "";
+    }
+}
+
+    
+    document.getElementById("couponForm").addEventListener("submit", async function (event) {
+        event.preventDefault(); // Prevent default form submission
+
+        if (!validateCouponForm()) {
+            return; // Stop submission if validation fails
+        }
+
+        let formData = Object.fromEntries(new FormData(this));
+        try {
+            let response = await fetch("/admin/coupons/add", { // Explicitly mention route
+                method: "POST",
+                headers: { "Content-Type": "application/json" }, // Specify JSON
+                body: JSON.stringify(formData)
+            });
+
+            let result = await response.json();
+
+            if (result.success) {
+                Swal.fire({
+                    icon: "success",
+                    title: "Success!",
+                    text: result.message
+                }).then(() => {
+                    window.location.href = "/admin/coupons"; // Redirect after success
+                });
+            } else {
+                Swal.fire({
+                    icon: "error",
+                    title: "Error!",
+                    text: result.message
+                });
+            }
+        } catch (error) {
+            Swal.fire({
+                icon: "error",
+                title: "Error!",
+                text: "Something went wrong. Please try again."
+            });
+        }
+    });
+
+    function validateCouponForm() {
+        let code = document.getElementById("code").value.trim();
+        let discountValue = parseFloat(document.getElementById("discountValue").value);
+        let expiryDate = document.getElementById("expiryDate").value;
+        let minPurchase = document.getElementById("minPurchase").value.trim();
+        let maxDiscount = document.getElementById("maxDiscount").value.trim();
+        let today = new Date().toISOString().split("T")[0]; // Get today's date in YYYY-MM-DD format
+
+        if (code === "") {
+            Swal.fire("Error", "Coupon code is required!", "error");
+            return false;
+        }
+        if (isNaN(discountValue) || discountValue <= 0) {
+            Swal.fire("Error", "Discount value must be a positive number!", "error");
+            return false;
+        }
+        if (new Date(expiryDate) < new Date(today)) {
+            Swal.fire("Error", "Expiry date cannot be in the past!", "error");
+            return false;
+        }
+        if (minPurchase !== "" && parseFloat(minPurchase) < 0) {
+            Swal.fire("Error", "Minimum purchase must be a positive number!", "error");
+            return false;
+        }
+        if (maxDiscount !== "" && parseFloat(maxDiscount) < 0) {
+            Swal.fire("Error", "Maximum discount must be a positive number!", "error");
+            return false;
+        }
+
+        return true; // Allow form submission
+    }
+
+
+</script>

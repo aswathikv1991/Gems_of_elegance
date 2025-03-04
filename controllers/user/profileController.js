@@ -315,10 +315,10 @@ const addAddress = async (req, res) => {
 const postaddAddress = async (req, res) => {
     try {
         console.log("Received Address Data:", req.body);
-        console.log("Logged-in user:", req.session.user); // Log session data
+        console.log("Logged-in user:", req.session.user);
 
-        const userId = req.session.user; // Directly use req.session.user
-        console.log("User ID from session:", userId); // Log the extracted user ID
+        const userId = req.session.user; 
+        console.log("User ID from session:", userId);
 
         if (!userId) {
             return res.json({ success: false, message: "User not authenticated. Please log in." });
@@ -334,13 +334,17 @@ const postaddAddress = async (req, res) => {
             return res.json({ success: false, message: "Invalid pincode. Must be 6 digits." });
         }
 
+        // Check if user already has any address
+        const existingAddresses = await Address.find({ userId });
+
         const newAddress = new Address({
-            userId, // Directly using extracted user ID
+            userId,
             houseNumber,
             street,
             city,
             state,
-            pincode
+            pincode,
+            isDefault: existingAddresses.length === 0 // First address will be default
         });
 
         await newAddress.save();
@@ -353,6 +357,7 @@ const postaddAddress = async (req, res) => {
         res.json({ success: false, message: "Something went wrong." });
     }
 };
+
 const getAddresses = async (req, res) => {
     try {
         const userId = req.session.user; // Get logged-in user ID
@@ -439,8 +444,40 @@ const updateAddress = async (req, res) => {
     }
 };
 
+const setDefaultAddress = async (req, res) => {
+    try {
+        const { addressId } = req.params;
+        const userId = req.session.user;
+
+        if (!userId) {
+            return res.json({ success: false, message: "User not authenticated." });
+        }
+
+        // Find the address to be set as default
+        const address = await Address.findOne({ _id: addressId, userId });
+
+        if (!address) {
+            return res.json({ success: false, message: "Address not found." });
+        }
+
+        // Set all other addresses to isDefault: false
+        await Address.updateMany({ userId }, { $set: { isDefault: false } });
+
+        // Set the selected address as default
+        address.isDefault = true;
+        await address.save();
+
+        // Fetch updated addresses and send to frontend
+        const updatedAddresses = await Address.find({ userId });
+
+        res.json({ success: true, message: "Default address updated successfully!", addresses: updatedAddresses });
+    } catch (error) {
+        console.error("Error setting default address:", error);
+        res.json({ success: false, message: "Something went wrong." });
+    }
+};
 
 
 
 module.exports={loadMyAccount,getForgotPassword,forgotEmailValid,resendForgotOtp,verifyForgotOtp,resetPasswordPage,
-    resetPassword,loadEditProfile,editProfile,sendProfileOtp,verifyProfileOtp,addAddress,postaddAddress,getAddresses,deleteAddress,updateAddress,editAddressPage}
+    resetPassword,loadEditProfile,editProfile,sendProfileOtp,verifyProfileOtp,addAddress,postaddAddress,getAddresses,deleteAddress,updateAddress,editAddressPage,setDefaultAddress}

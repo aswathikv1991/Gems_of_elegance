@@ -18,7 +18,8 @@
               <h3><%= item.productId.name %></h3>
             
               <p>Price: ₹<%= item.productId.price %></p>
-              <button>Add to Cart</button>
+              <button class="add-to-cart-btn" data-id="<%= item.productId._id %>">Add to Cart</button>
+
               <button class="delete-btn" data-id="<%= item._id %>">Delete</button>
 
             </div>
@@ -43,10 +44,41 @@
   </div>
 
 
-<%- include("../../views/partials/user/footer") %> <!-- Include the footer -->
+
 
 <script>
-    document.addEventListener("DOMContentLoaded", function () {
+    
+      document.addEventListener("DOMContentLoaded", function () {
+    const addToCartButtons = document.querySelectorAll(".add-to-cart-btn");
+
+    addToCartButtons.forEach(button => {
+        button.addEventListener("click", function () {
+            const productId = button.getAttribute("data-id");
+
+            fetch("/cart/add", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ productId, quantity: 1 })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    Swal.fire("Success!", "Product added to cart!", "success");
+
+                    // Remove the item from the wishlist page immediately
+                    button.closest(".wishlist-item").remove();
+                } else {
+                    Swal.fire("Error!", data.message, "error");
+                }
+            })
+            .catch(error => {
+                console.error("Error adding to cart:", error);
+                Swal.fire("Error!", "Something went wrong", "error");
+            });
+        });
+    });
+
+
       const deleteButtons = document.querySelectorAll(".delete-btn");
   
       deleteButtons.forEach(button => {
@@ -86,5 +118,6 @@
         });
       });
     });
+    
   </script>
-  
+  <%- include("../../views/partials/user/footer") %> <!-- Include the footer -->

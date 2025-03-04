@@ -259,7 +259,7 @@ const getReview = async (req, res) => {
         if (existingCartItem) {
             return res.status(400).json({ success: false, message: "Product already in cart" });
         }
-
+        await Wishlist.deleteOne({ userId, productId });
         // Add product to cart
         const newCartItem = new Cart({
             userId,

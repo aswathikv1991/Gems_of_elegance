@@ -13,13 +13,25 @@ const couponSchema = new mongoose.Schema(
       type: String, 
       enum: ["percentage", "fixed"], 
       required: true 
-    }, // Type of discount
+    }, // Type of discount (percentage or fixed amount)
 
     discountValue: { 
       type: Number, 
       required: true, 
       min: 0 
     }, // Discount amount (percentage or fixed)
+
+    appliesTo: { 
+      type: String, 
+      enum: ["cart", "category"], 
+      required: true 
+    }, // Whether the discount applies to the whole cart or a category
+
+    category: { 
+      type: mongoose.Schema.Types.ObjectId, 
+      ref: "Category",
+      required: function() { return this.appliesTo === "category"; } 
+    }, // Reference to Category (only required if appliesTo is 'category')
 
     minPurchase: { 
       type: Number, 
@@ -29,7 +41,7 @@ const couponSchema = new mongoose.Schema(
     maxDiscount: { 
       type: Number, 
       default: null 
-    }, // Max discount amount (useful for percentage-based discounts)
+    }, // Maximum discount amount (useful for percentage-based discounts)
 
     expiryDate: { 
       type: Date, 
@@ -51,7 +63,7 @@ const couponSchema = new mongoose.Schema(
       default: true 
     }, // Whether the coupon is currently active
   },
-  { timestamps: true } // Automatically adds createdAt & updatedAt
+  { timestamps: true } // Automatically adds createdAt & updatedAt timestamps
 );
 
 const Coupon = mongoose.model("Coupon", couponSchema);

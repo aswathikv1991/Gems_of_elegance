@@ -4,6 +4,7 @@ const adminController=require("../controllers/admin/adminController")
 const customerController=require("../controllers/admin/customerController")
 const categoryController=require("../controllers/admin/categoryController")
 const ProductController=require("../controllers/admin/productcontroller")
+const couponController=require("../controllers/admin/couponController")
 const {userAuth,adminAuth}=require("../middlewares/auth")
 const upload = require("../middlewares/uploadMiddleware");
 
@@ -22,7 +23,6 @@ router.post("/editCategory/:id",adminAuth,categoryController.editedCategory)
 router.delete("/deleteCategory/:id",adminAuth,categoryController.deleteCategory)
 
 
-
 router.get("/getproduct", adminAuth,ProductController.getAllProducts);
 
 router.post("/addproduct", adminAuth,upload.array("images", 3), ProductController.addProduct);
@@ -31,6 +31,11 @@ router.post("/editproduct/:id",adminAuth,upload.array("newImages", 3), ProductCo
 router.delete("/deleteproduct/:id", ProductController.deleteProduct);
 router.get("/viewproduct/:id", adminAuth, ProductController.viewProduct);
 router.get("/addproduct",adminAuth,ProductController.getAddProduct);
-
+router.get("/coupons",adminAuth,couponController.getCouponsPage)
+router.get('/coupons/add',adminAuth,couponController.renderAddCouponPage);
+router.post("/coupons/add",adminAuth,couponController.postAddCouponPage)
+router.delete("/coupons/delete/:id", adminAuth,couponController.deleteCoupon);
+router.get('/editcoupon/:id', couponController.getEditCoupon);
+router.post('/editcoupon/:id', couponController.postEditCoupon);
 
 module.exports=router

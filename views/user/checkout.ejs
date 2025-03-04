@@ -1,0 +1,271 @@
+<%- include("../../views/partials/user/header") %>
+<link href="/css/checkout.css" rel="stylesheet" type="text/css">
+
+<h2>Checkout</h2>
+
+<!-- Checkout Container -->
+<div class="checkout-container">
+    <!-- Left Column -->
+    <div class="left-column">
+        <!-- Address Section -->
+        <section class="address-section">
+            <h3>Select Address</h3>
+            <% if (addresses.length > 0) { %>
+                <div class="address-list">
+                    <% addresses.forEach((address, index) => { %>
+                        <label class="address-item">
+                            <input type="radio" name="selectedAddress" value="<%= address._id %>" 
+                                <%= address.isDefault || index === 0 ? 'checked' : '' %> required>
+                            <span><%= address.houseNumber %>, <%= address.street %>, <%= address.city %>, <%= address.state %>, <%= address.pincode %></span>
+                        </label>
+                    <% }) %>
+                </div>
+            <% } else { %>
+                <p>No saved addresses found.</p>
+            <% } %>
+            <button class="add-address-btn" onclick="openAddressModal()">+ Add New Address</button>
+        </section>
+
+      
+        <section class="coupon-payment">
+            <h3>Apply Coupon</h3>
+        
+            <% if (availableCoupons.length > 0) { %>
+                <!-- Dropdown for available coupons -->
+                <select id="couponSelect">
+                    <option value="">Select Coupon</option>
+                    <% availableCoupons.forEach(coupon => { %>
+                        <option value="<%= coupon.code %>" 
+                                data-discount="<%= coupon.discountValue %>" 
+                                data-type="<%= coupon.discountType %>" 
+                                data-min="<%= coupon.minPurchase %>">
+                            <%= coupon.code %> - <%= coupon.discountType === 'percentage' ? coupon.discountValue + '%' : '₹' + coupon.discountValue %> 
+                            off (Min: ₹<%= coupon.minPurchase %>)
+                        </option>
+                    <% }) %>
+                </select>
+            <% } %>
+        
+            <!-- Manual coupon entry -->
+            <input type="text" placeholder="Enter Coupon Code" class="coupon-input">
+            <button class="apply-coupon">Apply</button>
+        
+            <p id="couponMessage"></p>
+        
+    
+            <h3>Payment Methods</h3>
+            <label><input type="radio" name="paymentMethod" value="cod"> Cash on Delivery</label>
+            <label><input type="radio" name="paymentMethod" value="card"> Credit/Debit Card</label>
+            <label><input type="radio" name="paymentMethod" value="upi"> UPI</label>
+        </section>
+    </div>
+
+
+
+    <!-- Right Column -->
+    <div class="right-column">
+        <!-- Order Summary Section -->
+        <section class="order-summary">
+            <h3>Order Summary</h3>
+            <% if (cartItems.length > 0) { %>
+                <div class="summary-container">
+                    <% cartItems.forEach(item => { %>
+                        <% if (item.productId) { %>
+                            <div class="summary-item">
+                                <img src="<%= item.productId.image[0] %>" alt="<%= item.productId.name %>" class="product-image">
+                                <div class="item-details">
+                                    <span class="product-name"><%= item.productId.name %></span>
+                                    <span class="quantity">Qty: <%= item.quantity %></span>
+                                    <span class="price">₹<%= item.productId.price * item.quantity %></span>
+                                </div>
+                            </div>
+                        <% } else { %>
+                            <div class="summary-item">
+                                <span class="missing-product">Product details not available.</span>
+                            </div>
+                        <% } %>
+                    <% }) %>
+                </div>
+            <% } else { %>
+                <p class="empty-cart">Your cart is empty.</p>
+            <% } %>
+        </section>
+
+       
+<section class="checkout-footer">
+    <h3>Total Amount: ₹<span id="total-price">
+        <% let total = 0;
+        cartItems.forEach(item => { total += item.productId.price * item.quantity; });
+        %>
+        <%= total %>
+    </span></h3>
+    <p>Shipping Charge: <span id="shipping-cost"></span></p>
+    <!-- Discounted Amount Display -->
+    <h3>Final Amount: <span id="final-total"><%= total %></span></h3>
+
+    <button id="place-order">Place Order</button>
+</section>
+
+    </div>
+</div>
+
+<!-- Address Modal -->
+<div id="addressModal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeAddressModal()">&times;</span>
+        <h3>Add New Address</h3>
+        <form id="addAddressForm">
+            <input type="text" name="houseNumber" placeholder="House Number" required>
+            <input type="text" name="street" placeholder="Street" required>
+            <input type="text" name="city" placeholder="City" required>
+            <input type="text" name="state" placeholder="State" required>
+            <input type="text" name="pincode" placeholder="Pincode" required>
+            <div id="addressMessage" class="error-message"></div>
+            <button type="submit">Save Address</button>
+        </form>
+    </div>
+</div>
+
+
+<script>
+      function openAddressModal() {
+
+console.log("Open Address Modal Clicked");
+document.getElementById("addressModal").style.display = "block";
+}
+
+function closeAddressModal() {
+document.getElementById("addressModal").style.display = "none";
+}
+
+window.onclick = function (event) {
+let modal = document.getElementById("addressModal");
+if (event.target === modal) {
+    modal.style.display = "none";
+}
+};
+document.addEventListener("DOMContentLoaded", function () {
+    // Address Modal Functions
+  
+
+    // Address Form Submission
+    document.getElementById("addAddressForm").addEventListener("submit", async (event) => {
+        event.preventDefault();
+
+        let houseNumber = document.querySelector("[name='houseNumber']").value.trim();
+        let street = document.querySelector("[name='street']").value.trim();
+        let city = document.querySelector("[name='city']").value.trim();
+        let state = document.querySelector("[name='state']").value.trim();
+        let pincode = document.querySelector("[name='pincode']").value.trim();
+        let messageDiv = document.getElementById("addressMessage");
+        messageDiv.innerHTML = "";
+
+        // Validation Checks
+        if (!houseNumber || !street || !city || !state || !pincode) {
+            messageDiv.innerHTML = "All fields are required.";
+            return;
+        }
+
+        if (!/^[a-zA-Z0-9\s\-\/]+$/.test(houseNumber)) {
+            messageDiv.innerHTML = "House Number can contain letters, numbers, spaces, '-' and '/'.";
+            return;
+        }
+
+        if (!/^[a-zA-Z\s]+$/.test(city)) {
+            messageDiv.innerHTML = "City should contain only letters.";
+            return;
+        }
+
+        if (!/^[a-zA-Z\s]+$/.test(state)) {
+            messageDiv.innerHTML = "State should contain only letters.";
+            return;
+        }
+
+        if (!/^\d{6}$/.test(pincode)) {
+            messageDiv.innerHTML = "Pincode must be exactly 6 digits.";
+            return;
+        }
+
+        // Prepare Data for API
+        const formData = new FormData(event.target);
+        const addressData = Object.fromEntries(formData.entries());
+
+        const response = await fetch("/addnewaddress", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(addressData)
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+            alert("Address added successfully!");
+            location.reload();
+        } else {
+            messageDiv.innerHTML = result.message;
+        }
+    });
+
+    // Place Order Functionality
+    document.getElementById("place-order").addEventListener("click", () => {
+        let selectedAddress = document.querySelector("input[name='selectedAddress']:checked");
+        if (!selectedAddress) {
+            alert("Please select a delivery address before placing your order.");
+            return;
+        }
+        alert("Order placed successfully!");
+    });
+
+    // Coupon & Shipping Handling
+    const couponSelect = document.getElementById("couponSelect");
+    const couponMessage = document.getElementById("couponMessage");
+    const totalPriceElement = document.getElementById("total-price");
+    const finalTotalElement = document.getElementById("final-total");
+    const shippingElement = document.getElementById("shipping-cost");
+
+    let cartTotal = parseFloat(totalPriceElement.innerText); // Initial cart total
+    let shippingCost = cartTotal < 3000 ? 100 : 0; // Apply ₹100 shipping if cartTotal < 4000
+
+    function updateTotal() {
+        let finalTotal = cartTotal + shippingCost; // Reset total before applying coupon
+
+        let selectedOption = couponSelect.options[couponSelect.selectedIndex];
+
+        if (selectedOption.value) {
+            const discountValue = parseFloat(selectedOption.getAttribute("data-discount"));
+            const discountType = selectedOption.getAttribute("data-type");
+
+            if (discountType === "percentage") {
+                finalTotal -= (cartTotal * discountValue / 100);
+            } else {
+                finalTotal -= discountValue;
+            }
+
+            // Ensure the final total is never negative
+            finalTotal = Math.max(finalTotal, 0);
+
+            // Highlight the coupon message
+            couponMessage.innerHTML = `<strong style="color: green;">Coupon Applied: ${selectedOption.value}. You saved ₹${(cartTotal - finalTotal + shippingCost).toFixed(2)}</strong>`;
+        } else {
+            couponMessage.innerHTML = "";
+        }
+
+        // Update total display
+        shippingElement.innerText = shippingCost > 0 ? `₹${shippingCost}` : "Free";
+        finalTotalElement.innerText = `₹${finalTotal.toFixed(2)}`;
+    }
+
+    // Initial Shipping Cost Display
+    shippingElement.innerText = shippingCost > 0 ? `₹${shippingCost}` : "Free";
+
+    couponSelect.addEventListener("change", updateTotal);
+
+    // Initial Total Update
+    updateTotal();
+});
+
+</script>
+
+
+<%- include("../../views/partials/user/footer") %>
+

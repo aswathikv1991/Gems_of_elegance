@@ -1,26 +1,29 @@
 <%- include("../../views/partials/user/header") %>
 <link href="/css/userproducts.css" rel="stylesheet" type="text/css" media="all" />  
+
 <div class="container">
     <div class="row">
-        <!-- Sidebar for Filtering -->
+        <!-- Sidebar for Filtering (Ensure it's limited to col-md-3) -->
         <div class="col-md-3">
-            <h4>Filter by</h4>
-            <form id="filter-form">
-                <div>
-                    <h5>Category</h5>
-                    <% categories.forEach(category => { %>
-                        <div>
-                            <input type="checkbox" name="category" value="<%= category._id %>"> <%= category.name %>
-                        </div>
-                    <% }) %>
-                </div>
-                <div>
-                    <h5>Price</h5>
-                    <input type="number" name="minPrice" placeholder="Min Price">
-                    <input type="number" name="maxPrice" placeholder="Max Price">
-                </div>
-                <button type="submit">Apply Filters</button>
-            </form>
+            <div class="filter-section"> <!-- Add a wrapper div to control width -->
+                <h4>Filter by</h4>
+                <form id="filter-form">
+                    <div>
+                        <h5>Category</h5>
+                        <% categories.forEach(category => { %>
+                            <div>
+                                <input type="checkbox" name="category" value="<%= category._id %>"> <%= category.name %>
+                            </div>
+                        <% }) %>
+                    </div>
+                    <div>
+                        <h5>Price</h5>
+                        <input type="number" name="minPrice" placeholder="Min Price">
+                        <input type="number" name="maxPrice" placeholder="Max Price">
+                    </div>
+                    <button type="submit">Apply Filters</button>
+                </form>
+            </div>
         </div>
 
         <!-- Product Grid -->
@@ -45,15 +48,19 @@
             <!-- Pagination -->
             <div class="pagination">
                 <% if (currentPage > 1) { %>
-                  <a href="?page=<%= currentPage - 1 %>">Previous</a>
+                    <a href="?page=<%= currentPage - 1 %>">Previous</a>
                 <% } %>
-                
                 <span>Page <%= currentPage %> of <%= totalPages %></span>
-              
                 <% if (currentPage < totalPages) { %>
-                  <a href="?page=<%= currentPage + 1 %>">Next</a>
+                    <a href="?page=<%= currentPage + 1 %>">Next</a>
                 <% } %>
-              </div>
+            </div>
+        </div>
+    </div> <!-- End of Row -->
+</div> <!-- End of Container -->
+
+<!-- Footer in Full Width -->
+
               
 <script>
     document.addEventListener("DOMContentLoaded", function() {
@@ -113,5 +120,8 @@
 
   
 </script>
-
-<%- include("../../views/partials/user/footer") %>
+<div class="container-fluid">
+    <footer class="footer">
+        <%- include("../../views/partials/user/footer") %>
+    </footer>
+</div>

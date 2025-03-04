@@ -1,5 +1,6 @@
 .container {
     margin-top: 0px;
+      
 }
 
 .product-card {
@@ -89,9 +90,17 @@
 .col-md-3 button:hover {
     background-color: #b89c2d; 
 }
-
-.container::after {
+.filter-section {
+    width: 100%; /* Prevent overflow */
+    max-width: 250px; /* Adjust width */
+}
+.row::after {
     content: "";
-    display: table;
+    display: block;
     clear: both;
 }
+
+
+
+
+

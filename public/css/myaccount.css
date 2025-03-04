@@ -152,3 +152,18 @@ button {
 }
 .edit-btn { background-color: #007bff; color: white; }
 .delete-btn { background-color: #dc3545; color: white; }
+.default-address {
+    border: 2px solid #4CAF50; /* Green border for default address */
+    background-color: #e8f5e9; /* Light green background */
+    padding: 10px;
+    border-radius: 5px;
+}
+
+.default-label {
+    font-weight: bold;
+    color: #4CAF50; /* Green color */
+    padding: 5px 10px;
+    border: 1px solid #4CAF50;
+    border-radius: 3px;
+    background: white;
+}

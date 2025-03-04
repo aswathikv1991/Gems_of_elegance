@@ -3,6 +3,7 @@ const router=express.Router()
 const userController= require("../controllers/user/userController")
 const ProductController=require("../controllers/user/ProductController")
 const ProfileController=require("../controllers/user/profileController")
+const CheckoutController=require("../controllers/user/checkoutController")
 const passport = require("passport")
 const {userAuth,adminAuth}=require("../middlewares/auth")
 
@@ -51,6 +52,11 @@ router.post("/cart/add",userAuth,ProductController.addtocart)
 router.put('/update-cart-quantity',ProductController.updateQuantity)
 router.get("/cart", userAuth,ProductController.getcart)
 router.delete("/cart/remove/:cartItemId", ProductController.deleteCartItem);
+router.get("/checkout",userAuth,CheckoutController.checkoutPage)
+router.post("/setdefaultaddress/:addressId", ProfileController.setDefaultAddress);
+
+// Edit Coupon
+
 
 
 

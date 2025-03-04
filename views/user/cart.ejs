@@ -10,7 +10,7 @@
         <img src="<%= item.productId.image[0] %>" alt="<%= item.productId.name %>" class="cart-item-image">
         <div class="cart-item-details">
           <h3><%= item.productId.name %></h3>
-          <p>Price: $<%= item.productId.price %></p>
+          <p>Price: ₹<%= item.productId.price %></p>
           <p>Status: <%= item.productId.stockStatus %></p>
           <div class="quantity-controls">
             <button class="decrease-quantity" data-id="<%= item._id %>">-</button>
@@ -28,10 +28,14 @@
 
 
 <div id="cart-total">
-    <p>Total: $<span id="total-price"><%= totalPrice %></span></p> <!-- ✅ Corrected ID -->
-    <button id="checkout">Proceed to Checkout</button>
-  </div>
+    <p>Total: ₹<span id="total-price"><%= totalPrice %></span></p>
+    <form action="/checkout" method="GET">
+      <button type="submit" id="checkout">Proceed to Checkout</button>
+  </form>
   
+   
+  </div>
+  <p class="checkout-note">Shipping, taxes, and discount codes calculated at checkout.</p>
 <script>
    
     const decreaseBtns = document.querySelectorAll(".decrease-quantity");

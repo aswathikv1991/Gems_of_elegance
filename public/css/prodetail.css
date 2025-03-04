@@ -51,10 +51,28 @@
 }
 
 
-.product-info h2, 
+/*.product-info h2, 
 .product-info p {
-  margin-bottom: 5px !important; /* Slightly reduced spacing */
+  margin-bottom: 5px !important; 
+}*/
+.product-info h2 {
+  margin-bottom: 15px; /* Add more space below the heading */
+  color: #3a1a74; /* Change product name color (Deep Pinkish-Red) */
+  font-weight: bold;
 }
+.product-info p {
+  margin-bottom: 10px; /* Space between paragraphs */
+}
+.product-info strong {
+  display: inline-block;
+  margin-bottom: 5px;
+}
+
+/* Push buttons slightly below the content */
+.product-info button {
+  margin-top: 15px;
+}
+
 
 .row {
   display: flex;
@@ -66,26 +84,28 @@
 }
 
 .btn-secondary {
-  background-color:blueviolet; /* Nice pinkish-red color */
+  background-color:rgba(205, 26, 35, 0.945); /* Nice pinkish-red color */
   color: white;
   border: none;
   padding: 6px 6px;
   border-radius: 5px;
   cursor: pointer;
   transition: background 0.3s ease-in-out;
+  margin-top: 10px;
 }
 
 .btn-secondary:hover {
   background-color: #e63950; /* Darker shade on hover */
 }
 .btn-primary {
-  background-color:#B03060; /* Nice pinkish-red color */
+  background-color:#0c7b0cdd; /* Nice pinkish-red color */
   color: white;
   border: none;
   padding: 8px 8px;
   border-radius: 5px;
   cursor: pointer;
   transition: background 0.3s ease-in-out;
+  margin-right: 10px;
 }
 
 .btn-primary:hover {
