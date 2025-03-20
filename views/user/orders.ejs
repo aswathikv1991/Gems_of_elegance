@@ -1,0 +1,71 @@
+<%- include("../../views/partials/user/header") %>
+<title>My Orders</title>
+<link rel="stylesheet" href="/css/order.css"> <!-- Add your CSS file -->
+
+<div class="order-page">
+    <div class="container">
+        <h2>My Orders</h2>
+
+        <!-- Search & Filter Form -->
+        <form method="GET" action="/orders" class="search-filter-form">
+            <input 
+                type="text" 
+                name="search" 
+                placeholder="Search Order ID" 
+                value="<%= search || '' %>"
+            >
+            
+            <select name="status">
+                <option value="All" <%= status === 'All' ? 'selected' : '' %>>All</option>
+                <option value="pending" <%= status === 'pending' ? 'selected' : '' %>>Pending</option>
+                <option value="shipped" <%= status === 'shipped' ? 'selected' : '' %>>Shipped</option>
+                <option value="delivered" <%= status === 'delivered' ? 'selected' : '' %>>Delivered</option>
+                <option value="cancelled" <%= status === 'cancelled' ? 'selected' : '' %>>Cancelled</option>
+            </select>
+
+            <button type="submit">Filter</button>
+        </form>
+
+        <% if (orders.length === 0) { %>
+            <p>No orders found.</p>
+        <% } else { %>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Order ID</th>
+                        <th>Date</th>
+                        <th>Status</th>
+                        <th>Total</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% orders.forEach(order => { %>
+                        <tr>
+                            <td><%= order.orderID %></td>
+                            <td><%= new Date(order.createdAt).toLocaleDateString() %></td>
+                            <td><%= order.orderStatus %></td>
+                            <td>₹<%= order.totalAmount.toFixed(2) %></td>
+                            <td>
+                                <a href="/order/<%= order._id %>">View Details</a>
+                            </td>
+                        </tr>
+                    <% }) %>
+                </tbody>
+            </table>
+        <% } %>
+
+        <!-- Pagination -->
+        <div class="pagination">
+            <% if (currentPage > 1) { %>
+                <a href="?search=<%= search || '' %>&status=<%= status || 'All' %>&page=<%= currentPage - 1 %>">Previous</a>
+            <% } %>
+            <span>Page <%= currentPage %> of <%= totalPages %></span>
+            <% if (currentPage < totalPages) { %>
+                <a href="?search=<%= search || '' %>&status=<%= status || 'All' %>&page=<%= currentPage + 1 %>">Next</a>
+            <% } %>
+        </div>
+    </div>
+</div> <!-- Closing .order-page -->
+
+<%- include("../../views/partials/user/footer") %> 

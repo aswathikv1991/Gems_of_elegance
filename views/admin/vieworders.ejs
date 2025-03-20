@@ -1,0 +1,126 @@
+<%- include("../../views/partials/admin/header") %>
+
+<link rel="stylesheet" href="/css/vieworders.css">
+
+<div class="container">
+    <h1>Admin Orders</h1>
+
+    <!-- Search, Filter, and Sort Form -->
+    <form id="orderFilterForm" method="GET" action="/admin/getorders">
+        <input type="text" id="searchInput" name="search" placeholder="Search by Order ID or Email" value="<%= search ? search : '' %>">
+        
+        <select id="statusFilter" name="status">
+            <option value="">All Status</option>
+            <option value="pending" <%= status === 'pending' ? 'selected' : '' %>>Pending</option>
+            <option value="processing" <%= status === 'processing' ? 'selected' : '' %>>Processing</option>
+            <option value="shipped" <%= status === 'shipped' ? 'selected' : '' %>>Shipped</option>
+            <option value="delivered" <%= status === 'delivered' ? 'selected' : '' %>>Delivered</option>
+            <option value="cancelled" <%= status === 'cancelled' ? 'selected' : '' %>>Cancelled</option>
+        </select>
+
+        <select id="sortFilter" name="sort">
+            <option value="highAmount" <%= sort === 'highAmount' ? 'selected' : '' %>>Highest Amount</option>
+            <option value="lowAmount" <%= sort === 'lowAmount' ? 'selected' : '' %>>Lowest Amount</option>
+        </select>
+
+        <button type="submit">Apply</button>
+        <button type="button" id="clearSearch">Clear</button>
+    </form>
+
+    <!-- Orders Table -->
+    <table border="1">
+        <thead>
+            <tr>
+                <th>Order ID</th>
+                <th>Order Date</th>
+                <th>User Name</th>
+                <th>User Email</th>
+                <th>Total Amount</th>
+                <th>Order Status</th>
+                <th>Return Status</th>  <!-- New Column -->
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            <% if (orders.length === 0) { %>
+                <tr><td colspan="7">No orders found</td></tr>
+            <% } else { %>
+                <% orders.forEach(order => { %>
+                    <tr>
+                        <td><%= order.orderID %></td>
+                        <td><%= new Date(order.createdAt).toLocaleDateString("en-US", { 
+                            year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit', hour12: true 
+                        }) %></td>
+                        <td><%= order.userId?.name %></td>
+                        <td><%= order.userId?.email %></td>
+                        <td><%= order.totalAmount?.toFixed(2) %></td>
+                        <td><%= order.orderStatus %></td>
+                        <td>
+                            <% 
+                            // Check return statuses for order items
+                            let hasPending = false;
+                            let hasApproved = false;
+                            let hasCompleted = false;
+        
+                            if (Array.isArray(order.items)) {
+                                order.items.forEach((item) => {  // Fixed `.foreach()` to `.forEach()`
+                                    switch (item.returnApprovalStatus) {
+                                        case "pending":
+                                            hasPending = true;
+                                            break;
+                                        case "approved":
+                                            hasApproved = true;
+                                            break;
+                                        case "completed":
+                                            hasCompleted = true;
+                                            break;
+                                        default:
+                                            break;
+                                    }
+                                });
+                            }
+        
+                            // Display return status
+                            if (hasPending) { 
+                            %>
+                                <span style="color: orange; font-weight: bold;">Pending Return</span>
+                            <% } else if (hasApproved) { %>
+                                <span style="color: green;">Returns Approved</span>
+                            <% } else if (hasCompleted) { %>
+                                <span style="color: green;">Returns Completed</span>
+                            <% } else { %>
+                                <span style="color: gray;">No Returns</span>
+                            <% } %>
+                        </td>
+                        <td>
+                            <a href="/admin/vieworder/<%= order._id %>">View</a>
+                        </td>
+                    </tr>
+                <% }) %>
+            <% } %>
+        </tbody>
+        
+    </table>
+
+    <!-- Pagination Controls -->
+    <div class="pagination">
+        <% if (currentPage > 1) { %>
+            <a href="?page=<%= currentPage - 1 %>&search=<%= search ? search : '' %>&status=<%= status ? status : '' %>&sort=<%= sort ? sort : '' %>">Previous</a>
+        <% } %>
+    
+        <span>Page <%= currentPage %> of <%= totalPages %></span>
+    
+        <% if (currentPage < totalPages) { %>
+            <a href="?page=<%= currentPage + 1 %>&search=<%= search ? search : '' %>&status=<%= status ? status : '' %>&sort=<%= sort ? sort : '' %>">Next</a>
+        <% } %>
+    </div>
+    
+</div>
+
+<script>
+document.getElementById('clearSearch').addEventListener('click', function () {
+    window.location.href = '/admin/getorders'; // Reload page without filters
+});
+</script>
+
+<%- include("../../views/partials/admin/footer") %>

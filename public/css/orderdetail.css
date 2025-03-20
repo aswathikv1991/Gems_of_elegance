@@ -1,0 +1,61 @@
+/* Restrict styles to only apply within the order-details-page class */
+.order-details-page .container {
+    max-width: 800px;
+    margin: 20px auto;
+    padding: 20px;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+}
+
+.order-details-page h2, 
+.order-details-page h3 {
+    text-align: center;
+    color: #333;
+}
+
+.order-details-page table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+.order-details-page th, 
+.order-details-page td {
+    border: 1px solid #ddd;
+    padding: 10px;
+    text-align: center;
+}
+
+.order-details-page th {
+    background: #f4f4f4;
+}
+
+.order-details-page .btn {
+    display: inline-block;
+    padding: 10px 15px;
+    text-decoration: none;
+    color: white;
+    border-radius: 5px;
+    margin: 10px 5px;
+}
+
+.order-details-page .btn-secondary {
+    background: #333;
+}
+.cancel-section {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+#cancelReason {
+    flex: 1; /* This will make the textarea take available space */
+    height: 40px;
+    padding: 5px;
+}
+
+.btn.btn-danger {
+    white-space: nowrap; /* Ensures button text stays on one line */
+}

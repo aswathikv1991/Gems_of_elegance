@@ -1,6 +1,9 @@
 <%- include("../../views/partials/user/header") %>
-<link href="/css/userproducts.css" rel="stylesheet" type="text/css" media="all" />  
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
+
+<link href="/css/userproducts.css" rel="stylesheet" type="text/css" media="all" />  
+<div id="product-content">
 <div class="container">
     <div class="row">
         <!-- Sidebar for Filtering (Ensure it's limited to col-md-3) -->
@@ -12,20 +15,41 @@
                         <h5>Category</h5>
                         <% categories.forEach(category => { %>
                             <div>
-                                <input type="checkbox" name="category" value="<%= category._id %>"> <%= category.name %>
+                                <input type="checkbox" name="category" value="<%= category._id %>" 
+                                    <%= (selectedCategories && selectedCategories.includes(category._id.toString())) ? 'checked' : '' %> > 
+                                <%= category.name %>
                             </div>
                         <% }) %>
                     </div>
+                    
                     <div>
                         <h5>Price</h5>
-                        <input type="number" name="minPrice" placeholder="Min Price">
-                        <input type="number" name="maxPrice" placeholder="Max Price">
+                        <input type="number" name="minPrice" placeholder="Min Price" value="<%= selectedMinPrice %>">
+                        <input type="number" name="maxPrice" placeholder="Max Price" value="<%= selectedMaxPrice %>">
+                        
                     </div>
                     <button type="submit">Apply Filters</button>
+                    <button type="button" id="clear-filters">Clear Filters</button>
+
                 </form>
             </div>
         </div>
+     
+      <!-- Sorting Dropdown -->
+<!-- Sorting Dropdown -->
+<div class="sorting-section">
+    <label for="sort">Sort by:</label>
+    <select id="sort" name="sort">
+        <option value="" <%= selectedSort === "" ? "selected" : "" %>>Select</option>
+        <option value="priceAsc" <%= selectedSort === "priceAsc" ? "selected" : "" %>>Price: Low to High</option>
+        <option value="priceDesc" <%= selectedSort === "priceDesc" ? "selected" : "" %>>Price: High to Low</option>
+        <option value="newest" <%= selectedSort === "newest" ? "selected" : "" %>>Newest First</option>
+        <option value="oldest" <%= selectedSort === "oldest" ? "selected" : "" %>>Oldest First</option>
+    </select>
+</div>
 
+
+        
         <!-- Product Grid -->
         <div class="col-md-9">
             <div class="row">
@@ -38,32 +62,121 @@
                                 <% }) %>
                             </div>
                             <h5><%= product.name %></h5>
-                            <p>Price: ₹<%= product.price %></p>
+                           <!-- <p>Price: ₹<%= product.price %></p>-->
+                           <p>
+                            <% if (product.discountPrice < product.price) { %>
+                                Price: <span style="text-decoration: line-through; color: grey;">₹<%= product.price %></span> 
+                                <span style="color: red; font-weight: bold;">₹<%= product.discountPrice %></span>
+                            <% } else { %>
+                                Price: <span style="color: black; font-weight: bold;">₹<%= product.price %></span>
+                            <% } %>
+                        </p>
+                        
+                            <!-- Wishlist Button -->
+                               
                             <a href="/productdetail/<%= product._id %>" class="btn btn-primary">View Details</a>
+                            <button class="wishlist-btn <%= wishlistItems.includes(product._id.toString()) ? 'active' : '' %>" 
+                                data-id="<%= product._id %>">
+                                <i class="fa fa-heart"></i> 
+                            </button>
+                            
                         </div>
                     </div>
+                    
                 <% }) %>
             </div>
 
             <!-- Pagination -->
             <div class="pagination">
                 <% if (currentPage > 1) { %>
-                    <a href="?page=<%= currentPage - 1 %>">Previous</a>
+                    <a href="?page=<%= currentPage - 1 %>&sort=<%= query.sort || '' %>">Previous</a>
                 <% } %>
+            
                 <span>Page <%= currentPage %> of <%= totalPages %></span>
+            
                 <% if (currentPage < totalPages) { %>
-                    <a href="?page=<%= currentPage + 1 %>">Next</a>
+                    <a href="?page=<%= currentPage + 1 %>&sort=<%= query.sort || '' %>">Next</a>
                 <% } %>
             </div>
+            
         </div>
     </div> <!-- End of Row -->
-</div> <!-- End of Container -->
+</div> 
+</div>
 
-<!-- Footer in Full Width -->
 
               
 <script>
     document.addEventListener("DOMContentLoaded", function() {
+        
+        document.getElementById("clear-filters").addEventListener("click", function() {
+    window.location.href = "/products"; // Redirect to show all products
+});
+
+const wishlistButtons = document.querySelectorAll(".wishlist-btn");
+console.log("Wishlist buttons found:", wishlistButtons.length);
+
+wishlistButtons.forEach(button => {
+    button.addEventListener("click", function () {
+        console.log("Wishlist button clicked!");
+
+        const productId = button.getAttribute("data-id");
+        if (!productId) {
+            console.error("Error: Product ID is missing!");
+            return;
+        }
+
+        fetch("/check-login-status")
+            .then(response => response.json())
+            .then(data => {
+                if (!data.loggedIn) {
+                    Swal.fire({
+                        title: "Login Required",
+                        text: "You need to log in to add items to your wishlist.",
+                        icon: "warning",
+                        showCancelButton: true,
+                        confirmButtonText: "Login",
+                        cancelButtonText: "Cancel"
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            window.location.href = "/login";
+                        }
+                    });
+                } else {
+                    // User is logged in, proceed with wishlist request
+                    const isInWishlist = button.classList.contains("active");
+                    console.log(`Product ID: ${productId}, isInWishlist: ${isInWishlist}`);
+
+                    fetch(`/wishlist/${isInWishlist ? "delete" : "add"}`, {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ productId })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        console.log("Server Response:", data);
+
+                        if (data.success) {
+                            button.classList.toggle("active");
+                            button.innerHTML = `<i class="fa ${isInWishlist ? "fa-heart-o" : "fa-heart"}"></i>`;
+                            Swal.fire("Success!", data.message, "success");
+                        } else {
+                            Swal.fire("Error!", data.message, "error");
+                        }
+                    })
+                    .catch(error => {
+                        console.error("Fetch Error:", error);
+                        Swal.fire("Error!", "Something went wrong", "error");
+                    });
+                }
+            })
+            .catch(error => {
+                console.error("Error checking login status:", error);
+                Swal.fire("Error!", "Something went wrong while checking login status", "error");
+            });
+    });
+})
+
     // Image Slider
     const sliders = document.querySelectorAll(".image-slider");
 
@@ -116,10 +229,27 @@
             window.location.href = query; // Redirect with query params
         });
     }
+    const sortSelect = document.getElementById("sort");
+
+if (sortSelect) {
+    sortSelect.addEventListener("change", function () {
+        let url = new URL(window.location.href);
+        let selectedSort = sortSelect.value;
+
+        if (selectedSort) {
+            url.searchParams.set("sort", selectedSort); // Add sorting to URL
+        } else {
+            url.searchParams.delete("sort"); // Remove sorting if default
+        }
+
+        window.location.href = url.toString(); // Reload page with sorting
+    });
+}
 });
 
-  
+
 </script>
+
 <div class="container-fluid">
     <footer class="footer">
         <%- include("../../views/partials/user/footer") %>

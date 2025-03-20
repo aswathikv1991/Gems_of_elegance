@@ -1,106 +1,173 @@
-.container {
-    margin-top: 0px;
-      
+/* Ensure the entire content is wrapped properly */
+#product-content {
+    padding: 20px 0;
+    background-color: #f8f9fa;
 }
 
-.product-card {
-    border: 1px solid #ddd;
+/* Fix container alignment */
+.container {
+    max-width: 1200px;
+    margin: auto;
+}
+
+/* Sidebar (Filter Section) */
+/* Filter Section Styling */
+.filter-section {
+    background-color: #f8f9fa; /* Light grey background */
     padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+}
+
+.filter-section h4 {
+    font-size: 18px;
+    font-weight: bold;
+    margin-bottom: 10px;
+    text-align: center;
+}
+
+.filter-section h5 {
+    font-size: 16px;
+    margin-top: 10px;
+    font-weight: bold;
+    color: #333;
+}
+
+.filter-section div {
+    margin-bottom: 10px;
+}
+
+.filter-section input[type="number"] {
+    width: 100%;
+    padding: 5px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+.filter-section input[type="checkbox"] {
+    margin-right: 5px;
+}
+
+.filter-section label {
+    font-size: 14px;
+    color: #555;
+}
+
+/* Apply Filter Button */
+.filter-section button {
+    width: 100%;
+    background-color: #007bff;
+    color: white;
+    padding: 8px 10px;
+    font-size: 14px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: 0.3s ease;
+    margin-top: 10px;
+}
+
+.filter-section button:hover {
+    background-color: #0056b3;
+}
+
+
+/* Sorting Section */
+.sorting-section {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.sorting-section label {
+    font-weight: bold;
+    margin-right: 10px;
+}
+
+.sorting-section select {
+    padding: 5px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+}
+
+/* Product Grid */
+.product-card {
+    background: #fff;
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
     text-align: center;
     margin-bottom: 20px;
 }
 
-.product-image {
-    width: 100%;
+.product-card h5 {
+    font-size: 16px;
+    margin-top: 10px;
+}
+
+.product-card p {
+    font-size: 14px;
+    color: #555;
+}
+
+/* Image Slider */
+.image-slider {
+    position: relative;
     height: 200px;
-    object-fit: cover;
+    overflow: hidden;
 }
 
 .image-slider img {
-    display: none;
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+    border-radius: 5px;
 }
 
-.image-slider img:first-child {
-    display: block;
+/* Wishlist Button */
+.wishlist-btn {
+    background: transparent;
+    border: none;
+    font-size: 20px;
+    cursor: pointer;
+    margin-top: 10px;
 }
 
+.wishlist-btn.active i {
+    color: red;
+}
+
+/* Pagination */
 .pagination {
     text-align: center;
     margin-top: 20px;
 }
 
 .pagination a {
+    padding: 8px 15px;
     margin: 0 5px;
-    padding: 5px 10px;
-    border: 1px solid #ddd;
+    background: #007bff;
+    color: #fff;
+    border-radius: 5px;
     text-decoration: none;
 }
- Filter Section Styling 
-.col-md-3 {
-    background: #f8f8f8;
-    padding: 15px;
-    border-radius: 8px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+
+.pagination span {
+    font-weight: bold;
+    margin: 0 10px;
 }
 
-.col-md-3 h4 {
+/* Footer Alignment */
+.footer {
+    background: #333;
+    color: #fff;
+    padding: 20px 0;
     text-align: center;
-    font-size: 20px;
-    margin-bottom: 15px;
-    color: #333;
-}
-
-.col-md-3 h5 {
-    font-size: 16px;
-    margin-top: 10px;
-    color: #555;
-}
-
-.col-md-3 div {
-    margin-bottom: 15px;
-}
-
-.col-md-3 input[type="checkbox"] {
-    margin-right: 8px;
-    cursor: pointer;
-}
-
-.col-md-3 input[type="number"] {
     width: 100%;
-    padding: 8px;
-    margin-top: 5px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    font-size: 14px;
 }
 
-.col-md-3 button {
-    width: 100%;
-    padding: 10px;
-    background-color: #d4af37;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 16px;
-    margin-top: 10px;
-    transition: background-color 0.3s ease-in-out;
+.container-fluid {
+    padding: 0;
 }
-
-.col-md-3 button:hover {
-    background-color: #b89c2d; 
-}
-.filter-section {
-    width: 100%; /* Prevent overflow */
-    max-width: 250px; /* Adjust width */
-}
-.row::after {
-    content: "";
-    display: block;
-    clear: both;
-}
-
-
-
-
-

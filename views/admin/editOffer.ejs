@@ -1,0 +1,148 @@
+<%- include("../../views/partials/admin/header") %>
+<link rel="stylesheet" href="/css/editoffer.css">
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<div class="offer-edit-container">
+    <h2>Edit Offer</h2>
+    <form id="editOfferForm" action="/admin/editoffer/<%= offer._id %>" method="POST" data-offer-id="<%= offer._id %>">
+        <label>Offer Name</label>
+        <input type="text" id="offerName" name="name" value="<%= offer.name %>" required>
+
+        <label>Apply To</label>
+        <select name="type" id="offerType" onchange="toggleDropdowns()" required>
+            <option value="product" <%= offer.type === 'product' ? 'selected' : '' %>>Product</option>
+            <option value="category" <%= offer.type === 'category' ? 'selected' : '' %>>Category</option>
+        </select>
+
+        <div id="productDropdown" class="dropdown-container" style="display:<%= offer.type === 'product' ? 'block' : 'none' %>;">
+            <label>Select Product</label>
+            <select name="productId" id="productId">
+                <% products.forEach(product => { %>
+                    <option value="<%= product._id %>" <%= offer.productId.toString() === product._id.toString() ? 'selected' : '' %>><%= product.name %></option>
+                <% }) %>
+            </select>
+        </div>
+
+        <div id="categoryDropdown" class="dropdown-container" style="display:<%= offer.type === 'category' ? 'block' : 'none' %>;">
+            <label>Select Category</label>
+            <select name="categoryId" id="categoryId">
+                <% categories.forEach(category => { %>
+                    <option value="<%= category._id %>" 
+                        <%= offer.categoryId && offer.categoryId.toString() === category._id.toString() ? 'selected' : '' %>>
+                        <%= category.name %>
+                    </option>
+                <% }) %>
+            </select>
+            
+        </div>
+
+        <label>Discount (%)</label>
+        <input type="number" id="discount" name="discount" value="<%= offer.discount %>" min="1" max="100" required>
+
+        <label>End Date</label>
+        <input type="date" id="endDate" name="endDate" value="<%= offer.endDate.toISOString().split('T')[0] %>" required>
+  
+        <button type="submit">Update Offer</button>
+        <button><a href="/admin/getoffers" class="btn btn-danger"><i class="fas fa-times"></i> Exit</a></button>
+    </form>
+</div>
+
+<script>
+    console.log("Edit Offer script loaded!");
+
+    function toggleDropdowns() {
+        let type = document.getElementById('offerType').value;
+        document.getElementById('productDropdown').style.display = type === 'product' ? 'block' : 'none';
+        document.getElementById('categoryDropdown').style.display = type === 'category' ? 'block' : 'none';
+    }
+
+    function showError(message) {
+        Swal.fire({
+            title: "Error!",
+            text: message,
+            icon: "error",
+            confirmButtonText: "OK"
+        });
+    }
+
+    document.getElementById("editOfferForm").addEventListener("submit", async function (event) {
+        event.preventDefault();
+        console.log("Edit offer form submitted!");
+        const offerName = document.getElementById("offerName").value.trim();
+        const offerType = document.getElementById("offerType").value;
+        const productId = document.getElementById("productId")?.value;
+        const categoryId = document.getElementById("categoryId")?.value;
+        const endDate = document.getElementById("endDate").value;
+        const discount = document.getElementById("discount").value.trim();
+        const offerId = this.getAttribute("data-offer-id");
+
+        // Basic Validation
+        if (!offerName || !offerType || !endDate || !discount) {
+            return showError("All fields are required!");
+        }
+
+        // Ensure either product or category is selected based on offer type
+        if (offerType === "product" && !productId) {
+            return showError("Please select a product!");
+        }
+
+        if (offerType === "category" && !categoryId) {
+            return showError("Please select a category!");
+        }
+
+        // Validate discount range
+        if (discount < 1 || discount > 100) {
+            return showError("Discount must be between 1 and 100!");
+        }
+
+        // Validate future date
+        const today = new Date().toISOString().split("T")[0];
+        if (endDate < today) {
+            return showError("End date must be in the future!");
+        }
+
+        // Prepare JSON data
+        const offerData = {
+            name: offerName,
+            type: offerType,
+            discount: discount,
+            endDate: endDate
+        };
+
+        if (offerType === "product") {
+            offerData.productId = productId;
+        } else if (offerType === "category") {
+            offerData.categoryId = categoryId;
+        }
+
+        try {
+            console.log("Sending request to server...", offerData);
+            let response = await fetch(`/admin/editoffer/${offerId}`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(offerData)
+            });
+            console.log("Response status:", response.status); 
+            let result = await response.json();
+            console.log("Server Response:", result);
+            if (result.success) {
+                Swal.fire({
+                    title: "Success!",
+                    text: "Offer updated successfully!",
+                    icon: "success",
+                    confirmButtonText: "OK"
+                }).then(() => {
+                    window.location.href = "/admin/getoffers";
+                });
+            } else {
+                console.error("Error Response:", result);
+                showError(result.message || "Something went wrong!");
+            }
+        } catch (error) {
+            console.error("Fetch error:", error);
+            showError("Failed to update offer. Try again later.");
+        }
+    });
+</script>
+
+<%- include("../../views/partials/admin/footer") %>

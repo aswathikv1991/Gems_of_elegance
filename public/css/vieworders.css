@@ -1,0 +1,140 @@
+/* views/css/admin/orders.css */
+
+.container {
+    width: 90%;
+    margin: 0 auto;
+    padding-top: 20px;
+}
+
+h1 {
+    text-align: center;
+    font-size: 2rem;
+    margin-bottom: 20px;
+}
+
+/* Search, Filter, and Sort Form */
+#orderFilterForm {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+}
+
+#orderFilterForm input,
+#orderFilterForm select,
+#orderFilterForm button {
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 1rem;
+}
+
+/* Ensure placeholder text is visible */
+#searchInput::placeholder {
+    color: #888;
+}
+
+/* Button Styles */
+#orderFilterForm button {
+    background-color: #28a745;
+    color: white;
+    cursor: pointer;
+    border: none;
+}
+
+#orderFilterForm button:hover {
+    background-color: #0056b3;
+}
+
+#clearSearch {
+    background-color: #dc3545;
+}
+
+#clearSearch:hover {
+    background-color: #a71d2a;
+}
+
+/* Table Styling */
+table {
+    width: 100%;
+    max-width: 1200px;
+    margin-left: 200px; /* Adjusted margin to move table slightly to the right */
+    border-collapse: collapse;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+th, td {
+    padding: 15px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+}
+
+th {
+    background-color: #007bff;
+    color: white;
+    font-weight: bold;
+    font-size: 1rem;
+}
+
+td {
+    font-size: 0.9rem;
+    color: #333;
+}
+
+tr:hover {
+    background-color: #f1f1f1;
+}
+
+a {
+    color: #007bff;
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+/* Pagination Styling */
+.pagination {
+    text-align: center;
+    margin-top: 20px;
+}
+
+.pagination a {
+    padding: 8px 12px;
+    margin: 0 5px;
+    border-radius: 5px;
+    background-color: #007bff;
+    color: white;
+    text-decoration: none;
+}
+
+.pagination a:hover {
+    background-color: #0056b3;
+}
+
+/* Responsive Design */
+@media screen and (max-width: 768px) {
+    table {
+        width: 100%;
+        font-size: 0.8rem;
+        margin-left: 10px; /* Adjust for smaller screens */
+    }
+
+    th, td {
+        padding: 10px;
+    }
+
+    #orderFilterForm {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    #orderFilterForm input,
+    #orderFilterForm select,
+    #orderFilterForm button {
+        width: 100%;
+        max-width: 300px;
+    }
+}

@@ -1,0 +1,108 @@
+<%- include("../../views/partials/admin/header") %>
+<link rel="stylesheet" href="/css/offer.css">
+<section class="content-main">
+    <div class="content-header">
+        <h2 class="content-title">Offer Management</h2>
+    </div>
+
+    <div class="header-actions">
+        <a href="/admin/addoffer" class="btn btn-primary"><i class="fas fa-plus"></i> Add Offer</a>
+    </div>
+
+    <div class="offer-container mt-4">
+        <table class="table table-hover table-bordered text-center">
+            <thead class="table-dark">
+                <tr>
+                    <th>#</th>
+                    <th>Offer Name</th>
+                    <th>Type</th>
+                    <th>Discount (%)</th>
+                    <th>Applied On</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% if (offers.length > 0) { %>
+                    <% offers.forEach((offer, index) => { %>
+                        <tr>
+                            <td><%= index + 1 %></td>
+                            <td><%= offer.name %></td>
+                            <td><%= offer.type %></td>
+                            <td><%= offer.discount %>%</td>
+                            <td>
+                                <% if (offer.productId) { %>
+                                    <span class="badge bg-success">Product: <%= offer.productId.name %></span>
+                                <% } else if (offer.categoryId) { %>
+                                    <span class="badge bg-info">Category: <%= offer.categoryId.name %></span>
+                                <% } %>
+                            </td>
+                            <td>
+                                <% if (offer.status === "active") { %>
+                                    <span class="badge bg-success">Active</span>
+                                <% } else { %>
+                                    <span class="badge bg-danger">Inactive</span>
+                                <% } %>
+                            </td>
+                            <td>
+                                <button class="btn btn-warning btn-sm edit-offer" >
+                                 
+                               
+                                <a href="/admin/editoffer/<%= offer._id %>" class="btn btn-warning btn-sm">
+                                    <i class="fas fa-edit"></i> Edit
+                                </a>
+                            </button>
+                                <% if (offer.status === "active") { %>
+                                    <button class="btn btn-secondary btn-sm toggle-offer" data-id="<%= offer._id %>" data-status="inactive">
+                                        <i class="fas fa-toggle-off"></i> Disable
+                                    </button>
+                                <% } else { %>
+                                    <button class="btn btn-success btn-sm toggle-offer" data-id="<%= offer._id %>" data-status="active">
+                                        <i class="fas fa-toggle-on"></i> Enable
+                                    </button>
+                                <% } %>
+                            </td>
+                        </tr>
+                    <% }) %>
+                <% } else { %>
+                    <tr>
+                        <td colspan="7" class="text-center text-muted">No offers available</td>
+                    </tr>
+                <% } %>
+            </tbody>
+        </table>
+    </div>
+</section>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    document.querySelectorAll(".toggle-offer").forEach(button => {
+        button.addEventListener("click", function () {
+            const offerId = this.getAttribute("data-id");
+            const newStatus = this.getAttribute("data-status");
+            const actionUrl = newStatus === "inactive" ? `/admin/disableoffer/${offerId}` : `/admin/enableoffer/${offerId}`;
+
+            fetch(actionUrl, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    Swal.fire({
+                        title: "Success!",
+                        text: data.message,
+                        icon: "success",
+                        confirmButtonText: "OK"
+                    }).then(() => {
+                        location.reload(); // Refresh to update status
+                    });
+                } else {
+                    Swal.fire("Error", data.message, "error");
+                }
+            })
+            .catch(error => {
+                Swal.fire("Error", "Something went wrong!", "error");
+            });
+        });
+    });
+</script>

@@ -40,6 +40,22 @@ const userSchema = new mongoose.Schema(
       type: Boolean,
       default: false, // False means normal user, true means admin user
     },
+    referralToken: {
+      type: String,
+      unique: true, // Each user gets a unique referral link
+    },
+    referredBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      default: null, // Stores the user who referred this person
+    },
+    coupons: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Coupon", // Stores the referral coupon IDs
+      },
+    ],
+    referralCount: { type: Number, default: 0 },
   },
   {
     timestamps: true, // Automatically adds createdAt and updatedAt fields

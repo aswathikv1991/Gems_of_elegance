@@ -32,6 +32,9 @@ app.set("view engine","ejs")
 app.set("views",path.join(__dirname,"views"))
 app.use(express.static("public"))
 
+app.get("/get-razorpay-key", (req, res) => {
+    res.json({ key: process.env.RAZORPAY_KEY_ID });
+});
 
 
 

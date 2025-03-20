@@ -16,9 +16,10 @@ const paymentSchema = new mongoose.Schema(
 
     paymentMethod: { 
       type: String, 
-      enum: ["credit_card", "debit_card", "paypal", "cod", "upi"], 
+      enum: ["cod", "razorpay", "wallet"], // 🔄 Replaced multiple options with "razorpay"
       required: true 
-    }, // Payment method used
+    },
+    // Payment method used
 
     transactionId: { 
       type: String, 

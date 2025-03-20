@@ -1,0 +1,255 @@
+/* General Container Styles */
+.container {
+    margin: 20px 20px 20px 280px; /* Adjust left margin for sidebar */
+    padding: 20px;
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Heading Styles */
+h1 {
+    font-size: 26px;
+    font-weight: bold;
+    color: #2c3e50; /* Dark blue */
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+h3 {
+    font-size: 22px;
+    font-weight: bold;
+    color: #2c3e50; /* Dark blue */
+    margin-bottom: 15px;
+}
+
+/* Order Information Section */
+.order-info, .order-items, .shipping-address, .payment-details, .order-status {
+    background-color: #f8f9fa;
+    padding: 15px;
+    margin-bottom: 20px;
+    border-radius: 5px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+.order-info p, .shipping-address p, .payment-details p {
+    font-size: 16px;
+    margin: 5px 0;
+}
+
+/* Order Items Table */
+.order-items table {
+    width: 100%;
+    border-collapse: collapse;
+    border-radius: 5px;
+    overflow: hidden;
+}
+
+.order-items th, .order-items td {
+    padding: 12px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+}
+
+.order-items th {
+    background-color: #2c3e50; /* Dark blue */
+    color: white;
+    font-weight: bold;
+}
+
+.order-items tbody tr:nth-child(odd) {
+    background-color: #f2f2f2;
+}
+
+.order-items tbody tr:hover {
+    background-color: #e0e0e0;
+}
+
+/* Order Status Section */
+.order-status form {
+    display: flex;
+    align-items: center;
+}
+
+.order-status select {
+    padding: 10px;
+    font-size: 16px;
+    margin-right: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+.order-status button {
+    padding: 10px 20px;
+    background-color: #28a745;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.order-status button:hover {
+    background-color: #218838;
+}
+
+/* Payment Details */
+.payment-details a {
+    color: #007bff;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.payment-details a:hover {
+    text-decoration: underline;
+}
+
+/* Alert Message */
+.alert {
+    padding: 15px;
+    margin-bottom: 20px;
+    border-radius: 4px;
+}
+
+.alert-success {
+    border: 1px solid #c3e6cb;
+    background-color: #d4edda;
+    color: #155724;
+}
+
+/* Back Button */
+.back-button {
+    margin-top: 20px;
+    text-align: left; /* Align to left */
+}
+
+.back-button .btn {
+    display: inline-block;
+    background-color: #007bff;
+    color: white;
+    padding: 12px 25px;
+    text-decoration: none;
+    border-radius: 5px;
+    font-size: 16px;
+    font-weight: bold;
+    transition: background-color 0.3s ease;
+}
+
+.back-button .btn:hover {
+    background-color: #0056b3;
+}
+
+/* Responsive Styles */
+@media (max-width: 768px) {
+    .container {
+        margin-left: 10px; /* Smaller margin for mobile */
+        padding: 15px;
+    }
+
+    h1 {
+        font-size: 24px;
+    }
+
+    h3 {
+        font-size: 18px;
+    }
+
+    .order-info, .order-items, .shipping-address, .payment-details, .order-status {
+        padding: 12px;
+    }
+
+    .order-items table {
+        font-size: 14px;
+    }
+
+    .back-button {
+        text-align: center; /* Center align back button for small screens */
+    }
+}
+/* Return Requests Section */
+.return-requests {
+    background-color: #f8f9fa;
+    padding: 15px;
+    margin-bottom: 20px;
+    border-radius: 5px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+.return-requests h3 {
+    font-size: 22px;
+    font-weight: bold;
+    color: #2c3e50;
+    margin-bottom: 15px;
+}
+
+.return-requests table {
+    width: 100%;
+    border-collapse: collapse;
+    border-radius: 5px;
+    overflow: hidden;
+}
+
+.return-requests th, .return-requests td {
+    padding: 12px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+}
+
+.return-requests th {
+    background-color: #2c3e50; /* Dark blue */
+    color: white;
+    font-weight: bold;
+}
+
+.return-requests tbody tr:nth-child(odd) {
+    background-color: #f2f2f2;
+}
+
+.return-requests tbody tr:hover {
+    background-color: #e0e0e0;
+}
+
+/* Return Status Text Styling */
+.return-requests .text-warning {
+    color: #e67e22; /* Orange for pending */
+    font-weight: bold;
+}
+
+.return-requests .text-success {
+    color: #27ae60; /* Green for approved */
+    font-weight: bold;
+}
+
+.return-requests .text-danger {
+    color: #e74c3c; /* Red for rejected */
+    font-weight: bold;
+}
+
+/* Approve/Reject Buttons */
+.return-requests button {
+    padding: 8px 12px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: bold;
+    margin-right: 5px;
+}
+
+.return-requests button[name="action"][value="approve"] {
+    background-color: #27ae60;
+    color: white;
+}
+
+.return-requests button[name="action"][value="approve"]:hover {
+    background-color: #219150;
+}
+
+.return-requests button[name="action"][value="reject"] {
+    background-color: #e74c3c;
+    color: white;
+}
+
+.return-requests button[name="action"][value="reject"]:hover {
+    background-color: #c0392b;
+}

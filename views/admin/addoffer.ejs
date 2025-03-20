@@ -1,0 +1,158 @@
+<%- include("../../views/partials/admin/header") %>
+<link rel="stylesheet" href="/css/addoffer.css">
+<script src="https://kit.fontawesome.com/16d4885483.js" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<section class="content-main">
+    <div class="content-header">
+        <h2 class="content-title">Add Offer</h2>
+    </div>
+
+    <div class="offer-container mt-4">
+        <form id="offerForm" class="p-4 border rounded shadow bg-light">
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label for="offerName" class="form-label fw-bold">Offer Name</label>
+                    <input type="text" class="form-control" id="offerName" name="name" required placeholder="Enter offer name">
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label fw-bold">Apply Offer To</label>
+                    <select class="form-select" id="offerType" name="type" required onchange="toggleDropdowns()">
+                        <option value="" disabled selected>Select Type</option>
+                        <option value="product">Product</option>
+                        <option value="category">Category</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="row mb-3" id="productDropdown" style="display: none;">
+                <div class="col-md-6">
+                    <label for="productId" class="form-label fw-bold">Select Product</label>
+                    <select class="form-select" id="productId" name="productId">
+                        <option value="" disabled selected>Select a Product</option>
+                        <% products.forEach((product) => { %>
+                            <option value="<%= product._id %>"><%= product.name %></option>
+                        <% }) %>
+                    </select>
+                </div>
+            </div>
+
+            <div class="row mb-3" id="categoryDropdown" style="display: none;">
+                <div class="col-md-6">
+                    <label for="categoryId" class="form-label fw-bold">Select Category</label>
+                    <select class="form-select" id="categoryId" name="categoryId">
+                        <option value="" disabled selected>Select a Category</option>
+                        <% categories.forEach((category) => { %>
+                            <option value="<%= category._id %>"><%= category.name %></option>
+                        <% }) %>
+                    </select>
+                </div>
+            </div>
+
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label for="endDate" class="form-label fw-bold">End Date</label>
+                    <input type="date" class="form-control" id="endDate" name="endDate" required>
+                </div>
+            </div>
+
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label for="discount" class="form-label fw-bold">Discount (%)</label>
+                    <input type="number" class="form-control" id="discount" name="discount" min="1" max="100" required placeholder="Enter discount percentage">
+                </div>
+            </div>
+
+            <div class="text-center d-flex gap-3 justify-content-center">
+                <a href="/admin/getoffers" class="btn btn-danger"><i class="fas fa-times"></i> Exit</a>
+                <button type="submit" class="btn btn-success"><i class="fas fa-save"></i> Save Offer</button>
+            </div>
+        </form>
+    </div>
+</section>
+
+<script>
+    function toggleDropdowns() {
+        let type = document.getElementById('offerType').value;
+        document.getElementById('productDropdown').style.display = type === 'product' ? 'block' : 'none';
+        document.getElementById('categoryDropdown').style.display = type === 'category' ? 'block' : 'none';
+    }
+
+    function showError(message) {
+        Swal.fire({
+            title: "Error!",
+            text: message,
+            icon: "error",
+            confirmButtonText: "OK"
+        });
+    }
+
+    document.getElementById("offerForm").addEventListener("submit", async function (event) {
+        event.preventDefault();
+
+        const offerName = document.getElementById("offerName").value.trim();
+        const offerType = document.getElementById("offerType").value;
+        const productId = document.getElementById("productId")?.value;
+        const categoryId = document.getElementById("categoryId")?.value;
+        const endDate = document.getElementById("endDate").value;
+        const discount = document.getElementById("discount").value.trim();
+
+        // Basic Validation
+        if (!offerName || !offerType || !endDate || !discount) {
+            return showError("All fields are required!");
+        }
+
+        // Ensure either product or category is selected based on offer type
+        if (offerType === "product" && !productId) {
+            return showError("Please select a product!");
+        }
+
+        if (offerType === "category" && !categoryId) {
+            return showError("Please select a category!");
+        }
+
+        // Validate discount range
+        if (discount < 1 || discount > 100) {
+            return showError("Discount must be between 1 and 100!");
+        }
+
+        // Validate future date
+        const today = new Date().toISOString().split("T")[0];
+        if (endDate < today) {
+            return showError("End date must be in the future!");
+        }
+
+        // Prepare form data
+        const formData = new FormData(this);
+        const formObject = {};
+        formData.forEach((value, key) => formObject[key] = value);
+
+        try {
+            let response = await fetch("/admin/addoffer", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(formObject)
+            });
+
+            let result = await response.json();
+
+            if (result.success) {
+                Swal.fire({
+                    title: "Success!",
+                    text: "Offer added successfully!",
+                    icon: "success",
+                    confirmButtonText: "OK"
+                }).then(() => {
+                    window.location.href = "/admin/getoffers";
+                });
+            } else {
+                showError(result.message || "Something went wrong!");
+            }
+        } catch (error) {
+            showError("Failed to add offer. Try again later.");
+        }
+    });
+</script>
+
+<%- include("../../views/partials/admin/footer") %>

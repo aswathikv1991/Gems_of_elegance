@@ -1,0 +1,156 @@
+<%- include("../../views/partials/user/header") %>
+<link rel="stylesheet" href="/css/orderdetail.css"> <!-- Add your CSS file -->
+<div class="order-details-page">
+    <div class="container">
+        <h2>Order Details</h2>
+
+        <p><strong>Order ID:</strong> <%= order.orderID %></p>
+        <p><strong>Date:</strong> <%= new Date(order.createdAt).toLocaleDateString() %></p>
+        <p><strong>Status:</strong> <%= order.orderStatus %></p>
+        <p><strong>Total Amount:</strong> ₹<%= order.totalAmount.toFixed(2) %></p>
+
+        <h3>Items:</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Product</th>
+                    <th>Quantity</th>
+                    <th>Price</th>
+                    <th>SalePrice</th>
+                    <th>Subtotal</th>
+                    <th>Status</th> <!-- Added Status Column -->
+
+                    <% if (order.orderStatus === "pending" || order.orderStatus === "processing") { %>
+                        <th>Cancel</th>
+                    <% } %>
+                    <th>Return</th> <!-- Added Return Column -->
+                </tr>
+            </thead>
+            <tbody>
+                <% order.items.forEach(item => { %>
+                    <tr>
+                        <td><%= item.productId.name %></td>
+                        <td><%= item.quantity %></td>
+                        <td>₹<%= item.price.toFixed(2) %></td>
+                        <td>₹<%= item.salePrice.toFixed(2) %></td>
+                        <td>₹<%= (item.quantity * item.price).toFixed(2) %></td>
+                        
+                        <td>
+                            <% if (item.status === "cancelled") { %>
+                                <span class="text-danger">Cancelled</span> <!-- 🚨 Display cancelled status -->
+                            <% } else { %>
+                                <span class="text-success">Confirmed</span> <!-- Show "Confirmed" -->
+                            <% } %>
+                        </td>
+                        <% if (order.orderStatus === "pending" || order.orderStatus === "processing") { %>
+                            <td>
+                                <% if (item.status !== "cancelled") { %>
+                                    <input type="checkbox" name="cancelProducts" value="<%= item.productId._id %>">
+                                <% } else { %>
+                                    <span class="text-muted">N/A</span> <!-- 🚫 No cancel option for cancelled items -->
+                                <% } %>
+                            </td>
+                        <% } %>
+                        <td>
+                            <% if (order.orderStatus === "delivered" && item.returnApprovalStatus ==="no_return") { %>
+                                <button onclick="requestReturn('<%= order.orderID %>', '<%= item.productId._id %>')" class="btn btn-warning">
+                                    Request Return
+                                </button>
+                            <% } else if (item.returnApprovalStatus === "pending") { %>
+                                <span class="text-warning">Return Pending</span>
+                            <% } else if (item.returnApprovalStatus === "approved") { %>
+                                <span class="text-success">Return Approved</span>
+                            <% } else if (item.returnApprovalStatus === "rejected") { %>
+                                <span class="text-danger">Return Rejected</span>
+                            <% } else { %>
+                                <span class="text-muted">No Return Available</span>
+                            <% } %>
+                        </td>
+                    </tr>
+                <% }) %>
+            </tbody>
+        </table>
+
+        <!-- Cancel Order Section -->
+        <% if (order.orderStatus === "pending" || order.orderStatus === "processing") { %>
+            <div class="cancel-section">
+                <h3>Cancel Order</h3>
+                <textarea id="cancelReason" placeholder="Enter cancellation reason"></textarea>
+                <button onclick="cancelOrder('<%= order.orderID %>')" class="btn btn-danger">
+                    Cancel Selected Items</button>
+            </div>
+        <% } %>
+
+        <a href="/orders" class="btn btn-secondary">⬅ Back to Orders</a>
+    </div>
+</div>
+
+<script>
+    function cancelOrder(orderId) {
+        const selectedProducts = [];
+        document.querySelectorAll('input[name="cancelProducts"]:checked').forEach(checkbox => {
+            selectedProducts.push(checkbox.value);
+        });
+
+        if (selectedProducts.length === 0) {
+            alert("Please select at least one item to cancel.");
+            return;
+        }
+
+        const cancelReason = document.getElementById("cancelReason").value.trim();
+        if (!cancelReason) {
+            alert("Please provide a cancellation reason.");
+            return;
+        }
+
+        fetch("/order/cancel", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ orderId, cancelProducts: selectedProducts, cancelReason })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert("Order cancellation successful!");
+                window.location.reload();
+            } else {
+                alert(data.message);
+            }
+        })
+        .catch(error => {
+            console.error("Error cancelling order:", error);
+            alert("An error occurred. Please try again.");
+        });
+    }
+
+    function requestReturn(orderId, productId) {
+       
+        const reason = prompt("Please enter your reason for return:");
+        if (!reason) return; // If no reason is provided, exit
+
+        fetch("/request-return", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ orderId, productId, returnReason: reason })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert("Return request submitted successfully!");
+                window.location.reload();
+            } else {
+                alert(data.message);
+            }
+        })
+        .catch(error => {
+            console.error("Error submitting return request:", error);
+            alert("An error occurred. Please try again.");
+        });
+    }
+</script>
+
+<%- include("../../views/partials/user/footer") %>

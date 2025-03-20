@@ -1,8 +1,10 @@
 <%- include("../../views/partials/admin/header") %>
 <link href="/css/addproduct.css" rel="stylesheet" type="text/css">
 <!-- Include Cropper.js CSS & JS -->
-<link href="https://unpkg.com/cropperjs/dist/cropper.min.css" rel="stylesheet">
-<script src="https://unpkg.com/cropperjs/dist/cropper.min.js"></script>
+<!-- CropperJS CSS -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.css">
+<!-- CropperJS JS -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.js"></script>
 
 <div class="add-product-container">
   <div class="container mt-5">
@@ -96,7 +98,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   });
 
-  function processNextFile() {
+  /*function processNextFile() {
     if (currentFileIndex < filesToProcess.length) {
       const file = filesToProcess[currentFileIndex];
       const objectUrl = URL.createObjectURL(file);
@@ -115,32 +117,58 @@ document.addEventListener("DOMContentLoaded", function () {
       croppedFiles.forEach(file => dataTransfer.items.add(file));
       fileInput.files = dataTransfer.files;
     }
+  }*/
+  function processNextFile() {
+  if (currentFileIndex < filesToProcess.length) {
+    const file = filesToProcess[currentFileIndex];
+    const objectUrl = URL.createObjectURL(file);
+    cropImage.src = objectUrl;
+    cropModal.style.display = "flex";
+
+    cropImage.onload = function () {
+      if (cropper) {
+        cropper.destroy();
+      }
+      cropper = new Cropper(cropImage, {
+        aspectRatio: 1,
+        viewMode: 1,
+      });
+    };
+  } else {
+    const dataTransfer = new DataTransfer();
+    croppedFiles.forEach(file => dataTransfer.items.add(file));
+    fileInput.files = dataTransfer.files;
+  }
+}
+
+document.getElementById("cropBtn").addEventListener("click", function () {
+  if (!cropper || !cropImage.complete || cropImage.naturalWidth === 0) {
+    console.log("Cropper status:", cropper);
+    console.log("Image complete:", cropImage.complete);
+    console.log("Image natural width:", cropImage.naturalWidth);
+    alert("Please wait for the image to load before cropping.");
+    return;
   }
 
-  document.getElementById("cropBtn").addEventListener("click", function () {
-    if (!cropper || !cropImage.src) {
-      alert("Please wait for the image to load before cropping.");
+  const canvas = cropper.getCroppedCanvas({ width: 500, height: 500 });
+  canvas.toBlob(function (blob) {
+    if (!blob) {
+      alert("Something went wrong with cropping.");
       return;
     }
-    const canvas = cropper.getCroppedCanvas({ width: 500, height: 500 });
-    canvas.toBlob(function (blob) {
-      if (!blob) {
-        alert("Something went wrong with cropping.");
-        return;
-      }
-      const croppedFile = new File([blob], "cropped_" + Date.now() + ".png", { type: "image/png" });
-      croppedFiles.push(croppedFile);
-      cropper.destroy();
-      cropper = null;
-      currentFileIndex++;
+    const croppedFile = new File([blob], "cropped_" + Date.now() + ".png", { type: "image/png" });
+    croppedFiles.push(croppedFile);
+    cropper.destroy();
+    cropper = null;
+    currentFileIndex++;
 
-      if (currentFileIndex < filesToProcess.length) {
-        processNextFile();
-      } else {
-        cropModal.style.display = "none";
-      }
-    }, "image/png");
-  });
+    if (currentFileIndex < filesToProcess.length) {
+      processNextFile();
+    } else {
+      cropModal.style.display = "none";
+    }
+  }, "image/png");
+});
 
   document.getElementById("cancelCropBtn").addEventListener("click", function () {
     croppedFiles.push(filesToProcess[currentFileIndex]);

@@ -13,12 +13,19 @@
 
         <div class="col-md-6 product-info">
             <h2><%= product.name %></h2>
-            <p>Price: ₹<%= product.price %></p>
+            <p>
+                <% if (product.discountPrice < product.price) { %>
+                    Price: <span style="text-decoration: line-through; color: grey;">₹<%= product.price %></span> 
+                    <span style="color: red; font-weight: bold;">₹<%= product.discountPrice %></span>
+                <% } else { %>
+                    Price: <span style="color: black; font-weight: bold;">₹<%= product.price %></span>
+                <% } %>
+            </p>
             <p><strong>Material:</strong> <%= product.material %></p>
             <p><strong>Color:</strong> <%= product.color %></p>
             <p><strong>Description:</strong> <%= product.description %></p>
-            <p><strong>Stock Status:</strong> <%= product.stockStatus %></p>
-            <button class="btn-primary" <%= product.stockStatus === 'Out of Stock' ? 'disabled' : '' %>>
+            <p><strong>Stock Status:</strong> <%= product.quantity %></p>
+            <button class="btn-primary" <%= product.quantity === 'Out of Stock' ? 'disabled' : '' %>>
                 Add to Cart
             </button>
             <button class="btn-secondary add-to-wishlist" data-product-id="<%= product._id %>">

@@ -10,7 +10,14 @@
         <img src="<%= item.productId.image[0] %>" alt="<%= item.productId.name %>" class="cart-item-image">
         <div class="cart-item-details">
           <h3><%= item.productId.name %></h3>
-          <p>Price: ₹<%= item.productId.price %></p>
+          <% if (item.discountPrice < item.productId.price) { %>
+            <p class="price">
+              <span class="original-price" style="text-decoration: line-through; color: gray;">₹<%= item.productId.price %></span>
+              <span class="discounted-price" style="color: red; font-weight: bold;">₹<%= item.discountPrice.toFixed(2) %></span>
+            </p>
+          <% } else { %>
+            <p class="price">₹<%= item.productId.price %></p>
+          <% } %>
           <p>Status: <%= item.productId.stockStatus %></p>
           <div class="quantity-controls">
             <button class="decrease-quantity" data-id="<%= item._id %>">-</button>
@@ -108,7 +115,7 @@
 }
 
    
-function deleteCartItem(cartItemId) {
+/*function deleteCartItem(cartItemId) {
   fetch(`/cart/remove/${cartItemId}`, {
     method: "DELETE",
   })
@@ -133,6 +140,58 @@ function deleteCartItem(cartItemId) {
           document.getElementById("cart-container").innerHTML = "<p>No items found</p>";
         }
       } else {
+        Swal.fire("Error", data.message, "error");
+      }
+    })
+    .catch(error => {
+      console.error("Error removing item:", error);
+      Swal.fire("Error", "Something went wrong while removing the item.", "error");
+    });
+}
+*/
+
+function deleteCartItem(cartItemId) {
+  fetch(`/cart/remove/${cartItemId}`, {
+    method: "DELETE",
+  })
+    .then(response => response.json())
+    .then(data => {
+    
+
+      if (data.success) {
+        Swal.fire("Success", "Item removed from your cart!", "success");
+
+        // Remove the deleted item from the UI
+        const cartItem = document.querySelector(`.cart-item[data-id="${cartItemId}"]`);
+        if (cartItem) cartItem.remove();
+
+        // Get all remaining cart items
+        const cartItems = document.querySelectorAll(".cart-item");
+
+        // If cart is empty after deletion
+        if (cartItems.length === 0) {
+        
+
+          // Update cart container
+          const cartContainer = document.getElementById("cart-container");
+          if (cartContainer) {
+            cartContainer.innerHTML = "<p>No items found</p>";
+          }
+
+          // Update cart total
+          const cartTotal = document.getElementById("cart-total");
+          if (cartTotal) {
+            cartTotal.innerHTML = `<p>Total: $0.00</p>`;
+          }
+        } else {
+          // Update the cart total when items remain
+          const cartTotal = document.getElementById("cart-total");
+          if (cartTotal) {
+            cartTotal.innerHTML = `<p>Total: $${data.newTotal.toFixed(2)}</p><button id="checkout">Proceed to Checkout</button>`;
+          }
+        }
+      } else {
+        console.error("Error response from server:", data); // Debugging log
         Swal.fire("Error", data.message, "error");
       }
     })

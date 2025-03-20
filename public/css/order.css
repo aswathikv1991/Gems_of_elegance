@@ -1,0 +1,150 @@
+/* Restrict styles to only apply within the order-page */
+.order-page .container {
+    width: 80%;
+    margin: 40px auto;
+    text-align: center;
+    padding: 20px;
+    background: #fff;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 10px;
+}
+
+.order-page h2 {
+    margin-bottom: 20px;
+    font-size: 28px;
+    color: #003366; /* Dark Blue */
+    font-weight: bold;
+}
+
+/* Search & Filter Form */
+.search-filter-form {
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.search-filter-form input,
+.search-filter-form select,
+.search-filter-form button {
+    padding: 10px;
+    font-size: 16px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+}
+
+.search-filter-form input {
+    width: 200px;
+}
+
+.search-filter-form select {
+    width: 150px;
+}
+
+.search-filter-form button {
+    background: #007bff;
+    color: white;
+    cursor: pointer;
+    transition: 0.3s;
+    border: none;
+}
+
+.search-filter-form button:hover {
+    background: #0056b3;
+}
+
+/* Order Table */
+.order-page table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.order-page table th, 
+.order-page table td {
+    padding: 14px;
+    text-align: center;
+}
+
+.order-page table th {
+    background-color: #003366; /* Dark Blue */
+    color: white;
+    font-weight: bold;
+}
+
+.order-page table tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+.order-page table tr:hover {
+    background-color: #e6f2ff;
+}
+
+/* View Details Link */
+.order-page a {
+    text-decoration: none;
+    color: #007bff;
+    font-weight: bold;
+    transition: 0.3s;
+}
+
+.order-page a:hover {
+    color: #0056b3;
+    text-decoration: underline;
+}
+
+/* Pagination */
+.order-page .pagination {
+    margin-top: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+}
+
+.order-page .pagination a {
+    display: inline-block;
+    padding: 10px 14px;
+    margin: 5px;
+    border: 1px solid #007bff;
+    color: #007bff;
+    text-decoration: none;
+    border-radius: 5px;
+    transition: 0.3s;
+    font-weight: bold;
+}
+
+.order-page .pagination a:hover {
+    background-color: #007bff;
+    color: white;
+}
+
+.order-page span {
+    font-weight: bold;
+    margin: 0 10px;
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+    .order-page .container {
+        width: 95%;
+    }
+
+    .search-filter-form {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .search-filter-form input,
+    .search-filter-form select {
+        width: 100%;
+        max-width: 250px;
+    }
+
+    .order-page table {
+        font-size: 14px;
+    }
+}

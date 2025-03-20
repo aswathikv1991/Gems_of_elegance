@@ -1,0 +1,90 @@
+/* Main Container */
+.offer-container {
+    max-width: 900px;
+    margin: 40px auto;
+    background: #fff;
+    padding: 40px; /* Increased padding */
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Form Title */
+.offer-container h2 {
+    font-size: 26px;
+    font-weight: bold;
+    text-align: center;
+    margin-bottom: 30px; /* More spacing below title */
+}
+
+/* Form Labels */
+.offer-container .form-label {
+    font-size: 18px;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 10px; /* Add spacing below labels */
+}
+
+/* Input Fields */
+.offer-container .form-control,
+.offer-container .form-select {
+    font-size: 18px;
+    padding: 14px; /* Increased padding for bigger input fields */
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    width: 100%; /* Make inputs take full width */
+    margin-bottom: 20px; /* More spacing between fields */
+}
+
+/* Buttons */
+.offer-container .btn {
+    font-size: 18px;
+    padding: 14px 20px;
+    border-radius: 6px;
+    font-weight: bold;
+    transition: 0.3s;
+}
+
+/* Button Colors */
+.offer-container .btn-danger {
+    background-color: #dc3545;
+    border: none;
+}
+
+.offer-container .btn-success {
+    background-color: #28a745;
+    border: none;
+}
+
+.offer-container .btn i {
+    margin-right: 8px;
+}
+
+/* Button Alignment */
+.button-container {
+    display: flex;
+    justify-content: center;
+    gap: 25px; /* More spacing between buttons */
+    margin-top: 30px;
+}
+
+/* Dropdown Visibility */
+#productDropdown,
+#categoryDropdown {
+    display: none;
+}
+
+/* Responsive Fix */
+@media (max-width: 768px) {
+    .offer-container {
+        width: 90%;
+        padding: 30px;
+    }
+
+    .offer-container h2 {
+        font-size: 24px;
+    }
+
+    .offer-container .btn {
+        width: 100%;
+    }
+}

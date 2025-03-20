@@ -1,5 +1,7 @@
 const User = require("../../models/userschema");
+const Coupon=require("../../models/couponschema")
 const nodemailer = require("nodemailer");
+const { v4: uuidv4 } = require('uuid');
 const env = require("dotenv").config();
 const bcrypt = require("bcrypt");
 
@@ -29,6 +31,8 @@ const loadHomepage = async (req, res) => {
 };*/
 const loadSignup = async (req, res) => {
     try {
+        console.log("Signup page requested.");
+        console.log("Referral token received in query:", req.query.ref);
         if (req.session.user) {
             // Fetch the full user object from the database
             const user = await User.findById(req.session.user);
@@ -71,7 +75,45 @@ async function sendVerificationEmail(email, otp) {
         return false;
     }
 }
+const sendReferralEmail=async (req, res) =>{
+    try {
+        const { email, referralLink } = req.body;
+       // console.log("email sentto",req.body)
 
+        if (!email || !referralLink) {
+            return res.status(400).json({ message: "Email and referral link are required." });
+        }
+        console.log("Using email:", process.env.NODEMAILER_EMAIL);
+        console.log("Using password:", process.env.NODEMAILER_PASSWORD ? "Exists" : "Not Set");
+
+        const transporter = nodemailer.createTransport({
+            service: "gmail",
+            port: 587,
+            secure: false,
+            requireTLS: true,
+            auth: {
+                user: process.env.NODEMAILER_EMAIL,
+                pass: process.env.NODEMAILER_PASSWORD
+            }
+        });
+
+        const mailOptions = {
+            from: process.env.NODEMAILER_EMAIL,
+            to: email,
+            subject: "You're Invited! Join & Earn Rewards",
+           text: `Join Us and Earn Rewards! Use this referral link: ${referralLink}`
+        };
+
+        const info = await transporter.sendMail(mailOptions);
+        console.log("Referral email sent:", info.response);
+
+        return res.status(200).json({ success: true, message: "Invitation email sent successfully!" });
+
+    } catch (error) {
+        console.error("Error sending referral email:", error);
+        return res.status(500).json({ success: false, message: "Failed to send invitation email." });
+    }
+}
 
 
 /*const signup = async (req, res) => {
@@ -105,7 +147,7 @@ async function sendVerificationEmail(email, otp) {
         res.redirect("/pageNotFound");
     }
 };*/
-const signup = async (req, res) => {
+/*const signup = async (req, res) => {
     try {
         const { name, email, password, confirmPassword, phone } = req.body;
 
@@ -156,7 +198,80 @@ const signup = async (req, res) => {
         console.error("Signup error", error);
         res.redirect("/pageNotFound");
     }
+};*/
+
+const signup = async (req, res) => {
+    try {
+        const { name, email, password, confirmPassword, phone,referralToken} = req.body;
+       
+        if (password !== confirmPassword) {
+            return res.render("user/signup", { 
+                message: "Password do not match", 
+                name, 
+                email, 
+                phone, 
+                user: null 
+            });
+        }
+
+        const findUser = await User.findOne({ email });
+        if (findUser) {
+            return res.render("user/signup", { 
+                message: "User with this email id already exists", 
+                name, 
+                email, 
+                phone, 
+                user: null 
+            });
+        }
+        
+        const findUserByPhone = await User.findOne({ phone });
+        if (findUserByPhone) {
+            return res.render("user/signup", {
+                message: "User with this phone number already exists",
+                name,
+                email,
+                phone,
+                user: null,
+            });
+        }
+
+        // Generate a unique referral token
+        const referralID = uuidv4();
+        console.log("Generated Referral Token for new user:", referralToken);
+        // Check if the user signed up using a referral link
+        let referredBy = null;
+        if (referralToken) {
+            const referringUser = await User.findOne({ referralToken });
+            if (referringUser) {
+                referredBy = referringUser._id;
+                console.log("Referred by user ID:", referredBy);
+            } else {
+                console.log("No matching referring user found for token:", referralToken);
+            }
+        } else {
+            console.log("No referral token provided in the signup request.");
+        }
+        const otp = generateOtp();
+        console.log("OTP sent", otp);
+
+        const emailSent = await sendVerificationEmail(email, otp);
+        if (!emailSent) {
+            return res.json("email.error");
+        }
+
+        req.session.userOtp = otp;
+        req.session.user = { name, email, password, phone, referralID, referredBy };
+        console.log("OTP stored in session:", req.session.userOtp);
+        console.log("User session data:", req.session.user);
+        res.render("user/verifyotp", { user: null }); 
+        console.log("OTP stored in session", req.session.userOtp);
+    } catch (error) {
+        console.error("Signup error", error);
+        res.redirect("/pageNotFound");
+    }
 };
+
 
 const securePassword = async (password) => {
     try {
@@ -167,7 +282,7 @@ const securePassword = async (password) => {
     }
 };
 
-const verifyOtp = async (req, res) => {
+/*const verifyOtp = async (req, res) => {
     try {
         const { otp } = req.body;
         if (otp === req.session.userOtp) {
@@ -192,7 +307,67 @@ const verifyOtp = async (req, res) => {
         console.error("Error verifying OTP", error);
         res.status(500).json({ success: false, message: "An error occurred" });
     }
+};*/
+const verifyOtp = async (req, res) => {
+    try {
+        const { otp } = req.body;
+        if (otp === req.session.userOtp) {
+            const user = req.session.user;
+            const passwordHash = await securePassword(user.password);
+
+            // Generate a unique referral token for the new user
+            const referralToken = require("crypto").randomBytes(16).toString("hex");
+
+            const saveUserData = new User({
+                name: user.name,
+                email: user.email,
+                phone: user.phone,
+                password: passwordHash,
+                referralToken:user.referralID, // Assign unique referral token
+                referredBy: user.referredBy || null, // Store referrer ID if available
+                ...(user.googleId && { googleId: user.googleId })
+            });
+
+            await saveUserData.save();
+
+            //If the user was referred, generate a referral coupon
+            if (user.referredBy) {
+                const referringUser = await User.findById(user.referredBy);
+                if (referringUser) {
+                    // Create a referral coupon
+                    const referralCoupon = new Coupon({
+                        code: `REFER-${referringUser._id}-${Date.now()}`, // Unique coupon code
+                        discountType: "percentage",
+                        discountValue: 5, // ₹100 off (example)
+                        appliesTo: "referral",
+                        minPurchase: 500, // Minimum cart value ₹500
+                        maxDiscount: 100,
+                        expiryDate: new Date(new Date().setMonth(new Date().getMonth() + 6)), // 6-month validity
+                        isActive: true,
+                    });
+
+                    await referralCoupon.save();
+
+                    // Add coupon to the referring user's coupon list
+                    referringUser.coupons.push(referralCoupon._id);
+                    referringUser.referralCount += 1; // Increase referral count
+                    await referringUser.save();
+                }
+            }
+
+            req.session.user = saveUserData._id;
+
+            res.json({ success: true, redirectUrl: "/" });
+        } else {
+            res.status(400).json({ success: false, message: "Invalid OTP, please try again" });
+        }
+    } catch (error) {
+        console.error("Error verifying OTP", error);
+        res.status(500).json({ success: false, message: "An error occurred" });
+    }
 };
+
+
 
 const resendOtp = async (req, res) => {
     try {
@@ -283,7 +458,7 @@ const pageNotFound = async (req, res) => {
         res.redirect("/");
     }
 }
-
+ 
 
 module.exports = {
     loadHomepage,
@@ -293,6 +468,7 @@ module.exports = {
     verifyOtp,
     resendOtp,
     loadLogin,
-    login,logout
+    login,logout,
+    sendReferralEmail
    
 }

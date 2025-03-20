@@ -1,0 +1,23 @@
+<%- include("../../views/partials/user/header") %>
+
+    <title>Order Successful</title>
+    <link rel="stylesheet" href="/css/ordersuccess.css"> <!-- Link to external stylesheet -->
+   
+
+    <div class="main-content">
+    <div class="success-container">
+        <div class="success-icon">✅</div>
+        <div class="success-message">Thank you for your purchase!</div>
+        <div class="order-details">
+            Your order <strong>#<%= order.orderID%></strong> has been placed successfully.<br>
+            Payment Method: <strong><%= order.paymentMethod.toUpperCase() %></strong><br>
+            Total Amount: <strong>₹<%=order.totalAmount %></strong>
+        </div>
+      
+        <a href="/order/<%= order._id %>" class="btn btn-primary">📦 View Order Details</a>
+
+        <a href="/products " class="btn btn-secondary">🛍️ Continue Shopping</a>
+    </div>
+</div>
+    <%- include("../../views/partials/user/footer") %>
+

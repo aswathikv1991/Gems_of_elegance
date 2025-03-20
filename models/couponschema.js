@@ -23,7 +23,7 @@ const couponSchema = new mongoose.Schema(
 
     appliesTo: { 
       type: String, 
-      enum: ["cart", "category"], 
+      enum: ["cart", "category", "referral"], 
       required: true 
     }, // Whether the discount applies to the whole cart or a category
 

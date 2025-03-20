@@ -56,12 +56,10 @@ const getAddProduct = async (req, res) => {
 
 const addProduct = async (req, res) => {
     try {
-        console.log("Received request body:", req.body);
-        console.log("Received files:", req.files);
-
+       
         const { name, categoryId, material, color, description, price, sku, quantity, isFeatured } = req.body;
 
-        console.log("Received files:", req.files);
+       
 
         if (!req.files || req.files.length === 0) {
             return res.status(400).json({ error: "At least one image is required" });
@@ -88,7 +86,7 @@ const addProduct = async (req, res) => {
         });
 
         await newProduct.save();
-        console.log("Product saved successfully:", newProduct);
+       
 
         return res.redirect("/admin/getproduct"); 
 
@@ -132,21 +130,21 @@ const viewProduct = async (req, res) => {
 
 const postEditProduct = async (req, res) => {
     try {
-        console.log("Received request for product:", req.params.id);
-        console.log("Received files:", req.files);
-
+        
+       
         const productId = req.params.id;
         const { name, category, material, sku, price, description, color, quantity, deleteImages,status } = req.body;
-
+        const updatedQuantity = parseInt(quantity, 10);
+       
         let product = await Product.findById(productId);
         if (!product) {
-            console.log("Product not found!");
+           
             return res.status(404).send("Product not found");
         }
 
         const categoryData = await Category.findById(category);
         if (!categoryData) {
-            console.log("Category not found!");
+           
             return res.status(400).send("Error: Selected category does not exist.");
         }
 
@@ -154,7 +152,7 @@ const postEditProduct = async (req, res) => {
         if (deleteImages) {
             const imagesToDelete = Array.isArray(deleteImages) ? deleteImages : [deleteImages];
 
-            console.log("Images to delete:", imagesToDelete);
+            
 
             product.image = product.image.filter(img => !imagesToDelete.includes(img));
 
@@ -185,13 +183,20 @@ const postEditProduct = async (req, res) => {
         product.price = price;
         product.description = description;
         product.color = color;
-        product.quantity = quantity;
+        product.quantity = updatedQuantity;
         product.status = status;
-        console.log("Final product object before saving:", product);
+        //product.stockStatus = quantity == 0 ? "Out of Stock" : "In Stock";
+        if (updatedQuantity === 0) {
+            product.stockStatus = "Out of Stock";
+        } else {
+            product.stockStatus = "In Stock";
+        }
+
+       
 
         await product.save();
 
-        console.log("Product updated successfully!");
+       
 
         //res.redirect("/admin/getproduct"); // Redirect after update
         res.send(`<script>

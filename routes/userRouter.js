@@ -4,6 +4,7 @@ const userController= require("../controllers/user/userController")
 const ProductController=require("../controllers/user/ProductController")
 const ProfileController=require("../controllers/user/profileController")
 const CheckoutController=require("../controllers/user/checkoutController")
+const OrderController=require("../controllers/user/orderController")
 const passport = require("passport")
 const {userAuth,adminAuth}=require("../middlewares/auth")
 
@@ -48,13 +49,24 @@ router.get("/wishlist", userAuth,ProductController.getWishlist );
 router.get("/check-login-status",ProductController.loginstatus)
 router.post("/wishlist/add",userAuth, ProductController.addToWishlist);
 router.delete("/wishlist/remove/:id", userAuth,ProductController.removeFromWishlist);
+router.post("/wishlist/delete", userAuth, ProductController.removeFromWishlistByProduct);
+
 router.post("/cart/add",userAuth,ProductController.addtocart)
 router.put('/update-cart-quantity',ProductController.updateQuantity)
 router.get("/cart", userAuth,ProductController.getcart)
 router.delete("/cart/remove/:cartItemId", ProductController.deleteCartItem);
 router.get("/checkout",userAuth,CheckoutController.checkoutPage)
 router.post("/setdefaultaddress/:addressId", ProfileController.setDefaultAddress);
-
+router.post("/order/place",userAuth,CheckoutController.placeOrder);
+router.get("/order-success/:orderId", OrderController.orderSuccess);
+router.get("/orders",OrderController.getOrders);
+router.get("/order/:orderId",userAuth,OrderController.getOrderDetails);
+router.post("/order/cancel",userAuth,OrderController.cancelOrder)
+router.post("/request-return", userAuth, OrderController.requestReturn);
+router.post("/send-invite",userAuth,userController.sendReferralEmail);
+router.post("/create-razorpay-order", CheckoutController.createRazorpayOrder);
+router.post("/razorpay/verify-payment", CheckoutController.verifyPayment);
+router.get("/wallet-balance", OrderController.getWallet)
 // Edit Coupon
 
 

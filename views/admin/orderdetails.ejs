@@ -1,0 +1,183 @@
+<%- include("../../views/partials/admin/header") %>
+<link href="/css/adminorder.css" rel="stylesheet" type="text/css" />
+
+<div class="container">
+    <h1>Order Details</h1>
+
+    <!-- Alert Message -->
+    <% if (statusUpdated) { %>
+        <div class="alert alert-success">
+            <strong>Success!</strong> The order status has been updated.
+        </div>
+    <% } %>
+
+    <!-- Order Information -->
+    <div class="order-info">
+        <h3>Order ID: <%= order.orderID %></h3>
+        <p><strong>Order Date:</strong> <%= new Date(order.createdAt).toLocaleString() %></p>
+        <p><strong>User Name:</strong> <%= order.userId.name %></p>
+        <p><strong>User Email:</strong> <%= order.userId.email %></p>
+        <p><strong>Total Amount:</strong> ₹<%= order.totalAmount.toFixed(2) %></p>
+        <p><strong>Order Status:</strong> <%= order.orderStatus %></p>
+
+        <% if (order.orderStatus === "cancelled") { %>
+            <div class="alert alert-danger">
+                <strong>Overall Cancellation Reason:</strong> <%= order.overallCancellationReason || "Not Provided" %>
+            </div>
+        <% } %>
+    </div>
+
+    <!-- Items in Order -->
+    <div class="order-items">
+        <h3>Ordered Items</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Product Name</th>
+                    <th>Quantity</th>
+                    <th>Price</th>
+                    <th>Status</th>
+                    <% if (order.items.some(item => item.status === "cancelled")) { %>
+                        <th>Cancellation Reason</th>
+                    <% } %>
+                </tr>
+            </thead>
+            <tbody>
+                <% order.items.forEach(item => { %>
+                    <tr>
+                        <td><%= item.productId.name %></td>
+                        <td><%= item.quantity %></td>
+                        <td>₹<%= item.price.toFixed(2) %></td>
+                        <td>
+                            <% if (item.status === "cancelled") { %>
+                                <span class="text-danger">Cancelled</span>
+                            <% } else { %>
+                                <span class="text-success"><%= item.status %></span>
+                            <% } %>
+                        </td>
+                        <% if (item.status === "cancelled") { %>
+                            <td><span class="text-muted"><%= item.cancellationReason || "Not Provided" %></span></td>
+                        <% } %>
+                    </tr>
+                <% }) %>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Return Requests Section -->
+    <% if (order.orderStatus === "delivered" && order.items.some(item => item.returnApprovalStatus && item.returnApprovalStatus !== "no_return")) { %>
+        <div class="return-requests">
+            <h3>Return Section</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Product Name</th>
+                        <th>Quantity</th>
+                        <th>Return Reason</th>
+                        <th>Return Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% order.items.forEach(item => { %>
+                        <% if (item.returnApprovalStatus && item.returnApprovalStatus !== "no_return") { %>
+                            <tr>
+                                <td><%= item.productId.name %></td>
+                                <td><%= item.quantity %></td>
+                                <td><%= item.returnReason || "N/A" %></td>
+                                <td>
+                                    <% if (item.returnApprovalStatus === "pending") { %>
+                                        <span class="text-warning">Pending</span>
+                                    <% } else if (item.returnApprovalStatus === "approved") { %>
+                                        <span class="text-success">Approved</span>
+                                    <% } else { %>
+                                        <span class="text-danger">Rejected</span>
+                                    <% } %>
+                                </td>
+                                <td>
+                                    <% if (item.returnApprovalStatus === "pending") { %>
+                                        <form id="returnForm-<%= item.productId._id %>" onsubmit="handleReturnSubmit(event, '<%= order._id %>', '<%= item.productId._id %>')">
+                                            <button type="submit" name="action" value="approve">Approve</button>
+                                            <button type="submit" name="action" value="reject">Reject</button>
+                                        </form>
+                                        
+                                        
+                                        
+                                    <% } else { %>
+                                        <span class="text-muted">Processed</span>
+                                    <% } %>
+                                </td>
+                            </tr>
+                        <% } %>
+                    <% }); %>
+                </tbody>
+            </table>
+        </div>
+    <% } %>
+    
+
+    <!-- Shipping Address -->
+    <div class="shipping-address">
+        <h3>Shipping Address</h3>
+        <p><strong>Address:</strong> <%= order.shippingAddress.street %>, <%= order.shippingAddress.city %>, <%= order.shippingAddress.state %>, <%= order.shippingAddress.pincode %></p>
+    </div>
+
+    <!-- Payment Details -->
+    <div class="payment-details">
+        <h3>Payment Details</h3>
+        <p><strong>Payment Method:</strong> <%= order.paymentMethod %></p>
+        <p><strong>Payment Status:</strong> <%= order.paymentStatus %></p>
+        <p><strong>Invoice:</strong> <a href="<%= order.invoiceUrl %>" target="_blank">Download Invoice</a></p>
+    </div>
+
+    <!-- Order Status Dropdown (to change status) -->
+    <div class="order-status">
+        <h3>Change Order Status</h3>
+        <form action="/admin/order/status/<%= order._id %>" method="POST">
+            <select name="orderStatus" required>
+                <option value="pending" <%= order.orderStatus === 'pending' ? 'selected' : '' %>>Pending</option>
+                <option value="processing" <%= order.orderStatus === 'processing' ? 'selected' : '' %>>Processing</option>
+                <option value="shipped" <%= order.orderStatus === 'shipped' ? 'selected' : '' %>>Shipped</option>
+                <option value="delivered" <%= order.orderStatus === 'delivered' ? 'selected' : '' %>>Delivered</option>
+                <option value="cancelled" <%= order.orderStatus === 'cancelled' ? 'selected' : '' %>>Cancelled</option>
+            </select>
+            <button type="submit">Update Status</button>
+        </form>
+    </div>
+
+    <div class="back-button">
+        <a href="/admin/getorders" class="btn btn-primary">Back to Orders</a>
+    </div>
+</div>
+
+<script>function handleReturnSubmit(event, orderId, productId) {
+    event.preventDefault(); // Prevent form submission and page reload
+
+    const form = document.getElementById(`returnForm-${productId}`);
+    const action = event.submitter.value; // Get the selected action (approve or reject)
+
+    console.log("Action:", action); // Debugging log
+
+    fetch(`/admin/approve-return/${orderId}/${productId}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ action: action }) 
+    })
+    .then(response => response.json())
+.then(data => {
+    console.log("Response data:", data); 
+    if (data.success) {
+        const alert = document.createElement('div');
+        alert.classList.add('alert', 'alert-success');
+        alert.innerHTML = `<strong>Success!</strong> ${data.message}`;
+        document.querySelector('.container').prepend(alert);
+    } else {
+        alert('Something went wrong, please try again.');
+    }
+})
+}
+</script>
+
+<%- include("../../views/partials/admin/footer") %>

@@ -1,0 +1,151 @@
+/* Offer Management Page Styles */
+.container {
+    margin-left: 250px;
+    width: calc(100% - 250px);
+    padding: 20px;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.1);
+}
+.header-actions {
+    display: flex;
+    justify-content: flex-end; /* Aligns to the right */
+    margin-bottom: 15px;
+    padding-right: 20px; /* Adjust if necessary */
+}
+
+.header-actions a.btn {
+    display: inline-block;
+    white-space: nowrap;
+    padding: 10px 15px;
+    font-size: 14px;
+    background-color: #007bff;
+    color: white;
+    text-decoration: none;
+    border-radius: 5px;
+}
+
+.header-actions a.btn:hover {
+    background-color: #0056b3;
+}
+
+@media (max-width: 768px) {
+    .header-actions {
+        justify-content: center; /* Centers on smaller screens */
+        padding-right: 0;
+    }
+}
+
+h2 {
+    text-align: center;
+    margin-bottom: 20px;
+    color: #333;
+}
+
+.text-end {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.text-end a.btn {
+    white-space: nowrap; /* Prevents button from breaking into multiple lines */
+    padding: 8px 12px;
+    font-size: 14px;
+}
+
+.btn-primary {
+    background-color: #007bff;
+    border-color: #007bff;
+    padding: 8px 12px;
+    font-size: 14px;
+}
+
+.btn-primary:hover {
+    background-color: #0056b3;
+}
+
+/* Offer Table Styles */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    margin-right: 10px;
+}
+
+table th, table td {
+    border: 1px solid #ddd;
+    padding: 10px;
+    text-align: center;
+}
+
+table th {
+    background-color: #007bff;
+    color: white;
+    font-weight: bold;
+}
+
+.table-hover tbody tr:hover {
+    background-color: #f1f1f1;
+}
+
+.badge {
+    padding: 5px 10px;
+    font-size: 12px;
+    border-radius: 5px;
+}
+
+/* Button Styles */
+.btn-sm {
+    padding: 5px 10px;
+    font-size: 12px;
+}
+
+.btn-warning {
+    color: #fff;
+    background-color: #ffc107;
+    border-color: #ffc107;
+}
+
+.btn-warning:hover {
+    background-color: #e0a800;
+}
+
+.btn-secondary {
+    background-color: #6c757d;
+    border-color: #6c757d;
+}
+
+.btn-secondary:hover {
+    background-color: #5a6268;
+}
+
+.btn-success {
+    background-color: #28a745;
+    border-color: #28a745;
+}
+
+.btn-success:hover {
+    background-color: #218838;
+}
+
+
+.offer-container {
+    margin-left: 250px; /* Keeps alignment with sidebar */
+    width: calc(100% - 250px);
+    padding: 20px;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.1);
+}
+
+/* Responsive Fix */
+@media (max-width: 768px) {
+    .offer-container {
+        margin-left: 0;
+        width: 100%;
+    }
+}
+
+

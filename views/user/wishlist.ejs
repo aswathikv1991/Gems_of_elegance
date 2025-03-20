@@ -17,7 +17,16 @@
             <div class="wishlist-item-details">
               <h3><%= item.productId.name %></h3>
             
-              <p>Price: ₹<%= item.productId.price %></p>
+              <% if (item.productId.discountPrice < item.productId.price) { %>
+                <p class="price">
+                    <span class="original-price" style="text-decoration: line-through; color: gray;">₹<%= item.productId.price %></span>
+                    <span class="discounted-price" style="color: red; font-weight: bold;">₹<%= item.productId.discountPrice.toFixed(2) %></span>
+                </p>
+            <% } else { %>
+                <p class="price">₹<%= item.productId.price %></p>
+            <% } %>
+            
+            
               <button class="add-to-cart-btn" data-id="<%= item.productId._id %>">Add to Cart</button>
 
               <button class="delete-btn" data-id="<%= item._id %>">Delete</button>
@@ -63,7 +72,7 @@
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    Swal.fire("Success!", "Product added to cart!", "success");
+                    Swal.fire("Success!", data.message, "success");
 
                     // Remove the item from the wishlist page immediately
                     button.closest(".wishlist-item").remove();

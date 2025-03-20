@@ -8,7 +8,9 @@ body {
 
 h2 {
     text-align: center;
-    color: #333;
+    color: #222;
+    font-size: 28px;
+    font-weight: bold;
     margin-bottom: 20px;
 }
 
@@ -24,7 +26,7 @@ h2 {
 /* Left Column - Address and Coupon/Payment */
 .left-column {
     flex: 1;
-    max-width: 60%; /* Adjust as needed */
+    max-width: 60%;
     display: flex;
     flex-direction: column;
     gap: 20px;
@@ -33,25 +35,39 @@ h2 {
 /* Right Column - Order Summary and Total */
 .right-column {
     flex: 1;
-    max-width: 35%; /* Adjust as needed */
+    max-width: 35%;
     display: flex;
     flex-direction: column;
     gap: 20px;
 }
 
-/* Address Section */
-.address-section {
+/* Section Styling */
+.address-section, .coupon-payment, .order-summary, .checkout-footer {
     background: #fff;
     padding: 20px;
     border-radius: 10px;
-    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.15);
 }
 
-.address-section h3 {
+h3 {
+    font-size: 20px;
+    font-weight: bold;
+    color: #444;
+    border-bottom: 2px solid #007bff;
+    padding-bottom: 5px;
     margin-bottom: 15px;
-    color: #333;
 }
 
+/* Subheading Styling */
+.subheading {
+    font-size: 16px;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 10px;
+    text-transform: uppercase;
+}
+
+/* Address Section */
 .address-list {
     display: flex;
     flex-direction: column;
@@ -62,15 +78,15 @@ h2 {
 .address-item {
     display: flex;
     align-items: center;
-    padding: 10px;
-    border: 1px solid #ddd;
-    border-radius: 5px;
+    padding: 12px;
+    border: 1px solid #007bff;
+    border-radius: 8px;
     cursor: pointer;
-    transition: background-color 0.3s ease;
+    transition: all 0.3s ease;
 }
 
 .address-item:hover {
-    background-color: #f9f9f9;
+    background-color: #f0f8ff;
 }
 
 .address-item input[type="radio"] {
@@ -80,13 +96,13 @@ h2 {
 /* Add Address Button */
 .add-address-btn {
     width: 100%;
-    padding: 10px;
+    padding: 12px;
     background-color: #007bff;
     color: #fff;
     border: none;
     border-radius: 5px;
-    cursor: pointer;
     font-size: 14px;
+    cursor: pointer;
     transition: background-color 0.3s ease;
 }
 
@@ -95,33 +111,28 @@ h2 {
 }
 
 /* Coupon and Payment Section */
-.coupon-payment {
-    background: #fff;
-    padding: 20px;
-    border-radius: 10px;
-    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
-}
-
-.coupon-payment h3 {
-    margin-bottom: 15px;
-    color: #333;
+.coupon-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
 }
 
 .coupon-input {
-    width: calc(100% - 90px);
-    padding: 8px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
+    flex: 1;
+    padding: 10px;
+    border: 2px solid #007bff;
+    border-radius: 8px;
+    font-size: 14px;
 }
 
 .apply-coupon {
-    width: 80px;
-    padding: 8px;
+    padding: 10px 15px;
     background-color: #007bff;
     color: #fff;
     border: none;
-    border-radius: 5px;
+    border-radius: 8px;
     cursor: pointer;
+    font-size: 14px;
     transition: background-color 0.3s ease;
 }
 
@@ -129,29 +140,32 @@ h2 {
     background-color: #0056b3;
 }
 
-.payment-methods {
-    margin-top: 15px;
+/* Styled Discount Dropdown */
+.discount-dropdown {
+    width: 100%;
+    padding: 12px;
+    font-size: 14px;
+    border: 2px solid #007bff;
+    border-radius: 8px;
+    background: white;
+    cursor: pointer;
 }
 
+.discount-dropdown:focus {
+    outline: none;
+    border-color: #0056b3;
+}
+
+/* Payment Methods */
 .payment-methods label {
     display: block;
     margin-bottom: 10px;
-    font-size: 14px;
-}
-
-/* Order Summary Section */
-.order-summary {
-    background: #fff;
-    padding: 20px;
-    border-radius: 10px;
-    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
-}
-
-.order-summary h3 {
-    margin-bottom: 15px;
+    font-size: 16px;
+    font-weight: bold;
     color: #333;
 }
 
+/* Order Summary */
 .summary-container {
     display: flex;
     flex-direction: column;
@@ -189,17 +203,12 @@ h2 {
     color: #555;
 }
 
-/* Total and Proceed Button */
+/* Checkout Footer */
 .checkout-footer {
     background: #fff;
     padding: 20px;
     border-radius: 10px;
     box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
-}
-
-.checkout-footer h3 {
-    margin-bottom: 15px;
-    color: #333;
 }
 
 #place-order {
@@ -219,7 +228,6 @@ h2 {
 }
 
 /* Modal Styling */
-/* Modal Styling */
 .modal {
     display: none;
     position: fixed;
@@ -228,8 +236,8 @@ h2 {
     transform: translate(-50%, -50%);
     background: white;
     width: 350px;
-    max-height: 90vh; /* Ensure modal doesn't exceed viewport height */
-    overflow-y: auto; /* Enable scrolling if content exceeds modal height */
+    max-height: 90vh;
+    overflow-y: auto;
     padding: 20px;
     border-radius: 10px;
     box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
@@ -239,7 +247,7 @@ h2 {
 .modal-content {
     display: flex;
     flex-direction: column;
-    gap: 10px; /* Add spacing between form fields */
+    gap: 10px;
 }
 
 .modal-content h3 {
@@ -250,8 +258,7 @@ h2 {
 
 .modal input {
     width: 100%;
-    padding: 8px;
-    margin: 5px 0;
+    padding: 10px;
     border: 1px solid #ccc;
     border-radius: 5px;
 }
@@ -259,7 +266,6 @@ h2 {
 .modal button {
     width: 100%;
     padding: 10px;
-    margin-top: 10px;
     border: none;
     background-color: #28a745;
     color: white;
