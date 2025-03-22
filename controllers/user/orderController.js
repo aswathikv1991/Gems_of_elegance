@@ -1,6 +1,7 @@
 const Order=require("../../models/order")
 const Product=require("../../models/productschema")
 const Wallet=require("../../models/wallet")
+const mongoose = require("mongoose");
 
 const orderSuccess = async (req, res) => {
     try {
@@ -169,7 +170,7 @@ const cancelOrder = async (req, res) => {
             }
 
             // Update amounts correctly
-            order.amountBeforeDelivery -= totalDeduction; // ✅ Subtract from `amountBeforeDelivery`
+            order.amountBeforeDelivery -= totalDeduction; //  Subtract from `amountBeforeDelivery`
             order.totalAmount -= totalDeduction;
             order.discountAmount -= discountDeduction;
 
@@ -184,27 +185,28 @@ const cancelOrder = async (req, res) => {
 
         await order.save(); // Save updated order details
 
-        // ✅ Refund Handling
-        let refundAmount = totalDeduction;
-        if ((!cancelProducts || cancelProducts.length === 0 || allCancelled) && originalProductTotal > 4000) {
-            refundAmount += 100; // Add extra refund if applicable
-        }
+     // Refund Handling
+if (order.paymentMethod !== "cod") {
+    let refundAmount = totalDeduction;
 
-        let wallet = await Wallet.findOne({ userId });
-        if (!wallet) {
-            // If user doesn't have a wallet, create one
-            wallet = new Wallet({
-                userId,
-                amount: refundAmount, // Set initial amount as refund
-            });
-        } else {
-            // Update existing wallet balance
-            wallet.amount += refundAmount;
-        }
-        await wallet.save(); 
+    // Add extra refund if applicable (full cancellation & order > 4000)
+    if ((!cancelProducts || cancelProducts.length === 0 || allCancelled) && originalProductTotal > 4000) {
+        refundAmount += 100;
+    }
 
-        res.json({ success: true, message: "Order cancelled successfully" });
-    } catch (error) {
+    // Create a new wallet transaction (instead of updating a single wallet balance)
+    await Wallet.create({
+        userId,
+        amount: refundAmount,
+        type: "Credit",
+        source: "Order Cancellation Refund",
+        orderId: order._id, // Store reference to the order
+    });
+
+    res.json({ success: true, message: "Order cancelled successfully" });
+}
+    }
+    catch (error) {
         console.error("Error cancelling order:", error);
         res.status(500).json({ message: "Internal Server Error" });
     }
@@ -217,57 +219,75 @@ const requestReturn = async (req, res) => {
 
         const { orderId, productId, returnReason } = req.body;
         const userId = req.session.user; // Get user ID from session
-        console.log(userId)
-        console.log("return ------",req.body)
+        //console.log(userId)
+        //console.log("return ------",req.body)
         // Find the order with this userId
         const order = await Order.findOne({orderID: orderId, userId });
-        console.log("----return1")
+       // console.log("----return1")
         if (!order) {
             return res.status(404).json({ message: "Order not found" });
         }
 
-        console.log("----return2")
+        //console.log("----return2")
         const item = order.items.find(item => item.productId.toString() === productId);
 
         if (!item) {
             return res.status(404).json({ message: "Product not found in order" });
         }
 
-        console.log("----return3")
+        //console.log("----return3")
         if (item.status !== "delivered") {
             return res.status(400).json({ message: "Item is not delivered yet" });
         }
-        console.log("----return4")
+        //console.log("----return4")
         if (item.returnApprovalStatus === "approved") {
             return res.status(400).json({ message: "Return already approved" });
         }
-        console.log("----return5") 
+        //console.log("----return5") 
         if (item.returnApprovalStatus === "pending") {
             return res.status(400).json({ message: "Return request already submitted" });
         }
         if (item.returnApprovalStatus === "rejected") {
             return res.status(400).json({ message: "Return request was rejected previously" });
         }
-        console.log("----return6")
+        //console.log("----return6")
         item.returnApprovalStatus = "pending"; // Set return request as pending
         item.returnReason = returnReason;
         item.returnRequestDate = new Date();
 
         await order.save();
-        console.log("----return7")
+        //console.log("----return7")
         res.status(200).json({ message: "Return request submitted successfully" });
     } catch (error) {
         res.status(500).json({ message: "Internal server error", error: error.message });
     }
 };
-const getWallet=async (req, res) => {
+const getWallet = async (req, res) => {
     try {
         const userId = req.session.user;
-        if (!userId) return res.status(401).json({ success: false, message: "Unauthorized" });
+        if (!userId) {
+            return res.status(401).json({ success: false, message: "Unauthorized" });
+        }
 
-        const wallet = await Wallet.findOne({ userId });
+        // Calculate total credits and debits for the user
+        const totalCredit = await Wallet.aggregate([
+            { $match: { userId: new mongoose.Types.ObjectId(userId), type: "Credit" } },
+            { $group: { _id: null, total: { $sum: "$amount" } } }
+        ]);
 
-        res.json({ success: true, amount: wallet ? wallet.amount : 0 });
+        const totalDebit = await Wallet.aggregate([
+            { $match: { userId: new mongoose.Types.ObjectId(userId), type: "Debit" } },
+            { $group: { _id: null, total: { $sum: "$amount" } } }
+        ]);
+
+        // Extract values or set defaults if no transactions found
+        const creditAmount = totalCredit.length > 0 ? totalCredit[0].total : 0;
+        const debitAmount = totalDebit.length > 0 ? totalDebit[0].total : 0;
+
+        // Calculate wallet balance
+        const balance = creditAmount - debitAmount;
+
+        res.json({ success: true, amount: balance });
     } catch (error) {
         console.error("Error fetching wallet balance:", error);
         res.status(500).json({ success: false, message: "Server error" });
@@ -275,4 +295,27 @@ const getWallet=async (req, res) => {
 };
 
 
-  module.exports={orderSuccess,getOrders,getOrderDetails,cancelOrder,requestReturn,getWallet}
+async function getWalletTransactions(req, res){
+    try {
+      // Fetch all transactions for the given userId, sorted by most recent first
+      const transactions = await Wallet.find({ userId: req.session.user })
+        .sort({ createdAt: -1 })
+        .populate('orderId', '_id orderID')
+
+        .lean();
+  
+      // Return the transactions without pagination info
+      res.json({
+        success: true,
+        transactions,
+      });
+    } catch (error) {
+      console.error("Error fetching wallet transactions:", error);
+      res.status(500).json({ success: false, message: "Error fetching transactions" });
+    }
+  }
+  
+
+
+
+  module.exports={orderSuccess,getOrders,getOrderDetails,cancelOrder,requestReturn,getWallet,getWalletTransactions}

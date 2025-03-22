@@ -19,5 +19,17 @@
         <a href="/products " class="btn btn-secondary">🛍️ Continue Shopping</a>
     </div>
 </div>
+<script>
+// Push an initial state to history
+window.history.pushState({ page: "ordersuccess" }, "", window.location.href);
+
+// Listen for back navigation
+window.addEventListener("popstate", function (event) {
+    if (event.state && event.state.page === "ordersuccess") {
+        window.location.href = "/"; // Redirect to homepage or order history
+    }
+});
+
+</script>
     <%- include("../../views/partials/user/footer") %>
 

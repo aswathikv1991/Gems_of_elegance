@@ -1,0 +1,52 @@
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    background: #fff;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.table th, .table td {
+    padding: 12px 15px;
+    text-align: center;  /* Align content in the center */
+    border-bottom: 1px solid #ddd;
+}
+
+.table th {
+    background: #007bff;
+    color: white;
+    font-weight: bold;
+}
+
+.table tbody tr:nth-child(even) {
+    background: #f8f9fa;
+}
+
+.table tbody tr:hover {
+    background: #e9ecef;
+}
+
+.btn-info {
+    padding: 6px 10px;
+    font-size: 14px;
+    border-radius: 5px;
+}
+
+.btncancel {
+    display: block;
+    margin: 20px auto; /* Center the button */
+    padding: 10px 20px;
+    font-size: 16px;
+    color: white;
+    background: red;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: 0.3s ease-in-out;
+}
+
+.btncancel:hover {
+    background: darkred;
+}

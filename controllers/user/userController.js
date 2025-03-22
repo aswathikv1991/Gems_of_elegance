@@ -31,8 +31,8 @@ const loadHomepage = async (req, res) => {
 };*/
 const loadSignup = async (req, res) => {
     try {
-        console.log("Signup page requested.");
-        console.log("Referral token received in query:", req.query.ref);
+        //console.log("Signup page requested.");
+        //console.log("Referral token received in query:", req.query.ref);
         if (req.session.user) {
             // Fetch the full user object from the database
             const user = await User.findById(req.session.user);
@@ -238,7 +238,7 @@ const signup = async (req, res) => {
 
         // Generate a unique referral token
         const referralID = uuidv4();
-        console.log("Generated Referral Token for new user:", referralToken);
+        //console.log("Generated Referral Token for new user:", referralToken);
         // Check if the user signed up using a referral link
         let referredBy = null;
         if (referralToken) {

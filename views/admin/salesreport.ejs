@@ -5,23 +5,23 @@
 <div class="container">
     <h2>📊 Sales Report</h2>
 
-    <!-- Filters: Dropdown + Date Picker -->
     <div class="filter-section">
         <label for="salesFilter">Filter by:</label>
         <select id="salesFilter">
-            <option value="daily" <%= filter === 'daily' ? 'selected' : '' %>>Daily</option>
-            <option value="weekly" <%= filter === 'weekly' ? 'selected' : '' %>>Weekly</option>
-            <option value="monthly" <%= filter === 'monthly' ? 'selected' : '' %>>Monthly</option>
-            <option value="yearly" <%= filter === 'yearly' ? 'selected' : '' %>>Yearly</option>
-            <option value="custom" <%= filter === 'custom' ? 'selected' : '' %>>Custom Date Range</option>
+            <option value="daily" <%= filterType === 'daily' ? 'selected' : '' %>>Daily</option>
+            <option value="weekly" <%= filterType === 'weekly' ? 'selected' : '' %>>Weekly</option>
+            <option value="monthly" <%= filterType === 'monthly' ? 'selected' : '' %>>Monthly</option>
+            <option value="yearly" <%= filterType === 'yearly' ? 'selected' : '' %>>Yearly</option>
+            <option value="custom" <%= filterType === 'custom' ? 'selected' : '' %>>Custom Date Range</option>
         </select>
-        
+
         <input type="date" id="startDate" class="date-picker" value="<%= startDate ? startDate : '' %>">
         <input type="date" id="endDate" class="date-picker" value="<%= endDate ? endDate : '' %>">
         <button id="applyDateFilter">Apply</button>
     </div>
 
-    <!-- Sales Report Table -->
+    <!-- 📌 Summary Table -->
+    <h3>📈 Sales Summary</h3>
     <table>
         <thead>
             <tr>
@@ -35,10 +35,10 @@
             </tr>
         </thead>
         <tbody>
-            <% if (salesData.length > 0) { %>
-                <% salesData.forEach(data => { %>
+            <% if (summaryData.length > 0) { %>
+                <% summaryData.forEach(data => { %>
                     <tr>
-                        <td><%= data._id %></td>
+                        <td><%= data._id ? data._id : 'Custom Range' %></td>
                         <td><%= data.totalOrders %></td>
                         <td>₹<%= data.totalOrderValue.toFixed(2) %></td>
                         <td>₹<%= data.totalDiscounts.toFixed(2) %></td>
@@ -49,20 +49,70 @@
                 <% }) %>
             <% } else { %>
                 <tr>
-                    <td colspan="7">No sales data available</td>
+                    <td colspan="7">No summary data available</td>
                 </tr>
             <% } %>
         </tbody>
     </table>
+
+    <!-- 📌 Detailed Orders Table -->
+    <h3>📜 All Order Details</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>Order ID</th>
+                <th>Date</th>
+                <th>Customer Name</th>
+                <th>Product ID</th>
+                <th>Quantity</th>
+                <th>Sale Price</th>
+                <th>Actual price</th>
+                <th>Discount</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            <% if (reportData.length > 0) { %>
+                <% reportData.forEach(order => { %>
+                    <tr>
+                        <td><%= order.orderID %></td>
+                        <td><%= new Date(order.createdAt).toLocaleDateString() %></td>
+                        <td><%= order.customer.name %></td>
+                        <td><%= order.items.productId %></td>
+                        <td><%= order.items.quantity %></td>
+                        <td>₹<%= order.items.salePrice.toFixed(2) %></td>
+                        <td>₹<%= order.items.total.toFixed(2) %></td>
+                        <td>₹<%= (order.items.total - order.items.salePrice).toFixed(2) %></td>
+                        <td><%= order.items.status %></td>
+                    </tr>
+                <% }) %>
+            <% } else { %>
+                <tr>
+                    <td colspan="9">No orders found</td>
+                </tr>
+            <% } %>
+        </tbody>
+    </table>
+
+    <!-- 📥 Download Buttons -->
+    <div class="download-buttons">
+        <a href="/admin/download-sales-report?filter=<%= filterType %>&startDate=<%= startDate %>&endDate=<%= endDate %>&format=excel" class="btn btn-success">
+            📊 Download Excel
+        </a>
+        <a href="/admin/download-sales-report?filter=<%= filterType %>&startDate=<%= startDate %>&endDate=<%= endDate %>&format=pdf" class="btn btn-danger">
+            📄 Download PDF
+        </a>
+    </div>
 </div>
 
 <script>
-     document.addEventListener("DOMContentLoaded", function() {
-        let filter = "<%= filter %>";
+    document.addEventListener("DOMContentLoaded", function() {
+        let filter = "<%= filterType %>";
         let startDateInput = document.getElementById("startDate");
         let endDateInput = document.getElementById("endDate");
         let applyButton = document.getElementById("applyDateFilter");
-
+        console.log("startdate", startDateInput )
+        
         if (filter === "custom") {
             startDateInput.style.display = "inline";
             endDateInput.style.display = "inline";
@@ -73,12 +123,13 @@
             applyButton.style.display = "none";
         }
     });
+
     document.getElementById('salesFilter').addEventListener('change', function() {
         let filter = this.value;
         let startDateInput = document.getElementById('startDate');
         let endDateInput = document.getElementById('endDate');
         let applyButton = document.getElementById('applyDateFilter');
-
+        
         if (filter === "custom") {
             startDateInput.style.display = "inline";
             endDateInput.style.display = "inline";
@@ -87,7 +138,7 @@
             startDateInput.style.display = "none";
             endDateInput.style.display = "none";
             applyButton.style.display = "none";
-            window.location.href = `/admin/getSales?filter=${filter}`;
+            window.location.href = `/admin/getSales?filterType=${filter}`;
         }
     });
 
@@ -95,7 +146,7 @@
         let startDate = document.getElementById('startDate').value;
         let endDate = document.getElementById('endDate').value;
         if (startDate && endDate) {
-            window.location.href = `/admin/getSales?filter=custom&startDate=${startDate}&endDate=${endDate}`;
+            window.location.href = `/admin/getSales?filterType=custom&startDate=${startDate}&endDate=${endDate}`;
         } else {
             alert("Please select both start and end dates.");
         }

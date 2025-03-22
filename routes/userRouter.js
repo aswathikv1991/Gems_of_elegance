@@ -67,6 +67,7 @@ router.post("/send-invite",userAuth,userController.sendReferralEmail);
 router.post("/create-razorpay-order", CheckoutController.createRazorpayOrder);
 router.post("/razorpay/verify-payment", CheckoutController.verifyPayment);
 router.get("/wallet-balance", OrderController.getWallet)
+router.get('/wallet-transactions', userAuth,OrderController.getWalletTransactions);
 // Edit Coupon
 
 

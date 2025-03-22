@@ -80,16 +80,16 @@
 
 <script>
       function getQueryParam(param) {
-        alert("sign up getquery")
+       // alert("sign up getquery")
     let params = new URLSearchParams(window.location.search);
-    console.log("queryparameter sign up",params)
+   // console.log("queryparameter sign up",params)
     return params.get(param);
 }
 
 document.addEventListener("DOMContentLoaded", function () {
-    alert("dom loaded signup")
+    //alert("dom loaded signup")
     let referralToken = getQueryParam("ref");
-    console.log("Referral Token Retrieved:", referralToken); // Check if referral token is retrieved
+   // console.log("Referral Token Retrieved:", referralToken); // Check if referral token is retrieved
 
     let referralTokenInput = document.getElementById("referralToken");
     console.log("Before setting referralToken value:", referralTokenInput.value); // Debug before setting value

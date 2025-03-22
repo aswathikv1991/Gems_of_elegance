@@ -135,21 +135,14 @@ const approveReturn = async (req, res) => {
             order.discountAmount -= itemDiscount;
             order.totalAmount -= item.salePrice;
             order.amountBeforeDelivery -= item.salePrice;
-            let wallet = await Wallet.findOne({ userId: order.userId });
 
-            if (!wallet) {
-                // If the user doesn't have a wallet, create one
-                wallet = new Wallet({
-                    userId: order.userId,
-                    amount: 0, // Default balance
-                });
-            }
-
-           
-            wallet.amount += item.salePrice; 
-
-            
-            await wallet.save();
+           await Wallet.create({
+                userId: order.userId,
+                amount: item.salePrice,
+                type: "Credit",
+                source: "Order Return Refund",
+                orderId: order._id, // Store reference to order
+            });
 
         } else if (action === "reject") {
             item.returnApprovalStatus = "rejected";
@@ -176,4 +169,27 @@ const approveReturn = async (req, res) => {
     }
 };
 
-module.exports = { getAllOrders,getOrderDetails,updateOrderStatus,approveReturn };
+
+
+ const  getUserWalletDetails= async(req, res)=> {
+    try {
+      const userId = req.params.userId;
+
+      // Fetch user details
+      const user = await User.findById(userId).lean();
+      if (!user) return res.status(404).send("User not found");
+
+      // Fetch wallet transactions with order details (if available)
+      const transactions = await Wallet.find({ userId })
+        .populate("orderId", "orderID _id") // Fetch order details (only orderNumber)
+        .sort({ createdAt: -1 })
+        .lean();
+
+      res.render("admin/userWallet", { user, transactions });
+    } catch (error) {
+      console.error("Error fetching user wallet details:", error);
+      res.status(500).send("Error fetching transactions");
+    }
+  }
+
+module.exports = { getAllOrders,getOrderDetails,updateOrderStatus,approveReturn,getUserWalletDetails };

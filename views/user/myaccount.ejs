@@ -147,6 +147,8 @@ async function loadWalletBalance() {
                     <h3>₹${data.amount.toFixed(2)}</h3>
                 </div>
             `;
+            await loadTransactions(); 
+
         } else {
             walletSection.innerHTML = "<p>Error fetching wallet balance.</p>";
         }
@@ -155,6 +157,67 @@ async function loadWalletBalance() {
         document.getElementById("wallet").innerHTML = "<p>Error loading wallet balance.</p>";
     }
 }
+
+
+async function loadTransactions() {
+  try {
+    const response = await fetch("/wallet-transactions");  // Fetch all transactions without pagination
+    const data = await response.json();
+
+    const walletSection = document.getElementById("wallet");
+
+    if (data.success) {
+      // Build the transaction table
+      let tableHTML = `
+        <h3>Transaction History</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Amount</th>
+              <th>Type</th>
+              <th>Source</th>
+              <th>Order ID</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+      `;
+
+      data.transactions.forEach(transaction => {
+        let orderLink = 'N/A'; // Default value when no order is associated
+        let actionButton = ''; // Default empty button
+
+        // If the transaction is a "Credit" and has an associated orderId, create a button
+        if (transaction.type === 'Credit' && transaction.orderId) {
+          orderLink = transaction.orderId._id;
+          actionButton = `<button onclick="window.location.href='/order/${orderLink}'">View Order</button>`;
+        }
+
+        tableHTML += `
+          <tr>
+            <td>${new Date(transaction.createdAt).toLocaleDateString()}</td>
+            <td>₹${transaction.amount.toFixed(2)}</td>
+            <td>${transaction.type}</td>
+            <td>${transaction.source}</td>
+           <td>${transaction.orderId ? transaction.orderId.orderID : 'N/A'}</td>
+            <td>${actionButton}</td>
+          </tr>
+        `;
+      });
+
+      tableHTML += `</tbody></table>`;
+
+      walletSection.innerHTML += tableHTML; // Append the transaction table below wallet balance
+    } else {
+      walletSection.innerHTML += "<p>No transactions found.</p>";
+    }
+  } catch (error) {
+    console.error("Error loading transactions:", error);
+    document.getElementById("wallet").innerHTML = "<p>Error loading transactions.</p>";
+  }
+}
+
 
 async function loadOrders() {
     try {

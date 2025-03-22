@@ -43,3 +43,36 @@
     color: white;
      /* Light gray background, adjust as needed */
 }
+/* Wallet and Block button common styles */
+.action-button {
+    padding: 8px 15px;
+    border-radius: 5px;
+    font-size: 14px;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-block;
+    text-align: center;
+    width: 100px; /* Ensures both buttons have same width */
+}
+
+/* Block button (Red) */
+.block-button {
+    background-color: #dc3545; /* Bootstrap Danger Red */
+    color: white;
+    border: none;
+}
+
+.block-button:hover {
+    background-color: #b02a37;
+}
+
+/* Wallet button (Green or another distinct color) */
+.wallet-button {
+    background-color: #ece036; /* Bootstrap Success Green */
+    color: white;
+    border: none;
+}
+
+.wallet-button:hover {
+    background-color: #218838;
+}

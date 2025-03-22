@@ -37,14 +37,15 @@
                             <td><%= customer.phone %></td>
                             <td>
                                 <% if (customer.isBlocked) { %>
-                                    <button class="btn btn-success">
-                                        <a href="/admin/unblockCustomer?id=<%= customer._id %>" class="text-white" style="text-decoration: none;">Unblock</a>
-                                    </button>
-                                <% } else { %>
-                                    <button class="btn btn-danger">
-                                        <a href="/admin/blockCustomer?id=<%= customer._id %>" class="text-white" style="text-decoration: none;">Block</a>
-                                    </button>
-                                <% } %>
+                                    
+                                        <a href="/admin/unblockCustomer?id=<%= customer._id %>" class="btn btn-success action-button text-white" style="text-decoration: none;">Unblock</a>
+                                    <% } else { %>
+                                        <a href="/admin/blockCustomer?id=<%= customer._id %>" class="btn btn-danger action-button text-white" style="text-decoration: none;">Block</a>
+                                    <% } %>
+                                <button class="action-button wallet-button">
+                                    <a href="/admin/wallet/<%= customer._id %>" class="text-white">Wallet</a>
+                                </button>
+
                             </td>
                         </tr>
                     <% }); %>

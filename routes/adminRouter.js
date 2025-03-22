@@ -53,5 +53,7 @@ router.post("/enableoffer/:id",adminAuth,offerController.enableOffer);
 router.get("/dashboard-summary",AdminDashboardController.getDashboardSummary);
 router.get("/total-sales", AdminDashboardController.calculateTotalSales);
 router.get("/getSales",AdminDashboardController.getSalesCount);
+router.get("/download-sales-report", AdminDashboardController.downloadSalesReport);
+router.get("/wallet/:userId", orderController.getUserWalletDetails);
 
 module.exports=router

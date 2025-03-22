@@ -8,6 +8,7 @@ const crypto = require("crypto")
 const mongoose = require("mongoose");
 const Offer=require("../../models/offerschema")
 const Razorpay = require("razorpay");
+const Wallet=require("../../models/wallet")
 
 /*const checkoutPage = async (req, res) => {
     try {
@@ -251,6 +252,8 @@ async function callPlace(orderdata,userId) {
         // Fetch user to check referral coupons
         const user = await User.findById(userId);
      
+
+         
         if (couponId) {
             const coupon = await Coupon.findOne({ code: couponId });
             if (coupon) {
@@ -276,7 +279,30 @@ async function callPlace(orderdata,userId) {
                 return { success: false, message: `Insufficient stock for ${product?.name || "Unknown Product"}`,status:400 };
             }
         }
-       
+        // 💰 Wallet Payment Handling - Check before order creation
+        if (paymentMethod === "wallet") {
+            // Fetch backend wallet balance
+            const totalCredit = await Wallet.aggregate([
+                { $match: { userId: new mongoose.Types.ObjectId(userId), type: "Credit" } },
+                { $group: { _id: null, total: { $sum: "$amount" } } }
+            ]);
+
+            const totalDebit = await Wallet.aggregate([
+                { $match: { userId: new mongoose.Types.ObjectId(userId), type: "Debit" } },
+                { $group: { _id: null, total: { $sum: "$amount" } } }
+            ]);
+
+            const creditAmount = totalCredit.length > 0 ? totalCredit[0].total : 0;
+            const debitAmount = totalDebit.length > 0 ? totalDebit[0].total : 0;
+            const backendWalletBalance = creditAmount - debitAmount;
+
+            if (backendWalletBalance < totalAmount) {
+                return { success: false, message: "Insufficient Wallet Balance", status: 400 };
+            }
+        }
+
+
+
         // Reduce stock quantity
         for (let item of items) {
             await Product.findByIdAndUpdate(item.productId, { $inc: { quantity: -item.quantity } });
@@ -319,7 +345,18 @@ async function callPlace(orderdata,userId) {
         });
       
         await newOrder.save();
-      
+
+        if (paymentMethod === "wallet") {
+            const walletTransaction = new Wallet({
+                userId,
+                amount: totalAmount,
+                type: "Debit",
+                source: "Order Payment",
+                orderId: newOrder._id // Linking to the created order
+            });
+
+            await walletTransaction.save();
+        }
   
         if (isReferralCoupon) {
             await User.findByIdAndUpdate(userId, { $pull: { coupons: appliedCouponId } });
