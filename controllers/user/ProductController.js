@@ -1,9 +1,7 @@
-
-
 const Product = require("../../models/productschema");
 const Category=require("../../models/categoryschema")
 const Review=require("../../models/reviewschema")
-const OrderItem = require("../../models/orderitemsschema")
+
 const Order = require("../../models/order");
 const Wishlist = require("../../models/wishlistschema");
 const Cart=require("../../models/cartschema")
@@ -11,7 +9,7 @@ const mongoose = require("mongoose")
 const Offer=require("../../models/offerschema")
 
 
-const getAllProducts = async (req, res) => {
+const getAllProducts = async (req, res,next) => {
   try {
       const page = parseInt(req.query.page) || 1;
       const limit = 9;
@@ -27,7 +25,9 @@ const getAllProducts = async (req, res) => {
           if (categories.every(id => mongoose.isValidObjectId(id))) {
               filter.categoryId = { $in: categories.map(id => new mongoose.Types.ObjectId(id)) };
           } else {
-              console.error("Invalid Category ID(s) provided:", req.query.category);
+            const error = new Error("Invalid Category ID(s) provided");
+            error.statusCode = 400;
+            return next(error);
           }
       }
 
@@ -111,24 +111,28 @@ const updatedProducts = products.map(product => {
           wishlistItems
       });
   } catch (error) {
-      console.error("Error fetching products:", error);
-      res.status(500).send("Internal Server Error");
+      //console.error("Error fetching products:", error);
+     // res.status(500).send("Internal Server Error");
+     next(error);
   }
 };
 
 
-const getProductDetail = async (req, res) => {
+const getProductDetail = async (req, res,next) => {
   try {
       const productId = req.params.id;
-      console.log("Fetching product with ID:", productId); 
+      //console.log("Fetching product with ID:", productId); 
 
       const product = await Product.findById(productId).populate('categoryId');
-      console.log("Product fetched:", product); // Debug log
-
+      //console.log("Product fetched:", product); // Debug log
+      const reviews = await Review.find({productId}).populate("userId", "name");
       if (!product) {
-          console.log("Product not found");
-          return res.status(404).send("Product not found");
-      }
+          //console.log("Product not found");
+          //return res.status(404).send("Product not found");
+          const error = new Error("Product not found");
+          error.statusCode = 404;
+          return next(error);
+        }
 
       // Fetch active offers
       const activeOffers = await Offer.find({ status: "active", endDate: { $gte: new Date() } });
@@ -153,16 +157,18 @@ const getProductDetail = async (req, res) => {
 
       res.render("user/productdetails", {
           product: { ...product.toObject(), discountPrice }, // Add discountPrice dynamically
-          user: req.session.user ? { name: req.session.userName } : null
+          user: req.session.user ? { name: req.session.userName } : null,
+          reviews
       });
   } catch (error) {
-      console.error("Error fetching product details:", error);
-      res.status(500).send("Internal Server Error");
+      //console.error("Error fetching product details:", error);
+      //res.status(500).send("Internal Server Error");
+      next(error);
   }
 };
 
 
-const getWishlist = async (req, res) => {
+const getWishlist = async (req, res,next) => {
   try {
     const userId = req.session.user;
     if (!userId) {
@@ -227,8 +233,9 @@ const getWishlist = async (req, res) => {
       totalPages,
     });
   } catch (error) {
-    console.error("Error fetching wishlist:", error);
-    res.status(500).send("Internal Server Error");
+    //console.error("Error fetching wishlist:", error);
+    //res.status(500).send("Internal Server Error");
+    next(error); 
   }
 };
 
@@ -240,12 +247,14 @@ const loginstatus=(req,res)=>{
 }
 
 }
-const addToWishlist = async (req, res) => {
+const addToWishlist = async (req, res,next) => {
   try {
       const userId = req.session.user; // Get logged-in user ID
       const { productId } = req.body;
       if (!userId) {
-        return res.json({ success: false, message: "You must be logged in to add items to the wishlist." });
+        const error = new Error("You must be logged in to add items to the wishlist.");
+          error.statusCode = 401;
+          return next(error);
     }
 
       // Check if the product is already in the wishlist
@@ -261,48 +270,57 @@ const addToWishlist = async (req, res) => {
 
       res.json({ success: true, message: "Item added to wishlist" });
   } catch (error) {
-      console.error("Error adding to wishlist:", error);
-      res.redirect("/pageNotFound")
+      //console.error("Error adding to wishlist:", error);
+      //res.redirect("/pageNotFound")
+      next(error);
   }
 };
-const removeFromWishlistByProduct = async (req, res) => {
+const removeFromWishlistByProduct = async (req, res,next) => {
   try {
       const userId = req.session.user;
       const { productId } = req.body;
 
       if (!userId) {
-          return res.json({ success: false, message: "You must be logged in." });
+        const error = new Error("You must be logged in.");
+        error.statusCode = 401;
+        return next(error);
       }
 
       await Wishlist.findOneAndDelete({ userId, productId });
 
       res.json({ success: true, message: "Removed from wishlist." });
   } catch (error) {
-      console.error(error);
-      res.json({ success: false, message: "Error removing from wishlist." });
+    next(error);
+      //console.error(error);
+      //res.json({ success: false, message: "Error removing from wishlist." });
   }
 };
 
 
-const removeFromWishlist = async (req, res) => {
+const removeFromWishlist = async (req, res,next) => {
   try {
     const { id } = req.params; // Get wishlist item ID from URL
     const userId = req.session.user; // Get logged-in user
 
     if (!userId) {
-      return res.status(401).json({ success: false, message: "User not logged in" });
+      const error = new Error("User not logged in");
+      error.statusCode = 401;
+      return next(error)
     }
 
     const deletedItem = await Wishlist.findOneAndDelete({ _id: id, userId });
 
     if (!deletedItem) {
-      return res.status(404).json({ success: false, message: "Item not found" });
+      const error = new Error("Item not found");
+      error.statusCode = 404;
+      return next(error);
     }
 
     res.json({ success: true, message: "Item removed successfully" });
   } catch (error) {
-    console.error("Error removing item from wishlist:", error);
-    res.redirect("/pageNotFound")
+    //console.error("Error removing item from wishlist:", error);
+    //res.redirect("/pageNotFound")
+    next(error);
   }
 };
 
@@ -338,7 +356,7 @@ const removeFromWishlist = async (req, res) => {
     res.status(500).json({ success: false, message: "Error fetching reviews" });
   }
 };*/
-const getReview = async (req, res) => {
+/*const getReview = async (req, res) => {
     try {
       const { productId } = req.params;
       const reviews = await Review.find({ product: productId }).populate("user", "name");
@@ -347,36 +365,104 @@ const getReview = async (req, res) => {
       console.error("Error fetching reviews:", error);
       res.status(500).json({ success: false, message: "Error fetching reviews" });
     }
-  };
+  };*/
+  const addReview= async (req, res,next) => {
+    try {
+        const userId = req.session.user; 
+        const productId = req.params.productId;
 
-  const addtocart = async (req, res) => {
+        // Check if user has an order with the given product that is delivered or returned
+        const order = await Order.findOne({
+            userId: userId,
+            "items.productId": productId,
+            "items.status": { $in: ["delivered", "returned"] }
+        });
+
+        if (order) {
+            return res.json({ canReview: true });
+        } else {
+            return res.json({ canReview: false });
+        }
+    } catch (error) {
+      next(error);
+        //console.error("Error checking review eligibility:", error);
+        //res.status(500).json({ message: "Server error" });
+    }
+};
+
+const submitReview= async (req, res,next) => {
+  try {
+      const { productId, rating, comment } = req.body;
+      //console.log("review....",req.body)
+      const userId = req.session.user; 
+
+    
+      const order = await Order.findOne({
+          userId,
+          "items.productId": productId,
+          "items.status": "delivered"
+      });
+
+      if (!order) {
+        const error = new Error("You can only review delivered products!");
+        error.statusCode = 400;
+        return next(error);
+      }
+
+   
+      const review = new Review({ userId, productId, rating, comment });
+      await review.save();
+      await review.populate("userId", "name")
+      res.json({ success: true ,review});
+  } catch (error) {
+      //console.error(error);
+     
+      // res.json({ success: false, message: "Something went wrong" });
+      next(error);
+    }
+};
+
+
+
+  const addtocart = async (req, res,next) => {
     try {
         const { productId, quantity } = req.body;
-        console.log("Product ID:", productId);
+       // console.log("Product ID:", productId);
 
         const userId = req.session.user;
-        console.log("User Cart:", userId);
+        //console.log("User Cart:", userId);
 
         if (!userId) {
-            return res.status(401).json({ success: false, message: "User not logged in" });
+          const error = new Error("User not logged in");
+          error.statusCode = 401;
+          return next(error);
         }
 
         const product = await Product.findById(productId).populate("categoryId");
-        if (!product) return res.status(400).json({ success: false, message: "Product not found" });
+        if (!product) {
+          const error = new Error("Product not found");
+          error.statusCode = 400;
+          return next(error);
+      }
 
-        if (product.status === "Unlisted" || product.status === "Blocked") {
-            return res.status(400).json({ success: false, message: "This product is unavailable" });
-        }
+      if (product.status === "Unlisted" || product.status === "Blocked") {
+        const error = new Error("This product is unavailable");
+        error.statusCode = 400;
+        return next(error);
+    }
 
         const category = await Category.findById(product.categoryId);
         if (category.status === "Unlisted" || category.status === "Blocked") {
-            return res.status(400).json({ success: false, message: "This product category is unavailable" });
-        }
+          const error = new Error("This product category is unavailable");
+          error.statusCode = 400;
+          return next(error);
+      }
 
-        if (product.stockStatus === "Out of Stock") {
-            return res.status(400).json({ success: false, message: "This product is out of stock" });
-        }
-
+      if (product.stockStatus === "Out of Stock") {
+        const error = new Error("This product is out of stock");
+        error.statusCode = 400;
+        return next(error);
+    }
         // Check if product is already in cart
         const existingCartItem = await Cart.findOne({ 
             userId: new mongoose.Types.ObjectId(userId), 
@@ -389,12 +475,10 @@ const getReview = async (req, res) => {
 
           // Validate stock limit
           if (newQuantity > product.quantity) {
-              return res.status(400).json({ 
-                  success: false, 
-                  message: `Only ${product.quantity} items available in stock.` 
-              });
-          }
-
+            const error = new Error(`Only ${product.quantity} items available in stock.`);
+            error.statusCode = 400;
+            return next(error);
+        }
           existingCartItem.quantity = newQuantity;
           await existingCartItem.save();
 
@@ -417,28 +501,30 @@ const getReview = async (req, res) => {
 
         res.status(200).json({ success: true, message: "Product added to cart", cartItem: newCartItem });
     } catch (error) {
-        console.error("Cart Error:", error);
-        res.status(500).json({ success: false, message: "Something went wrong" });
-    }
+       // console.error("Cart Error:", error);
+        //res.status(500).json({ success: false, message: "Something went wrong" });
+        next(error);
+      }
 };
 
-  
-
-  
-  const updateQuantity=async (req, res) => {
+  const updateQuantity=async (req, res,next) => {
     try {
       const { cartItemId, quantity } = req.body;
       
       // Find cart item
       const cartItem = await Cart.findById(cartItemId).populate("productId");
       if (!cartItem) {
-        return res.json({ success: false, message: "Cart item not found." });
-      }
+        const error = new Error("Cart item not found.");
+        error.statusCode = 404;
+        return next(error);
+    }
   
       // Validate stock
       if (quantity > cartItem.productId.quantity) {
-        return res.json({ success: false, message: "Quantity exceeds stock availability." });
-      }
+        const error = new Error("Quantity exceeds stock availability.");
+        error.statusCode = 400;
+        return next(error);
+    }
   
       // Update quantity
       cartItem.quantity = quantity;
@@ -450,14 +536,15 @@ const getReview = async (req, res) => {
   
       return res.json({ success: true, message: "Quantity updated!", newTotal: newTotal });
     } catch (error) {
-      console.error("Error updating cart:", error);
-      res.status(500).json({ success: false, message: "Internal server error." });
+      //console.error("Error updating cart:", error);
+      //res.status(500).json({ success: false, message: "Internal server error." });
+      next(error);
     }
   }
 
 // Assuming you have the necessary imports and setup
 
-const getcart = async (req, res) => {
+const getcart = async (req, res,next) => {
   try {
     const userId = req.session.user;
     if (!userId) {
@@ -517,19 +604,22 @@ const getcart = async (req, res) => {
     });
   } catch (error) {
     //console.error("Error fetching cart:", error);
-    res.status(500).send("Internal Server Error");
+    //res.status(500).send("Internal Server Error");
+    next(error);
   }
 };
 
 
-const deleteCartItem = async (req, res) => {
+const deleteCartItem = async (req,res,next) => {
   try {
     const { cartItemId } = req.params;
 
     // Find the cart item before deleting
     const cartItem = await Cart.findById(cartItemId);
     if (!cartItem) {
-      return res.json({ success: false, message: "Cart item not found." });
+      const error = new Error("Cart item not found.");
+      error.statusCode = 404;
+      return next(error);
     }
 
     // Delete the cart item
@@ -545,7 +635,8 @@ const deleteCartItem = async (req, res) => {
     return res.json({ success: true, message: "Item removed!", newTotal: newTotal });
   } catch (error) {
     //console.error("Error removing item:", error);
-    res.status(500).json({ success: false, message: "Internal server error." });
+    //res.status(500).json({ success: false, message: "Internal server error." });
+    next(error);
   }
 };
 
@@ -553,7 +644,7 @@ const deleteCartItem = async (req, res) => {
 
 
 
-module.exports = { getAllProducts,getProductDetail,getReview,getWishlist,loginstatus,addToWishlist ,removeFromWishlist,addtocart,updateQuantity,
+module.exports = { getAllProducts,getProductDetail,addReview,submitReview,getWishlist,loginstatus,addToWishlist ,removeFromWishlist,addtocart,updateQuantity,
   getcart,deleteCartItem,removeFromWishlistByProduct};
 
 

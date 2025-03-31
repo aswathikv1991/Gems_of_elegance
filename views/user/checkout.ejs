@@ -190,7 +190,7 @@ document.addEventListener("DOMContentLoaded", async function () {
             console.log("Fetching wallet balance...");
             let response = await fetch("/wallet-balance");
             let data = await response.json();
-            console.log("Wallet API Response:", data);
+           // console.log("Wallet API Response:", data);
 
             if (data.success) {
                 document.getElementById("wallet-balance-display").innerText = `(Balance: ₹${data.amount})`;
@@ -257,11 +257,17 @@ document.addEventListener("DOMContentLoaded", async function () {
         const result = await response.json();
 
         if (result.success) {
-            alert("Address added successfully!");
-            location.reload();
-        } else {
-            messageDiv.innerHTML = result.message;
-        }
+    Swal.fire({
+        title: "Success!",
+        text: "Address added successfully!",
+        icon: "success",
+        confirmButtonText: "OK"
+    }).then(() => {
+        location.reload(); // Reload after clicking OK
+    });
+} else {
+    messageDiv.innerHTML = result.message;
+}
     });
 
 
@@ -381,7 +387,7 @@ document.addEventListener("DOMContentLoaded", async function () {
                     order_id: razorpayOrder.order.id,
                     handler: async function (response) {
                         // Step 2: Payment Success - Verify with backend
-                        console.log("razor***********",response)
+                        //console.log("razor***********",response)
                         let verifyResponse = await fetch("/razorpay/verify-payment", {
                             method: "POST",
                             headers: { "Content-Type": "application/json" },
@@ -447,12 +453,17 @@ document.addEventListener("DOMContentLoaded", async function () {
                 location.href = `/order-success/${result.orderId}`;
             });
         } else {
+            if(paymentMethod=="wallet"&&result.message=="WALLET_PAYMENT_ERROR"){
+                location.href = `/order-success/${result.orderId}?message=${result.message}`;
+            }
+            else{
             Swal.fire({
                 title: "Order Failed!",
                 text: result.message,
                 icon: "error",
                 confirmButtonText: "Try Again"
             });
+        }
         }
     } catch (error) {
         Swal.fire({
@@ -563,7 +574,13 @@ document.addEventListener("DOMContentLoaded", async function () {
     updateTotal();
 });
 
-
+window.addEventListener("pageshow", function(event) {
+    
+  if (event.persisted) {
+    // Reload the page
+    location.reload();
+  }
+});
 
 </script>
 

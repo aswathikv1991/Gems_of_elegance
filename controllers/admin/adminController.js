@@ -1,9 +1,6 @@
 const User=require("../../models/userschema")
-const mongoose=require ("mongoose")
+//const mongoose=require ("mongoose")
 const bcrypt=require("bcrypt")
-
-
-
 
 const loadLogin=(req,res)=>{
     if(req.session.admin){
@@ -51,6 +48,7 @@ const loadDashboard=async(req,res)=>{
         }
     }
    catch(error){
+    console.log("error load dashboard",error)
 res.redirect("/admin/pageError")
    }
 }

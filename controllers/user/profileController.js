@@ -1,9 +1,9 @@
 const User = require("../../models/userschema"); 
 const Address = require("../../models/addresschema"); 
 const nodemailer = require("nodemailer");
-const env = require("dotenv").config();
+ require("dotenv").config();
 const bcrypt = require("bcrypt");
-const session=require("express-session")
+//const session=require("express-session")
 function generateOtp() {
     return Math.floor(100000 + Math.random() * 900000).toString();
 }
@@ -27,10 +27,15 @@ async function sendVerificationEmail(email, otp) {
             html: `<b>Your OTP: ${otp}</b>`,
         });
         console.log("Email sent", info.response);
-        return info.accepted.length > 0;
+        //return info.accepted.length > 0;
+        if (!info.accepted.length) {
+            throw new Error("Failed to send email");
+        }
+        return true;
     } catch (error) {
-        console.error("Error sending email", error);
-        return false;
+       // console.error("Error sending email", error);
+        //return false;
+        throw new Error(`Email sending error: ${error.message}`);
     }
 }
 
@@ -40,10 +45,11 @@ const getForgotPassword=async(req,res)=>{
     }
     catch(error)
     {
+        console.error("Error in forgot password", error);
         res.render("/pageNotFound")
     }
 }
-const forgotEmailValid=async(req,res)=>{
+const forgotEmailValid=async(req,res,next)=>{
     try{
         const {email}=req.body
         const findUser=await User.findOne({email:email})
@@ -69,15 +75,19 @@ const forgotEmailValid=async(req,res)=>{
     }
     catch(error)
     {
-        res.redirect("/pageNotFound")
+        next(error);
+        //res.redirect("/pageNotFound")
+
     }
 }
-const resendForgotOtp = async (req, res) => {
+const resendForgotOtp = async (req, res,next) => {
     try {
         const email = req.session.email;
 
         if (!email) {
-            return res.json({ success: false, message: "Session expired. Please request OTP again." });
+            const error = new Error("Session expired. Please request OTP again.");
+            error.statusCode = 401;
+            return next(error);
         }
 
         const newOtp = generateOtp();
@@ -91,14 +101,20 @@ const resendForgotOtp = async (req, res) => {
             res.json({ success: false, message: "Failed to send OTP. Please try again." });
         }
     } catch (error) {
-        console.error("Error resending OTP:", error);
-        res.json({ success: false, message: "Something went wrong. Please try again later." });
+        //console.error("Error resending OTP:", error);
+        //res.json({ success: false, message: "Something went wrong. Please try again later." });
+        next(error); 
     }
 };
-const verifyForgotOtp = async (req, res) => {
+const verifyForgotOtp = async (req, res,next) => {
     try {
         const { otp } = req.body;
 
+        if (!otp) {
+            const error = new Error("OTP is required.");
+            error.statusCode = 400;
+            return next(error);
+        }
         if (otp !== req.session.userOtp) {  
             return res.render("user/forgotPass_otp", { 
                 user: null, 
@@ -111,25 +127,27 @@ const verifyForgotOtp = async (req, res) => {
         return res.redirect("/reset_password");
 
     } catch (error) {
-        console.error("Error verifying OTP:", error);
-        res.redirect("/pageNotFound");
+        //console.error("Error verifying OTP:", error);
+        //res.redirect("/pageNotFound");
+        next(error);
     }
 };
 
-const resetPasswordPage = (req, res) => {
+const resetPasswordPage = (req, res,next) => {
     try {
         if (!req.session.otpVerified) {
             return res.redirect("/forgot_password"); 
         }
         res.render("user/reset_Password", {user:null, message: null }); 
     } catch (error) {
-        console.error("Error loading reset password page:", error);
-        res.redirect("/pageNotFound"); 
+        //console.error("Error loading reset password page:", error);
+        //res.redirect("/pageNotFound"); 
+        next(error);
     }
 };
 
 
-    const resetPassword = async (req, res) => {
+    const resetPassword = async (req, res,next) => {
         try {
             const { password, confirmPassword } = req.body;
     
@@ -169,44 +187,49 @@ const resetPasswordPage = (req, res) => {
             // Redirect to login page
             res.redirect("/login");
         } catch (error) {
-            console.error("Error resetting password:", error);
-            res.render("user/reset_Password", { user: null, message: "Something went wrong. Please try again." });
+            //console.error("Error resetting password:", error);
+            next(error);
+            // res.render("user/reset_Password", { user: null, message: "Something went wrong. Please try again." });
         }
     };
     
 
 // ------------------ PROFILE MANAGEMENT ------------------
 
-const loadMyAccount = async (req, res) => {
+const loadMyAccount = async (req, res,next) => {
     try {
         const user = await User.findById(req.session.user);
         if (!user) return res.redirect("/login");
 
         res.render("user/myaccount", { user });
     } catch (error) {
-        res.redirect("/pageNotFound");
+       // res.redirect("/pageNotFound");
+       next(error); 
+
     }
 };
 
-const loadEditProfile = async (req, res) => {
+const loadEditProfile = async (req, res,next) => {
     try {
         const user = await User.findById(req.session.user);
         if (!user) return res.redirect("/login");
 
         res.render("user/editProfile", { user });
     } catch (error) {
-        res.redirect("/pageNotFound");
+        next(error); 
     }
 };
 
 // Send OTP for Email Change
-const sendProfileOtp = async (req, res) => {
+const sendProfileOtp = async (req, res,next) => {
     try {
         const { email } = req.body;
 
         const existingUser = await User.findOne({ email });
         if (existingUser) {
-            return res.json({ success: false, message: "Email already in use." });
+            const error = new Error("Email already in use.");
+            error.statusCode = 400;
+            return next(error);
         }
 
         const otp = generateOtp();
@@ -217,35 +240,43 @@ const sendProfileOtp = async (req, res) => {
             req.session.newEmail = email;
             return res.json({ success: true, message: "OTP sent successfully." });
         } else {
-            return res.json({ success: false, message: "Failed to send OTP. Please try again." });
+            const error = new Error("Failed to send OTP. Please try again.");
+            error.statusCode = 500;
+            return next(error);
         }
     } catch (error) {
-        res.json({ success: false, message: "Something went wrong." });
+        next(error);
     }
 };
 
 // Verify OTP for Email Change
-const verifyProfileOtp = async (req, res) => {
+const verifyProfileOtp = async (req, res,next) => {
     try {
         const { otp } = req.body;
         if (otp !== req.session.profileOtp) {
-            return res.json({ success: false, message: "Invalid OTP." });
+            const error = new Error("Invalid OTP.");
+            error.statusCode = 400;
+            return next(error);
         }
-
         req.session.profileOtpVerified = true;
         res.json({ success: true, message: "OTP verified. You can update your email now." });
     } catch (error) {
-        res.json({ success: false, message: "Something went wrong." });
+        //res.json({ success: false, message: "Something went wrong." });
+        next(error);
     }
 };
 
 // Edit Profile
-const editProfile = async (req, res) => {
+const editProfile = async (req, res,next) => {
     try {
         console.log("Received Request Body:", req.body); // Debugging step
 
         const user = await User.findById(req.session.user);
-        if (!user) return res.redirect("/login");
+        if (!user) {
+            const error = new Error("User not found. Please log in.");
+            error.statusCode = 401;
+            return next(error);
+        }
 
         let isUpdated = false; // To track if any field is updated
 
@@ -296,32 +327,36 @@ const editProfile = async (req, res) => {
 
         res.json({ success: true, message: "Profile updated successfully." });
     } catch (error) {
-        console.error("Edit profile error:", error);
-        res.json({ success: false, message: "Something went wrong." });
+        //console.error("Edit profile error:", error);
+        //res.json({ success: false, message: "Something went wrong." });
+        next(error);
     }
 };  
-const addAddress = async (req, res) => {
+const addAddress = async (req, res,next) => {
     try {
         const user = await User.findById(req.session.user);
         if (!user) return res.redirect("/login");
 
         res.render("user/addaddress", { user });
     } catch (error) {
-        res.redirect("/pageNotFound");
+        //res.redirect("/pageNotFound");
+        next(error);
     }
 }
 
 
-const postaddAddress = async (req, res) => {
+const postaddAddress = async (req,res,next) => {
     try {
-        console.log("Received Address Data:", req.body);
-        console.log("Logged-in user:", req.session.user);
+        //console.log("Received Address Data:", req.body);
+        //console.log("Logged-in user:", req.session.user);
 
         const userId = req.session.user; 
-        console.log("User ID from session:", userId);
+        //console.log("User ID from session:", userId);
 
         if (!userId) {
-            return res.json({ success: false, message: "User not authenticated. Please log in." });
+            const error = new Error("User not authenticated. Please log in.");
+            error.statusCode = 401;
+            return next(error);
         }
 
         const { houseNumber, street, city, state, pincode } = req.body;
@@ -348,53 +383,62 @@ const postaddAddress = async (req, res) => {
         });
 
         await newAddress.save();
-        console.log("Address saved successfully!");
+        //console.log("Address saved successfully!");
 
         res.json({ success: true, message: "Address added successfully!" });
 
     } catch (error) {
-        console.error("Error in postaddAddress:", error);
-        res.json({ success: false, message: "Something went wrong." });
+        //console.error("Error in postaddAddress:", error);
+        //res.json({ success: false, message: "Something went wrong." });
+        next(error);
     }
 };
 
-const getAddresses = async (req, res) => {
+const getAddresses = async (req, res,next) => {
     try {
         const userId = req.session.user; // Get logged-in user ID
         if (!userId) {
-            return res.json({ success: false, message: "User not authenticated." });
+            const error = new Error("User not authenticated.");
+            error.statusCode = 401;
+            return next(error);
         }
 
         const addresses = await Address.find({ userId }); // Fetch addresses for logged-in user
         res.json({ success: true, addresses });
     } catch (error) {
-        console.error("Error fetching addresses:", error);
-        res.json({ success: false, message: "Failed to fetch addresses." });
+        //console.error("Error fetching addresses:", error);
+        //res.json({ success: false, message: "Failed to fetch addresses." });
+        next(error);
     }
 };
-const deleteAddress = async (req, res) => {
+const deleteAddress = async (req, res,next) => {
     try {
         const userId = req.session.user; // Ensure user is logged in
         if (!userId) {
-            return res.status(401).json({ success: false, message: "User not authenticated." });
+            const error = new Error("User not authenticated.");
+            error.statusCode = 401;
+            return next(error);
         }
 
         const addressId = req.params.id;
         const address = await Address.findOne({ _id: addressId, userId });
 
         if (!address) {
-            return res.status(404).json({ success: false, message: "Address not found or not authorized to delete." });
+            const error = new Error("Address not found or not authorized to delete.");
+            error.statusCode = 404;
+            return next(error);
         }
 
         await Address.deleteOne({ _id: addressId, userId });
         return res.json({ success: true, message: "Address deleted successfully." });
 
     } catch (error) {
-        console.error("Error deleting address:", error);
-        return res.status(500).json({ success: false, message: "Failed to delete address." });
+        //console.error("Error deleting address:", error);
+        //return res.status(500).json({ success: false, message: "Failed to delete address." });
+        next(error);
     }
 };
-const editAddressPage = async (req, res) => {
+const editAddressPage = async (req, res,next) => {
     try {
         const userId = req.session.user; // Get logged-in user
         const addressId = req.params.id;
@@ -407,12 +451,13 @@ const editAddressPage = async (req, res) => {
 
         res.render("user/editaddress", { address, user: req.session.user });
     } catch (error) {
-        console.error("Error fetching address for edit:", error);
-        res.redirect("/myaccount");
+        //console.error("Error fetching address for edit:", error);
+        //res.redirect("/myaccount");
+        next(error);
     }
 };
 
-const updateAddress = async (req, res) => {
+const updateAddress = async (req, res,next) => {
     try {
         const userId = req.session.user;
         const addressId = req.params.id;
@@ -439,27 +484,30 @@ const updateAddress = async (req, res) => {
 
         res.json({ success: true, message: "Address updated successfully!" });
     } catch (error) {
-        console.error("Error updating address:", error);
-        res.json({ success: false, message: "Failed to update address." });
+        //console.error("Error updating address:", error);
+        //res.json({ success: false, message: "Failed to update address." });
+        next(error);
     }
 };
 
-const setDefaultAddress = async (req, res) => {
+const setDefaultAddress = async (req, res,next) => {
     try {
         const { addressId } = req.params;
         const userId = req.session.user;
 
+      
         if (!userId) {
-            return res.json({ success: false, message: "User not authenticated." });
+            const error = new Error("User not authenticated.");
+            error.statusCode = 401;
+            return next(error);
         }
-
         // Find the address to be set as default
         const address = await Address.findOne({ _id: addressId, userId });
-
         if (!address) {
-            return res.json({ success: false, message: "Address not found." });
+            const error = new Error("Address not found.");
+            error.statusCode = 404;
+            return next(error);
         }
-
         // Set all other addresses to isDefault: false
         await Address.updateMany({ userId }, { $set: { isDefault: false } });
 
@@ -472,8 +520,9 @@ const setDefaultAddress = async (req, res) => {
 
         res.json({ success: true, message: "Default address updated successfully!", addresses: updatedAddresses });
     } catch (error) {
-        console.error("Error setting default address:", error);
-        res.json({ success: false, message: "Something went wrong." });
+        //console.error("Error setting default address:", error);
+        //res.json({ success: false, message: "Something went wrong." });
+        next(error);
     }
 };
 

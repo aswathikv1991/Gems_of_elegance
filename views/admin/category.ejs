@@ -184,7 +184,7 @@
                         Swal.fire("Deleted!", "The category has been deleted.", "success")
                         .then(() => window.location.reload());
                     } else {
-                        Swal.fire("Error!", data.error, "error");
+                        Swal.fire("Error!", data.message, "error");
                     }
                 })
                 .catch(() => Swal.fire("Error!", "Something went wrong.", "error"));

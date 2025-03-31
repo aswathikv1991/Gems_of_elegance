@@ -1,6 +1,6 @@
 const express=require("express")
 const app=express()
-const env=require("dotenv").config()
+require("dotenv").config()
 const db=require("./config/db")
 const path=require("path")
 const session=require("express-session")
@@ -8,7 +8,7 @@ const passport=require("./config/passport")
 const setUser = require("./middlewares/setUserMiddleware")
 const userRouter=require("./routes/userRouter")
 const adminRouter=require("./routes/adminRouter")
-
+const errorHandler=require("./middlewares/errorMiddleware")
 db()
 app.use(express.json())
 app.use(express.urlencoded({extended:true}))
@@ -44,7 +44,7 @@ app.use("/admin",adminRouter)
 
 
 
-
+app.use(errorHandler);
 app.listen(process.env.PORT,()=>{
     console.log("server running")
 })

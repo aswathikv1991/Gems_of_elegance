@@ -2,10 +2,10 @@ const User = require("../../models/userschema");
 const Coupon=require("../../models/couponschema")
 const nodemailer = require("nodemailer");
 const { v4: uuidv4 } = require('uuid');
-const env = require("dotenv").config();
+ require("dotenv").config();
 const bcrypt = require("bcrypt");
 
-const loadHomepage = async (req, res) => {
+const loadHomepage = async (req, res,next) => {
     try {
         let user = null;
         if (req.session.user) {
@@ -13,8 +13,9 @@ const loadHomepage = async (req, res) => {
         }
         res.render("user/home", { user }); // Pass user data to the view
     } catch (error) {
-        console.log("Home page not found", error);
-        res.status(500).send("Server error");
+        //console.log("Home page not found", error);
+        //res.status(500).send("Server error");
+        next(error); 
     }
 };
 
@@ -29,19 +30,20 @@ const loadHomepage = async (req, res) => {
         res.status(500).send("Server error");
     }
 };*/
-const loadSignup = async (req, res) => {
+const loadSignup = async (req, res,next) => {
     try {
         //console.log("Signup page requested.");
         //console.log("Referral token received in query:", req.query.ref);
         if (req.session.user) {
             // Fetch the full user object from the database
-            const user = await User.findById(req.session.user);
+            //const user = await User.findById(req.session.user);
             return res.redirect("/"); 
         }
         return res.render("user/signup", { user: null, message: "" }); 
     } catch (error) {
-        console.log("Signup page not loading", error);
-        res.status(500).send("Server error");
+        //console.log("Signup page not loading", error);
+        //res.status(500).send("Server error");
+        next(error);
     }
 };
 
@@ -69,13 +71,15 @@ async function sendVerificationEmail(email, otp) {
             html: `<b>Your OTP: ${otp}</b>`,
         });
         console.log("Email sent", info.response);
-        return info.accepted.length > 0;
+        if (!info.accepted.length) {
+            throw new Error("Failed to send email");
+        }
+        return true;
     } catch (error) {
-        console.error("Error sending email", error);
-        return false;
+        throw new Error(`Email sending error: ${error.message}`);
     }
 }
-const sendReferralEmail=async (req, res) =>{
+const sendReferralEmail=async (req, res,next) =>{
     try {
         const { email, referralLink } = req.body;
        // console.log("email sentto",req.body)
@@ -110,8 +114,9 @@ const sendReferralEmail=async (req, res) =>{
         return res.status(200).json({ success: true, message: "Invitation email sent successfully!" });
 
     } catch (error) {
-        console.error("Error sending referral email:", error);
-        return res.status(500).json({ success: false, message: "Failed to send invitation email." });
+        //console.error("Error sending referral email:", error);
+        //return res.status(500).json({ success: false, message: "Failed to send invitation email." });
+        next(error);
     }
 }
 
@@ -200,7 +205,7 @@ const sendReferralEmail=async (req, res) =>{
     }
 };*/
 
-const signup = async (req, res) => {
+const signup = async (req, res,next) => {
     try {
         const { name, email, password, confirmPassword, phone,referralToken} = req.body;
        
@@ -253,12 +258,12 @@ const signup = async (req, res) => {
             console.log("No referral token provided in the signup request.");
         }
         const otp = generateOtp();
-        console.log("OTP sent", otp);
-
-        const emailSent = await sendVerificationEmail(email, otp);
+        console.log("OTP sent", otp); const emailSent = await sendVerificationEmail(email, otp);
         if (!emailSent) {
             return res.json("email.error");
         }
+
+       
 
         req.session.userOtp = otp;
         req.session.user = { name, email, password, phone, referralID, referredBy };
@@ -267,8 +272,9 @@ const signup = async (req, res) => {
         res.render("user/verifyotp", { user: null }); 
         console.log("OTP stored in session", req.session.userOtp);
     } catch (error) {
-        console.error("Signup error", error);
-        res.redirect("/pageNotFound");
+        //console.error("Signup error", error);
+        //res.redirect("/pageNotFound");
+        next(error);
     }
 };
 
@@ -278,37 +284,13 @@ const securePassword = async (password) => {
         const passwordHash = await bcrypt.hash(password, 10);
         return passwordHash;
     } catch (error) {
-        console.error("Error hashing password", error);
+       // console.error("Error hashing password", error);
+       throw new Error(`Error hashing password: ${error.message}`);
     }
 };
 
-/*const verifyOtp = async (req, res) => {
-    try {
-        const { otp } = req.body;
-        if (otp === req.session.userOtp) {
-            const user = req.session.user;
-            const passwordHash = await securePassword(user.password);
 
-            const saveUserData = new User({
-                name: user.name,
-                email: user.email,
-                phone: user.phone,
-                password: passwordHash,
-                ...(user.googleId && { googleId: user.googleId })
-            });
-
-            await saveUserData.save();
-            req.session.user = saveUserData._id;
-            res.json({ success: true, redirectUrl: "/" });
-        } else {
-            res.status(400).json({ success: false, message: "Invalid OTP, please try again" });
-        }
-    } catch (error) {
-        console.error("Error verifying OTP", error);
-        res.status(500).json({ success: false, message: "An error occurred" });
-    }
-};*/
-const verifyOtp = async (req, res) => {
+const verifyOtp = async (req, res,next) => {
     try {
         const { otp } = req.body;
         if (otp === req.session.userOtp) {
@@ -316,7 +298,7 @@ const verifyOtp = async (req, res) => {
             const passwordHash = await securePassword(user.password);
 
             // Generate a unique referral token for the new user
-            const referralToken = require("crypto").randomBytes(16).toString("hex");
+            //const referralToken = require("crypto").randomBytes(16).toString("hex");
 
             const saveUserData = new User({
                 name: user.name,
@@ -362,19 +344,21 @@ const verifyOtp = async (req, res) => {
             res.status(400).json({ success: false, message: "Invalid OTP, please try again" });
         }
     } catch (error) {
-        console.error("Error verifying OTP", error);
-        res.status(500).json({ success: false, message: "An error occurred" });
+        //console.error("Error verifying OTP", error);
+        //res.status(500).json({ success: false, message: "An error occurred" });
+        next(error);
     }
 };
 
 
 
-const resendOtp = async (req, res) => {
+const resendOtp = async (req, res,next) => {
     try {
         if (!req.session.user || !req.session.user.email) {
-            return res.status(400).json({ success: false, message: "Session expired. Please sign up again." });
+            const error = new Error("Session expired. Please sign up again.");
+            error.statusCode = 400;
+            return next(error);
         }
-
         const { email } = req.session.user;
         const newOtp = generateOtp();
 
@@ -382,19 +366,22 @@ const resendOtp = async (req, res) => {
 
         const emailSent = await sendVerificationEmail(email, newOtp);
         if (!emailSent) {
-            return res.status(500).json({ success: false, message: "Failed to resend OTP. Please try again later." });
+            const error = new Error("Failed to resend OTP. Please try again later.");
+            error.statusCode = 500;
+            return next(error);
         }
 
         req.session.userOtp = newOtp;
 
         res.json({ success: true, message: "New OTP sent successfully." });
     } catch (error) {
-        console.error("Error resending OTP:", error);
-        res.status(500).json({ success: false, message: "An error occurred. Please try again." });
+        //console.error("Error resending OTP:", error);
+        //res.status(500).json({ success: false, message: "An error occurred. Please try again." });
+        next(error);
     }
 };
 
-const loadLogin = async (req, res) => {
+const loadLogin = async (req, res,next) => {
     try {
         if (req.session.user) {
             return res.redirect("/"); // If the user is already logged in, redirect to homepage
@@ -403,12 +390,13 @@ const loadLogin = async (req, res) => {
         req.session.successMessage = null;
         return res.render("user/login", { user: null, message: successMessage });
     } catch (error) {
-        console.log("Login page not loading", error);
-        res.status(500).send("Server error");
+        //console.log("Login page not loading", error);
+        //res.status(500).send("Server error");
+        next(error);
     }
 };
 
-const login = async (req, res) => {
+const login = async (req, res,next) => {
     try {
         const { email, password } = req.body;
         const findUser = await User.findOne({ isAdmin: 0, email: email });
@@ -430,12 +418,13 @@ const login = async (req, res) => {
 
         res.redirect("/");
     } catch (error) {
-        console.error("Login error", error);
-        res.render("user/login", {user:null, message: "Login failed, please try again later" });
+       // console.error("Login error", error);
+        //res.render("user/login", {user:null, message: "Login failed, please try again later" });
+        next(error)
     }
 };
 
-const logout = async (req, res) => {
+const logout = async (req, res,next) => {
     try {
         req.session.destroy((err) => {
             if (err) {
@@ -444,8 +433,9 @@ const logout = async (req, res) => {
             res.redirect("/login");
         });
     } catch (error) {
-        console.error("Error logging out", error);
-        res.redirect("/pageNotFound");
+       // console.error("Error logging out", error);
+       // res.redirect("/pageNotFound");
+       next(error);
     }
 };
 
@@ -458,7 +448,10 @@ const pageNotFound = async (req, res) => {
         res.redirect("/");
     }
 }
- 
+const getAboutPage = (req, res) => {
+    res.render("user/aboutus", { title: "About Us - Gems of Elegance" });
+};
+
 
 module.exports = {
     loadHomepage,
@@ -469,6 +462,7 @@ module.exports = {
     resendOtp,
     loadLogin,
     login,logout,
-    sendReferralEmail
+    sendReferralEmail,
+    getAboutPage
    
 }

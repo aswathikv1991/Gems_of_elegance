@@ -1,4 +1,7 @@
 <%- include("../../views/partials/user/header") %>
+<meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 
     <title>Order Successful</title>
     <link rel="stylesheet" href="/css/ordersuccess.css"> <!-- Link to external stylesheet -->
@@ -20,15 +23,39 @@
     </div>
 </div>
 <script>
+   
+   // Remove the checkout page from history
+   window.onload = function () {
+    history.replaceState(null, null, document.URL);
+    setTimeout(function () {
+        window.onpopstate = function () {
+            window.location.href = "/orders"; // Redirect to orders page
+        };
+    }, 0);
+};
+
+
+
 // Push an initial state to history
-window.history.pushState({ page: "ordersuccess" }, "", window.location.href);
+// Store a state in history to detect back navigation
+//window.history.pushState({ page: "ordersuccess" }, "", window.location.href);
 
 // Listen for back navigation
-window.addEventListener("popstate", function (event) {
-    if (event.state && event.state.page === "ordersuccess") {
-        window.location.href = "/"; // Redirect to homepage or order history
+/*window.addEventListener("popstate", function (event) {
+    location.reload();
+    alert("Reload detected!");
+
+    console.log("Event state:", event.state); // Corrected console.log()
+
+   /* if (event.state && event.state.page === "ordersuccess") {
+        alert("Redirecting to home...");
+        window.location.href = "/"; // Redirect user to home page
+    } else {
+        // Re-push state to prevent going back
+        window.history.pushState({ page: "ordersuccess" }, "", window.location.href);
     }
-});
+});*/
+
 
 </script>
     <%- include("../../views/partials/user/footer") %>

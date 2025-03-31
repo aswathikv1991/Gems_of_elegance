@@ -149,8 +149,10 @@ document.getElementById("cropBtn").addEventListener("click", function () {
     alert("Please wait for the image to load before cropping.");
     return;
   }
+  //const canvas = cropper.getCroppedCanvas({ width: 1000, height: 1000 });
+  const canvas = cropper.getCroppedCanvas();
 
-  const canvas = cropper.getCroppedCanvas({ width: 500, height: 500 });
+  //const canvas = cropper.getCroppedCanvas({ width: 500, height: 500 });
   canvas.toBlob(function (blob) {
     if (!blob) {
       alert("Something went wrong with cropping.");

@@ -78,6 +78,7 @@ const  getOffers = async (req, res) => {
             const categories = await Category.find(); // Fetch all categories
             res.render("admin/editoffer", { offer, products, categories });
         } catch (error) {
+            console.log("offer error ",error)
             res.redirect("/admin/getoffers");
         }
     }
@@ -141,6 +142,7 @@ const disableOffer = async (req, res) => {
 
         return res.json({ success: true, message: "Offer disabled successfully!" });
     } catch (error) {
+        console.log("disable offer ",error)
         return res.status(500).json({ success: false, message: "Error disabling offer" });
     }
 };
@@ -153,6 +155,7 @@ const enableOffer = async (req, res) => {
 
         return res.json({ success: true, message: "Offer enabled successfully!" });
     } catch (error) {
+        console.log("enable offer error ",error)
         return res.status(500).json({ success: false, message: "Error enabling offer" });
     }
 };

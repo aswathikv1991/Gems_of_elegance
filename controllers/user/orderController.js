@@ -2,23 +2,26 @@ const Order=require("../../models/order")
 const Product=require("../../models/productschema")
 const Wallet=require("../../models/wallet")
 const mongoose = require("mongoose");
-
-const orderSuccess = async (req, res) => {
+const PDFDocument = require("pdfkit");
+const path = require("path");
+const fs = require("fs");
+const orderSuccess = async (req, res,next) => {
     try {
         const { orderId } = req.params;
         const order = await Order.findById(orderId);
 
         if (!order) {
-            return res.render("error", { message: "Order not found!" });
+            return res.render("page404", { message: "Order not found!" });
         }
 
         res.render("user/ordersuccess", { order });
     } catch (error) {
-        console.error("Error loading order success page:", error);
-        res.render("error", { message: "Something went wrong!" });
+        //console.error("Error loading order success page:", error);
+        //res.render("page404", { message: "Something went wrong!" });
+        next(error)
     }
 };
-const getOrders = async (req, res) => {
+const getOrders = async (req, res,next) => {
     try {
         const userId = req.session.user; // Get logged-in user ID
         const page = parseInt(req.query.page) || 1;
@@ -71,11 +74,12 @@ const getOrders = async (req, res) => {
         });
     } catch (error) {
         console.error("Error fetching orders:", error);
-        res.status(500).send("Internal Server Error");
+        //res.status(500).send("Internal Server Error");
+        next(error)
     }
 };
 
-const getOrderDetails = async (req, res) => {
+const getOrderDetails = async (req, res,next) => {
     try {
         if (!req.session.user) {
             return res.redirect("/login"); // Redirect guests to login
@@ -88,30 +92,37 @@ const getOrderDetails = async (req, res) => {
         const order = await Order.findOne({ _id: orderId, userId }).populate("items.productId");
 
         if (!order) {
-            return res.status(404).send("Order not found");
+            return res.render("page404", { message: "Order not found!" });
         }
+
 
         res.render("user/orderDetails", { order });
     } catch (error) {
         console.error("Error fetching order details:", error);
-        res.status(500).send("Internal Server Error");
+        //res.status(500).send("Internal Server Error");
+        next(error)
     }
 };
 
-const cancelOrder = async (req, res) => {
+const cancelOrder = async (req, res,next) => {
     try {
         const { orderId, cancelProducts, cancelReason } = req.body;
         const userId = req.session.user; // Get logged-in user ID
 
         // Find the order using custom orderID
         const order = await Order.findOne({ orderID: orderId, userId }).populate("items.productId"); // Populate product details
-        if (!order) {  
-            return res.status(404).json({ message: "Order not found" });
+        if (!order) {
+            const error = new Error("Order not found");
+            error.statusCode = 404;
+            return next(error);  
+           
         }
 
         // If the order is already shipped or delivered, cancellation is not allowed
         if (["shipped", "delivered"].includes(order.orderStatus)) {
-            return res.status(400).json({ message: "Cannot cancel a shipped or delivered order" });
+            const error = new Error("Cannot cancel a shipped or delivered order");
+            error.statusCode = 400;
+            return next(error);
         }
 
         const originalProductTotal = order.items.reduce((acc, item) => acc + item.salePrice, 0);
@@ -207,66 +218,81 @@ if (order.paymentMethod !== "cod") {
 }
     }
     catch (error) {
-        console.error("Error cancelling order:", error);
-        res.status(500).json({ message: "Internal Server Error" });
+        //console.error("Error cancelling order:", error);
+       
+        // res.status(500).json({ message: "Internal Server Error" });
+        next(error);
     }
 };
 
 
 
-const requestReturn = async (req, res) => {
+const requestReturn = async (req, res,next) => {
     try {
 
         const { orderId, productId, returnReason } = req.body;
         const userId = req.session.user; // Get user ID from session
-        //console.log(userId)
-        //console.log("return ------",req.body)
-        // Find the order with this userId
+       
         const order = await Order.findOne({orderID: orderId, userId });
-       // console.log("----return1")
+      
         if (!order) {
-            return res.status(404).json({ message: "Order not found" });
+            const error = new Error("Order not found");
+            error.statusCode = 404;
+            return next(error);
         }
 
-        //console.log("----return2")
+        
         const item = order.items.find(item => item.productId.toString() === productId);
 
         if (!item) {
-            return res.status(404).json({ message: "Product not found in order" });
+            const error = new Error("Product not found in order");
+            error.statusCode = 404;
+            return next(error);
         }
 
-        //console.log("----return3")
+        
         if (item.status !== "delivered") {
-            return res.status(400).json({ message: "Item is not delivered yet" });
+            const error = new Error("Item is not delivered yet");
+            error.statusCode = 400;
+            return next(error);
         }
-        //console.log("----return4")
+       
         if (item.returnApprovalStatus === "approved") {
-            return res.status(400).json({ message: "Return already approved" });
+            const error = new Error("Return already approved");
+            error.statusCode = 400;
+            return next(error);
         }
-        //console.log("----return5") 
+       
         if (item.returnApprovalStatus === "pending") {
-            return res.status(400).json({ message: "Return request already submitted" });
+            const error = new Error("Return request already submitted");
+            error.statusCode = 400;
+            return next(error);
         }
         if (item.returnApprovalStatus === "rejected") {
-            return res.status(400).json({ message: "Return request was rejected previously" });
+            const error = new Error("Return request was rejected previously");
+            error.statusCode = 400;
+            return next(error);
         }
-        //console.log("----return6")
+      
         item.returnApprovalStatus = "pending"; // Set return request as pending
         item.returnReason = returnReason;
         item.returnRequestDate = new Date();
 
         await order.save();
-        //console.log("----return7")
-        res.status(200).json({ message: "Return request submitted successfully" });
+        
+        res.status(200).json({ "success": true,message: "Return request submitted successfully" });
     } catch (error) {
-        res.status(500).json({ message: "Internal server error", error: error.message });
+        //res.status(500).json({ message: "Internal server error", error: error.message });
+        next(error);
     }
 };
-const getWallet = async (req, res) => {
+const getWallet = async (req, res,next) => {
     try {
         const userId = req.session.user;
         if (!userId) {
-            return res.status(401).json({ success: false, message: "Unauthorized" });
+            const error = new Error("Unauthorized");
+            error.statusCode = 401;
+            return next(error);
         }
 
         // Calculate total credits and debits for the user
@@ -289,13 +315,14 @@ const getWallet = async (req, res) => {
 
         res.json({ success: true, amount: balance });
     } catch (error) {
-        console.error("Error fetching wallet balance:", error);
-        res.status(500).json({ success: false, message: "Server error" });
+        //console.error("Error fetching wallet balance:", error);
+        //res.status(500).json({ success: false, message: "Server error" });
+        next(error);
     }
 };
 
 
-async function getWalletTransactions(req, res){
+async function getWalletTransactions(req, res,next){
     try {
       // Fetch all transactions for the given userId, sorted by most recent first
       const transactions = await Wallet.find({ userId: req.session.user })
@@ -310,12 +337,145 @@ async function getWalletTransactions(req, res){
         transactions,
       });
     } catch (error) {
-      console.error("Error fetching wallet transactions:", error);
-      res.status(500).json({ success: false, message: "Error fetching transactions" });
+      //console.error("Error fetching wallet transactions:", error);
+      //res.status(500).json({ success: false, message: "Error fetching transactions" });
+      next(error); 
     }
   }
+
+  
+ const dowloadInvoice=async (req, res,next) => {
+      try {
+          const orderId = req.params.orderId;
+          const order = await Order.findById(orderId)
+          .populate("userId") // Fetch user details
+          .populate("items.productId") // Fetch product details
+          .populate("shippingAddress"); // Fetch shipping address details
+      
+  
+          if (!order) {
+            const error = new Error("Order not found");
+            error.statusCode = 404;
+            return next(error);
+        }
+  
+          const doc = new PDFDocument({ size: "A4", margin: 50 });
+
+const fileName = `invoice-${order.orderID}.pdf`;
+const filePath = path.join(__dirname, `../../public/invoices/${fileName}`);
+
+if (!fs.existsSync(path.join(__dirname, "../../public/invoices"))) {
+    fs.mkdirSync(path.join(__dirname, "../../public/invoices"), { recursive: true });
+}
+
+const stream = fs.createWriteStream(filePath);
+doc.pipe(stream);
+
+// **Header Section**
+doc.image(path.join(__dirname, "../../public/images/gems.png"), 50, 30, { width: 80 });
+
+doc.font("Helvetica-Bold").fontSize(20).fillColor("#333").text("Gems Of Elegance", 140, 40);
+doc.fontSize(12).fillColor("#666").text("Luxury Jewelry", 140, 60);
+
+doc.moveDown(2);
+doc.fontSize(14).fillColor("#000").text(`Invoice #${order.orderID}`, { align: "right" });
+doc.text(`Date: ${new Date(order.createdAt).toLocaleDateString()}`, { align: "right" });
+doc.text(`Status: ${order.orderStatus}`, { align: "right" });
+
+doc.moveDown(1);
+
+// **Billing Details**
+doc.fontSize(14).fillColor("#000").text("Billing Details", { underline: true });
+
+doc.fontSize(12).fillColor("#333")
+    .text(`Name: ${order.userId.name}`)
+    .text(`Email: ${order.userId.email}`)
+    .text(`Address: ${order.shippingAddress.houseNumber}, ${order.shippingAddress.street}`)
+    .text(`${order.shippingAddress.city}, ${order.shippingAddress.state} - ${order.shippingAddress.pincode}`)
+   
+
+doc.moveDown(1);
+
+// **Order Summary Table**
+doc.fontSize(14).fillColor("#000").text("Order Summary", { underline: true });
+
+doc.moveDown(0.5);
+
+const tableTop = doc.y;
+const itemX = 50;
+const qtyX = 250;
+const priceX = 320;
+const salePriceX = 400;
+const subtotalX = 480;
+
+// **Table Header with Background**
+doc.rect(itemX - 5, tableTop - 5, 510, 20).fill("#ddd");
+doc.fillColor("#000").font("Helvetica-Bold").fontSize(12)
+    .text("Product", itemX, tableTop, { width: 180, align: "left" })
+    .text("Qty", qtyX, tableTop, { width: 40, align: "center" })
+    .text("Price", priceX, tableTop, { width: 60, align: "right" })
+    .text("Sale Price", salePriceX, tableTop, { width: 70, align: "right" })
+    .text("Subtotal", subtotalX, tableTop, { width: 70, align: "right" });
+
+doc.stroke();
+doc.moveDown();
+
+// **Order Items**
+order.items.forEach((item, index) => {
+    const y = tableTop + 25 + index * 25;
+
+    doc.font("Helvetica").fontSize(11).fillColor("#444")
+        .text(item.productId.name, itemX, y, { width: 180, align: "left" })
+        .text(item.quantity.toString(), qtyX, y, { width: 40, align: "center" })
+        .text(`₹${item.price.toFixed(2)}`, priceX, y, { width: 60, align: "right" })
+        .text(`₹${item.salePrice.toFixed(2)}`, salePriceX, y, { width: 70, align: "right" })
+        .text(`₹${item.salePrice.toFixed(2)}`, subtotalX, y, { width: 70, align: "right" });
+
+    // **Draw a line separator for each row**
+    doc.moveTo(itemX - 5, y + 15).lineTo(subtotalX + 70, y + 15).strokeColor("#ddd").stroke();
+});
+
+// **Total Amount Properly Aligned**
+const totalY = tableTop + 25 + order.items.length * 25 + 10;
+
+doc.font("Helvetica-Bold").fontSize(12).fillColor("#000")
+    .text("Delivery Charge:", salePriceX, totalY, { width: 100, align: "right" })
+    .text(`₹${order.deliveryCharge.toFixed(2)}`, subtotalX, totalY, { width: 70, align: "right" });
+
+// **Total Amount**
+const finalTotalY = totalY + 20; // Moving total amount below delivery charge
+doc.font("Helvetica-Bold").fontSize(12).fillColor("#000")
+    .text("Total Amount:", salePriceX, finalTotalY, { width: 100, align: "right" })
+    .text(`₹${order.totalAmount.toFixed(2)}`, subtotalX, finalTotalY, { width: 70, align: "right" });
+
+// **Signature Section**
+doc.moveDown(3);
+doc.fontSize(12).fillColor("#666").text("Authorized Signature", { align: "right" });
+doc.moveDown(1);
+doc.moveTo(400, doc.y).lineTo(550, doc.y).stroke(); // Signature line
+
+doc.end();
+
+          stream.on("finish", () => {
+              res.download(filePath, fileName, (err) => {
+                  if (err) {
+                      //console.error(err);
+                      //res.status(500).send("Error generating invoice");
+                      return next(err);
+                    }
+                  fs.unlinkSync(filePath); // Delete the file after download
+              });
+          });
+  
+      } catch (error) {
+          //console.error(error);
+          //res.status(500).send("Internal Server Error");
+          next(error);
+      }
+  };
+  
+
   
 
 
-
-  module.exports={orderSuccess,getOrders,getOrderDetails,cancelOrder,requestReturn,getWallet,getWalletTransactions}
+  module.exports={orderSuccess,getOrders,getOrderDetails,cancelOrder,requestReturn,getWallet,getWalletTransactions,dowloadInvoice}

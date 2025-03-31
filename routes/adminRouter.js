@@ -8,7 +8,7 @@ const couponController=require("../controllers/admin/couponController")
 const orderController=require("../controllers/admin/orderController")
 const offerController=require("../controllers/admin/offerController")
 const AdminDashboardController = require("../controllers/admin/dashboardController");
-const {userAuth,adminAuth}=require("../middlewares/auth")
+const {adminAuth}=require("../middlewares/auth")
 const upload = require("../middlewares/uploadMiddleware");
 
 router.get("/login",adminController.loadLogin)
@@ -55,5 +55,6 @@ router.get("/total-sales", AdminDashboardController.calculateTotalSales);
 router.get("/getSales",AdminDashboardController.getSalesCount);
 router.get("/download-sales-report", AdminDashboardController.downloadSalesReport);
 router.get("/wallet/:userId", orderController.getUserWalletDetails);
-
+router.get("/dashboard-sales",AdminDashboardController.getSalesReport);
+router.get("/sales-chart",AdminDashboardController.getSalesChart);
 module.exports=router

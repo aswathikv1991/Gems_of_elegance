@@ -1,6 +1,6 @@
 const Product=require("../../models/productschema")
 const Category=require("../../models/categoryschema")
-const sharp = require("sharp");
+//const sharp = require("sharp");
 const path = require("path");
 const fs = require("fs");
 

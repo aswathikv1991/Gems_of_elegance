@@ -33,7 +33,7 @@
                         <td><%= item.quantity %></td>
                         <td>₹<%= item.price.toFixed(2) %></td>
                         <td>₹<%= item.salePrice.toFixed(2) %></td>
-                        <td>₹<%= (item.quantity * item.price).toFixed(2) %></td>
+                        <td>₹<%= (item.salePrice).toFixed(2) %></td>
                         
                         <td>
                             <% if (item.status === "cancelled") { %>
@@ -82,75 +82,136 @@
         <% } %>
 
         <a href="/orders" class="btn btn-secondary">⬅ Back to Orders</a>
+        <a href="/download-invoice/<%= order._id %>" class="btn btn-primary">
+
+            📄 Download Invoice
+        </a>
+        
     </div>
 </div>
 
 <script>
-    function cancelOrder(orderId) {
-        const selectedProducts = [];
-        document.querySelectorAll('input[name="cancelProducts"]:checked').forEach(checkbox => {
-            selectedProducts.push(checkbox.value);
+function cancelOrder(orderId) {
+    const selectedProducts = [];
+    document.querySelectorAll('input[name="cancelProducts"]:checked').forEach(checkbox => {
+        selectedProducts.push(checkbox.value);
+    });
+
+    if (selectedProducts.length === 0) {
+        Swal.fire({
+            title: "Warning!",
+            text: "Please select at least one item to cancel.",
+            icon: "warning",
+            confirmButtonText: "OK"
         });
-
-        if (selectedProducts.length === 0) {
-            alert("Please select at least one item to cancel.");
-            return;
-        }
-
-        const cancelReason = document.getElementById("cancelReason").value.trim();
-        if (!cancelReason) {
-            alert("Please provide a cancellation reason.");
-            return;
-        }
-
-        fetch("/order/cancel", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({ orderId, cancelProducts: selectedProducts, cancelReason })
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                alert("Order cancellation successful!");
-                window.location.reload();
-            } else {
-                alert(data.message);
-            }
-        })
-        .catch(error => {
-            console.error("Error cancelling order:", error);
-            alert("An error occurred. Please try again.");
-        });
+        return;
     }
 
-    function requestReturn(orderId, productId) {
-       
-        const reason = prompt("Please enter your reason for return:");
-        if (!reason) return; // If no reason is provided, exit
-
-        fetch("/request-return", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({ orderId, productId, returnReason: reason })
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                alert("Return request submitted successfully!");
-                window.location.reload();
-            } else {
-                alert(data.message);
-            }
-        })
-        .catch(error => {
-            console.error("Error submitting return request:", error);
-            alert("An error occurred. Please try again.");
+    const cancelReason = document.getElementById("cancelReason").value.trim();
+    if (!cancelReason) {
+        Swal.fire({
+            title: "Required!",
+            text: "Please provide a cancellation reason.",
+            icon: "warning",
+            confirmButtonText: "OK"
         });
+        return;
     }
+
+    fetch("/order/cancel", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ orderId, cancelProducts: selectedProducts, cancelReason })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            Swal.fire({
+                title: "Cancelled!",
+                text: "Order cancellation successful!",
+                icon: "success",
+                confirmButtonText: "OK"
+            }).then(() => {
+                window.location.reload();
+            });
+        } else {
+            Swal.fire({
+                title: "Error!",
+                text: data.message,
+                icon: "error",
+                confirmButtonText: "OK"
+            });
+        }
+    })
+    .catch(error => {
+        console.error("Error cancelling order:", error);
+        Swal.fire({
+            title: "Error!",
+            text: "An error occurred. Please try again.",
+            icon: "error",
+            confirmButtonText: "OK"
+        });
+    });
+}
+
+
+function requestReturn(orderId, productId) {
+    Swal.fire({
+        title: "Return Request",
+        input: "text",
+        inputPlaceholder: "Please enter your reason for return",
+        showCancelButton: true,
+        confirmButtonText: "Submit",
+        cancelButtonText: "Cancel",
+        inputValidator: (value) => {
+            if (!value.trim()) {
+                return "Return reason is required!";
+            }
+        }
+    }).then((result) => {
+        if (result.isConfirmed) {
+            fetch("/request-return", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ orderId, productId, returnReason: result.value })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    Swal.fire({
+                        title: "Success!",
+                        text: "Return request submitted successfully!",
+                        icon: "success",
+                        confirmButtonText: "OK"
+                    }).then(() => {
+                        window.location.reload();
+                    });
+                } else {
+                    Swal.fire({
+                        title: "Failed!",
+                        text: data.message,
+                        icon: "error",
+                        confirmButtonText: "OK"
+                    });
+                }
+            })
+            .catch(error => {
+                console.error("Error submitting return request:", error);
+                Swal.fire({
+                    title: "Error!",
+                    text: "An error occurred. Please try again.",
+                    icon: "error",
+                    confirmButtonText: "OK"
+                });
+            });
+        }
+    });
+}
+
 </script>
 
 <%- include("../../views/partials/user/footer") %>

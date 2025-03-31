@@ -51,7 +51,8 @@ const customerBlocked=async(req,res)=>{
         res.redirect("/admin/users")
     }
     catch(error){
-        res.redirect("/pageError")
+        console.log("error customer ",error)
+        res.redirect("/admin/pageError")
     }
     
 }
@@ -63,7 +64,8 @@ const customerunBlocked=async(req,res)=>{
         res.redirect("/admin/users")
     }
     catch(error){
-        res.redirect("/pageError")
+        console.log("customer blocking error ",error)
+        res.redirect("/admin/pageError")
     }
     
 }

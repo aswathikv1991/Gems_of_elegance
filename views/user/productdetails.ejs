@@ -35,14 +35,55 @@
         </div>
     </div>
 </div>
+<div id="reviews-section">
+    <h2>Customer Reviews</h2>
 
-<!-- Reviews Section -->
+    <div id="reviews-container">
+        <% if (reviews.length > 0) { %>
+            <% reviews.forEach(review => { %>
+                <div class="review">
+                    <p><strong class="review-user"><%= review.userId.name %></strong> 
+                        <span class="review-date">(<%= new Date(review.createdAt).toLocaleDateString() %>)</span>
+                    </p>
+                    <p class="review-rating">Rating: ⭐<%= review.rating %></p>
+                    <p class="review-comment"><%= review.comment %></p>
+                </div>
+            <% }); %>
+        <% } else { %>
+            <p class="no-reviews">No reviews yet. Be the first to leave a review!</p>
+        <% } %>
+    </div>
+</div>
+
+
+<div id="add-review-section" class="review-container" >
+    <h3 class="review-heading">Add Your Review</h3>
+    <textarea id="review-comment" placeholder="Write your review here..." required></textarea>
+    
+    <div class="rating-container">
+        <label for="review-rating">Rating:</label>
+        <select id="review-rating">
+            <option value="" disabled selected>Choose rating</option>
+            <option value="5">⭐⭐⭐⭐⭐ (5)</option>
+            <option value="4">⭐⭐⭐⭐ (4)</option>
+            <option value="3">⭐⭐⭐ (3)</option>
+            <option value="2">⭐⭐ (2)</option>
+            <option value="1">⭐ (1)</option>
+        </select>
+    </div>
+
+    <button id="submit-review-btn">Submit Review</button>
+</div>
+
+
+
+<!-- Reviews Section 
 <div class="reviews-section">
     <h3>Customer Reviews</h3>
     <div id="reviews-container">
         <p>Loading reviews...</p>
     </div>
-</div>
+</div>-->
 
 <script>
     document.addEventListener("DOMContentLoaded", function () {
@@ -86,7 +127,7 @@
         // Wishlist Functionality
         document.addEventListener("click", function (event) {
             if (event.target.classList.contains("add-to-wishlist")) {
-                console.log("Wishlist button clicked!");
+                //console.log("Wishlist button clicked!");
                 const productId = event.target.getAttribute("data-product-id");
 
                 fetch("/check-login-status")
@@ -161,6 +202,7 @@
                                 if (data.success) {
                                     Swal.fire("Success", "Item added to your cart!", "success");
                                 } else {
+                                    
                                     Swal.fire("Error", data.message, "error");
                                 }
                             })
@@ -178,7 +220,7 @@
         }
 
         // Load Reviews
-        const reviewsContainer = document.getElementById("reviews-container");
+      /*  const reviewsContainer = document.getElementById("reviews-container");
         function loadReviews() {
             reviewsContainer.innerHTML = "<p>Loading reviews...</p>";
             fetch(`/reviews/${productId}`)
@@ -211,7 +253,76 @@
         }
 
         loadReviews();
-    });
+   */
+    async function checkReviewEligibility(productId) {
+        const response = await fetch(`/can-review/${productId}`);
+        const data = await response.json();
+
+        if (data.canReview) {
+            document.getElementById("add-review-section").style.display = "block";
+        }
+    }
+
+  
+    checkReviewEligibility("<%= product._id %>");
+    document.getElementById("submit-review-btn").addEventListener("click", submitReview);
+    
+})
+async function submitReview() {
+    const productId = "<%= product._id %>";
+    const comment = document.getElementById("review-comment").value;
+    const rating = document.getElementById("review-rating").value;
+
+    if (!comment || !rating) {
+        alert("Please provide both a comment and a rating!");
+        return;
+    }
+
+    try {
+        const response = await fetch("/submit-review", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ productId, comment, rating }),
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            Swal.fire({
+                icon: "success",
+                title: "Review Added!",
+                text: "Your review has been submitted successfully.",
+            });
+
+            // Clear input fields
+            document.getElementById("review-comment").value = "";
+            document.getElementById("review-rating").value = "";
+
+            // Dynamically update the reviews section without reloading
+            const reviewsContainer = document.getElementById("reviews-container");
+            const newReviewElement = document.createElement("div");
+            newReviewElement.classList.add("review");
+            newReviewElement.innerHTML = `
+                <p><strong>${data.review.userId.name}</strong> (${new Date().toLocaleDateString()})</p>
+                <p>Rating: ⭐${data.review.rating}</p>
+                <p>${data.review.comment}</p>
+            `;
+            reviewsContainer.prepend(newReviewElement); // Add new review at the top
+        } else {
+            Swal.fire({
+                icon: "error",
+                title: "Error",
+                text: data.message,
+            });
+        }
+    } catch (error) {
+        Swal.fire({
+            icon: "error",
+            title: "Error",
+            text: "Something went wrong while submitting your review.",
+        });
+    }
+}
 </script>
 
 

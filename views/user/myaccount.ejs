@@ -242,14 +242,30 @@ async function setAsDefault(addressId) {
         const data = await response.json();
 
         if (data.success) {
-            alert("Address set as default successfully!");
-            loadAddresses(); // Reload address list after setting default
+            Swal.fire({
+                title: "Success!",
+                text: "Address set as default successfully!",
+                icon: "success",
+                confirmButtonText: "OK"
+            }).then(() => {
+                loadAddresses(); // Reload address list after setting default
+            });
         } else {
-            alert("Failed to set default address: " + data.message);
+            Swal.fire({
+                title: "Failed!",
+                text: "Failed to set default address: " + data.message,
+                icon: "error",
+                confirmButtonText: "OK"
+            });
         }
     } catch (error) {
         console.error("Error setting default address:", error);
-        alert("An error occurred while setting the default address.");
+        Swal.fire({
+            title: "Error!",
+            text: "An error occurred while setting the default address.",
+            icon: "error",
+            confirmButtonText: "OK"
+        });
     }
 }
 
@@ -262,15 +278,31 @@ async function deleteAddress(addressId) {
         const data = await response.json();
 
         if (data.success) {
-            alert("Address deleted successfully!");
+        Swal.fire({
+            title: "Deleted!",
+            text: "Address deleted successfully!",
+            icon: "success",
+            confirmButtonText: "OK"
+        }).then(() => {
             loadAddresses(); // Reload address list after deletion
-        } else {
-            alert("Failed to delete address: " + data.message);
-        }
-    } catch (error) {
-        console.error("Error deleting address:", error);
-        alert("An error occurred while deleting the address.");
+        });
+    } else {
+        Swal.fire({
+            title: "Failed!",
+            text: "Failed to delete address: " + data.message,
+            icon: "error",
+            confirmButtonText: "OK"
+        });
     }
+} catch (error) {
+    console.error("Error deleting address:", error);
+    Swal.fire({
+        title: "Error!",
+        text: "An error occurred while deleting the address.",
+        icon: "error",
+        confirmButtonText: "OK"
+    });
+}
 }
 function copyReferralLink() {
     let linkInput = document.getElementById("referralLink");

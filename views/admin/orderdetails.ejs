@@ -150,13 +150,14 @@
     </div>
 </div>
 
-<script>function handleReturnSubmit(event, orderId, productId) {
+<script>
+function handleReturnSubmit(event, orderId, productId) {
     event.preventDefault(); // Prevent form submission and page reload
 
     const form = document.getElementById(`returnForm-${productId}`);
     const action = event.submitter.value; // Get the selected action (approve or reject)
 
-    console.log("Action:", action); // Debugging log
+    //console.log("Action:", action); // Debugging log
 
     fetch(`/admin/approve-return/${orderId}/${productId}`, {
         method: 'POST',
@@ -173,6 +174,14 @@
         alert.classList.add('alert', 'alert-success');
         alert.innerHTML = `<strong>Success!</strong> ${data.message}`;
         document.querySelector('.container').prepend(alert);
+    //  Update the status directly in the UI
+    const statusCell = form.closest('tr').querySelector('td:nth-child(4)');
+            statusCell.innerHTML = `<span class="status ${action === 'approve' ? 'approved' : 'rejected'}">${action.charAt(0).toUpperCase() + action.slice(1)}</span>`;
+
+            //  Remove the approve/reject buttons since action is completed
+            form.closest('td').innerHTML = `<span class="processed">Completed</span>`;
+
+
     } else {
         alert('Something went wrong, please try again.');
     }

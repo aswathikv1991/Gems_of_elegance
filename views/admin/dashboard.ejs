@@ -5,27 +5,98 @@
 <div class="container"> <!-- Wrapped in a container -->
     <div class="dashboard">
         <div class="card">
+            <h3>Total Customers</h3>
+            <p  id="totalCustomers">₹0.00</p>  
+        </div>
+        <div class="card">
             <h3>Total Orders</h3>
-            <p id="totalOrders">0</p> <!-- This will be updated dynamically -->
+            <p id="totalOrders">₹0.00</p> <!-- This will be updated dynamically -->
+        </div>
+        <div class="card">
+           
+            <h3>Pending Orders</h3>
+            <p  id="pendingOrders">₹0.00</p>   
         </div>
         <div class="card">
             <h3>Total Sales</h3>
             <p  id="totalSales">₹0.00</p>
         </div>
         <div class="card">
+
             <h3>Total Discounts</h3>
-            <p>₹0.00</p>
+            <p  id="totalDiscounts">₹0.00</p>    
         </div>
         <div class="card">
-            <h3>Pending Orders</h3>
-            <p>0</p>
+
+            <h3>Return Sale </h3>
+            <p  id="totalRefund">₹0.00</p>    
         </div>
         <div class="card">
-            <h3>Total Customers</h3>
-            <p>0</p>
+
+            <h3>Net Sale </h3>
+            <p  id="netSale">₹0.00</p>    
         </div>
     </div>
 </div>
+<div class="charts-container">
+    <!-- Sales Chart Section -->
+    <div class="chart-section">
+        <h3>Sales Chart</h3>
+
+        <!-- Filter Dropdown -->
+        <label for="salesFilter">Filter by:</label>
+        <select id="salesFilter">
+            <option value="daily" selected>Daily</option>
+            <option value="weekly">Weekly</option>
+            <option value="monthly">Monthly</option>
+            <option value="yearly">Yearly</option>
+        </select>
+
+        <canvas id="salesChart"></canvas>
+    </div>
+
+    <!-- Payment Pie Chart Section -->
+    <div class="chart-section">
+        <h3>Payment Method Distribution</h3>
+        <canvas id="paymentChart"></canvas>
+    </div>
+</div>
+
+
+<div class="charts-container">
+    <!-- Top Selling Products Section -->
+    <div class="chart-section">
+        <h3>Top 10 Best-Selling Products</h3>
+        <canvas id="topProductsChart"></canvas>
+        <table>
+            <thead>
+                <tr>
+                    <th>Product Name</th>
+                    <th>Quantity Sold</th>
+                    <th>Total Revenue (₹)</th>
+                </tr>
+            </thead>
+            <tbody id="topProductsTable"></tbody>
+        </table>
+    </div>
+
+    <!-- Top Selling Categories Section -->
+    <div class="chart-section">
+        <h3>Top 10 Best-Selling Categories</h3>
+        <canvas id="topCategoriesChart"></canvas>
+        <table>
+            <thead>
+                <tr>
+                    <th>Category Name</th>
+                    <th>Quantity Sold</th>
+                    <th>Total Revenue (₹)</th>-->
+                </tr>
+            </thead>
+            <tbody id="topCategoriesTable"></tbody>
+        </table>
+    </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
     document.addEventListener("DOMContentLoaded", async () => {
       try {
@@ -35,19 +106,161 @@
 
         if (ordersData.success) {
             document.getElementById("totalOrders").textContent = ordersData.totalOrders;
+            document.getElementById("totalCustomers").textContent = ordersData.totalCustomers;
+            document.getElementById("pendingOrders").textContent = ordersData.pendingOrders;
+            document.getElementById("totalRefund").textContent = ordersData.totalRefundAmount;
         }
-
+        const codOrders = ordersData.totalCODOrders;
+        const onlinePayments = ordersData.totalOnlinePayments;
+        
+        new Chart(document.getElementById("paymentChart"), {
+                type: "pie",
+                data: {
+                    labels: ["COD", "Online Payment"],
+                    datasets: [{
+                        data: [codOrders, onlinePayments],
+                        backgroundColor: ["#FF9F40", "#36A2EB"]
+                    }]
+                },
+                options: { responsive: true }
+            });
+        
+        
         const salesResponse = await fetch("/admin/total-sales");
         const salesData = await salesResponse.json();
 
         if (salesData.success) {
             document.getElementById("totalSales").textContent = `$${salesData.totalSales.toFixed(2)}`;
+            document.getElementById("totalDiscounts").textContent = `₹${salesData.totalDiscounts.toFixed(2)}`;
+            document.getElementById("netSale").textContent = `₹${salesData.totalAmountBeforeDelivery.toFixed(2)}`;
         }
+
+
+
     } catch (error) {
         console.error("Error fetching dashboard data:", error);
     }
       
+
+    try {
+        const response = await fetch("/admin/dashboard-sales");
+        const data = await response.json();
+
+        if (data.success) {
+            const productNames = data.topSellingProducts.map(p => p.name);
+           const productQuantities = data.topSellingProducts.map(p => p.totalQuantitySold);
+            const productRevenue = data.topSellingProducts.map(p => p.totalRevenue);
+
+            const categoryNames = data.topSellingCategories.map(c => c.name);
+            const categoryQuantities = data.topSellingCategories.map(c => c.totalQuantitySold);
+            const categoryRevenue = data.topSellingCategories.map(c => c.totalRevenue);
+
+            // Populate Product Table
+            document.getElementById("topProductsTable").innerHTML = data.topSellingProducts.map(p => `
+                <tr>
+                    <td>${p.name}</td>
+                    <td>${p.totalQuantitySold}</td>
+                    <td>₹${p.totalRevenue.toFixed(2)}</td>
+                </tr>
+            `).join("");
+
+          
+            document.getElementById("topCategoriesTable").innerHTML = data.topSellingCategories.map(c => `
+                <tr>
+                    <td>${c.name}</td>
+                    <td>${c.totalQuantitySold}</td>
+                    <td>₹${c.totalRevenue.toFixed(2)}</td>
+                </tr>
+            `).join("");
+
+            // Render Bar Chart for Products
+            new Chart(document.getElementById("topProductsChart"), {
+                type: "bar",
+                data: {
+                    labels: productNames,
+                    datasets: [{
+                        label: "Units Sold",
+                        data: productQuantities,
+                        backgroundColor: "rgba(75, 192, 192, 0.6)"
+                    }]
+                },
+                options: { responsive: true }
+            });
+
+            // Render Pie Chart for Categories
+            new Chart(document.getElementById("topCategoriesChart"), {
+                type: "pie",
+                data: {
+                    labels: categoryNames,
+                    datasets: [{
+                        data: categoryQuantities,
+                        backgroundColor: ["#FF6384", "#36A2EB", "#FFCE56", "#4BC0C0", "#9966FF", "#FF9F40"]
+                    }]
+                },
+                options: { responsive: true }
+            });
+        }
+    } catch (error) {
+        console.error("Error fetching sales data:", error);
+    }
+    const salesFilter = document.getElementById("salesFilter");
+    const salesChartCanvas = document.getElementById("salesChart");
+    let salesChart;
+
+    // Fetch and update sales data
+    async function fetchSalesData(filter = "daily") {
+        try {
+            const response = await fetch(`/admin/sales-chart?filter=${filter}`);
+            const data = await response.json();
+
+            if (data.success) {
+                updateSalesChart(data);
+            }
+        } catch (error) {
+            console.error("Error fetching sales data:", error);
+        }
+    }
+
+    function updateSalesChart(data) {
+        const labels = ["Total Sales", "Total Discounts", "Net Sales", "Refunds"];
+        const values = [
+            data.totalSales,
+            data.totalDiscounts,
+            data.totalAmountBeforeDelivery,
+            data.totalRefunds
+        ];
+
+        if (salesChart) {
+            salesChart.destroy(); // Destroy previous chart instance
+        }
+
+        salesChart = new Chart(salesChartCanvas, {
+            type: "bar",
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: "Amount (₹)",
+                    data: values,
+                    backgroundColor: ["#36A2EB", "#FFCE56", "#4BC0C0", "#FF6384"]
+                }]
+            },
+            options: { responsive: true }
+        });
+    }
+
+    // Fetch initial data when page loads
+    await fetchSalesData("daily");
+
+    // Add event listener only if salesFilter exists
+    if (salesFilter) {
+        salesFilter.addEventListener("change", async (e) => {
+            await fetchSalesData(e.target.value);
+        });
+    }
+
+
     });
+    
   </script>
   
 <%- include("../../views/partials/admin/footer") %>

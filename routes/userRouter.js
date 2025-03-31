@@ -6,7 +6,7 @@ const ProfileController=require("../controllers/user/profileController")
 const CheckoutController=require("../controllers/user/checkoutController")
 const OrderController=require("../controllers/user/orderController")
 const passport = require("passport")
-const {userAuth,adminAuth}=require("../middlewares/auth")
+const {userAuth}=require("../middlewares/auth")
 
 
 router.get("/",userController.loadHomepage)
@@ -27,7 +27,9 @@ router.post("/login",userController.login)
 router.get("/logout",userAuth,userController.logout);
 router.get("/products",ProductController.getAllProducts);
 router.get("/productdetail/:id", ProductController.getProductDetail);
-router.get("/reviews/:productId",ProductController.getReview)
+//router.get("/reviews/:productId",ProductController.getReview)
+router.get("/can-review/:productId",ProductController.addReview);
+router.post("/submit-review",ProductController.submitReview);
 router.get("/myaccount", userAuth, ProfileController.loadMyAccount);
 router.get("/forgot_password",ProfileController.getForgotPassword);
 router.post("/forgot_password",ProfileController.forgotEmailValid);
@@ -58,17 +60,19 @@ router.delete("/cart/remove/:cartItemId", ProductController.deleteCartItem);
 router.get("/checkout",userAuth,CheckoutController.checkoutPage)
 router.post("/setdefaultaddress/:addressId", ProfileController.setDefaultAddress);
 router.post("/order/place",userAuth,CheckoutController.placeOrder);
-router.get("/order-success/:orderId", OrderController.orderSuccess);
-router.get("/orders",OrderController.getOrders);
+router.get("/order-success/:orderId",userAuth, OrderController.orderSuccess);
+router.get("/orders",userAuth,OrderController.getOrders);
 router.get("/order/:orderId",userAuth,OrderController.getOrderDetails);
 router.post("/order/cancel",userAuth,OrderController.cancelOrder)
 router.post("/request-return", userAuth, OrderController.requestReturn);
 router.post("/send-invite",userAuth,userController.sendReferralEmail);
-router.post("/create-razorpay-order", CheckoutController.createRazorpayOrder);
-router.post("/razorpay/verify-payment", CheckoutController.verifyPayment);
-router.get("/wallet-balance", OrderController.getWallet)
+router.post("/create-razorpay-order",userAuth, CheckoutController.createRazorpayOrder);
+router.post("/razorpay/verify-payment",userAuth, CheckoutController.verifyPayment);
+router.get("/wallet-balance",userAuth, OrderController.getWallet)
 router.get('/wallet-transactions', userAuth,OrderController.getWalletTransactions);
-// Edit Coupon
+ router.get("/download-invoice/:orderId",userAuth,OrderController.dowloadInvoice)
+ router.get("/about",userController.getAboutPage);
+
 
 
 

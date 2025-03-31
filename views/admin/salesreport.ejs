@@ -55,44 +55,7 @@
         </tbody>
     </table>
 
-    <!-- 📌 Detailed Orders Table -->
-    <h3>📜 All Order Details</h3>
-    <table>
-        <thead>
-            <tr>
-                <th>Order ID</th>
-                <th>Date</th>
-                <th>Customer Name</th>
-                <th>Product ID</th>
-                <th>Quantity</th>
-                <th>Sale Price</th>
-                <th>Actual price</th>
-                <th>Discount</th>
-                <th>Status</th>
-            </tr>
-        </thead>
-        <tbody>
-            <% if (reportData.length > 0) { %>
-                <% reportData.forEach(order => { %>
-                    <tr>
-                        <td><%= order.orderID %></td>
-                        <td><%= new Date(order.createdAt).toLocaleDateString() %></td>
-                        <td><%= order.customer.name %></td>
-                        <td><%= order.items.productId %></td>
-                        <td><%= order.items.quantity %></td>
-                        <td>₹<%= order.items.salePrice.toFixed(2) %></td>
-                        <td>₹<%= order.items.total.toFixed(2) %></td>
-                        <td>₹<%= (order.items.total - order.items.salePrice).toFixed(2) %></td>
-                        <td><%= order.items.status %></td>
-                    </tr>
-                <% }) %>
-            <% } else { %>
-                <tr>
-                    <td colspan="9">No orders found</td>
-                </tr>
-            <% } %>
-        </tbody>
-    </table>
+   
 
     <!-- 📥 Download Buttons -->
     <div class="download-buttons">

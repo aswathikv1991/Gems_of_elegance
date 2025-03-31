@@ -1,8 +1,8 @@
 const Category = require("../../models/categoryschema");
-const User = require("../../models/categoryschema");
+//const User = require("../../models/categoryschema");
 
 
-const categoryInfo=async(req,res)=>{
+const categoryInfo=async(req,res,next)=>{
     try{
         const page=parseInt(req.query.page)||1
         const limit=4
@@ -30,14 +30,15 @@ const categoryInfo=async(req,res)=>{
     }
     catch(error){
         console.error(error)
-        res.redirect('/pageError')
+        //res.redirect('/pageError')
+        next(error)
     }
 }
 
 
 
 
-const addCategory=async(req,res)=>{
+const addCategory=async(req,res,next)=>{
     const {name,description}=req.body
     console.log("received data",{name,description})
 
@@ -46,7 +47,7 @@ const addCategory=async(req,res)=>{
 
         if(existingCategory){
             console.log("category exists")
-            return res.status(400).json({error:"Category already exists"})
+            return res.status(400).json({message:"Category already exists"})
         }
         const newCategory=new Category({
             name,description
@@ -58,24 +59,26 @@ const addCategory=async(req,res)=>{
     }  
    catch(error){
     console.log("error adding category",error)
-        return res.status(500).json({error:"Internal server error"})
-   }
+        //return res.status(500).json({error:"Internal server error"})
+    next(error)
+    }
 }
-const editCategory=async(req,res)=>{
+const editCategory=async(req,res,next)=>{
     try{
         const id=req.query.id
         const category=await Category.findOne({_id:id})
         res.render("admin/editCategory",{category:category})
     }
     catch(error){
-        res.redirect("/pageError")
+        //res.redirect("/pageError")
+        next(error)
 
     }
    
 
 }
 
-const editedCategory = async (req, res) => {
+const editedCategory = async (req, res,next) => {
     try {
         const categoryId = req.params.id; 
         const { categoryName, description, status } = req.body; 
@@ -87,9 +90,13 @@ const editedCategory = async (req, res) => {
         });
 
         if (existingCategory) {
-            return res.status(400).json({ error: "Category name already exists" });
+            // Render the edit page with an error message
+            const category = await Category.findById(categoryId); // Fetch the category again
+            return res.render("admin/editCategory", {
+                category,
+                errorMessage: "Category name already exists"
+            });
         }
-
         const updateCategory = await Category.findByIdAndUpdate(
             categoryId,
             { name: categoryName, description, status },
@@ -98,13 +105,17 @@ const editedCategory = async (req, res) => {
 
         if (updateCategory) {
             res.redirect('/admin/category'); // Redirect to category list after update
-        } else {
-            res.status(404).json({ error: "Category not found" });
+        }  else {
+            const error = new Error("Category not found");
+            error.statusCode = 404;
+            throw error; // Throw error to be caught by middleware
         }
     
             }catch (error) {
             console.error("Error updating category:", error);
-            res.status(500).json({ error: "Internal server error" });
+            
+            //res.status(500).json({ error: "Internal server error" });
+            next(error)
         }
 
 };
@@ -112,7 +123,7 @@ const editedCategory = async (req, res) => {
 
 
 
-const deleteCategory = async (req, res) => {
+const deleteCategory = async (req, res,next) => {
     try {
         const categoryId = req.params.id;
 
@@ -125,7 +136,8 @@ const deleteCategory = async (req, res) => {
         res.json({ success: true, message: "Category deleted successfully" });
     } catch (error) {
         console.error("Error deleting category:", error);
-        res.status(500).json({ error: "Internal server error" });
+        //res.status(500).json({ error: "Internal server error" });
+        next(error)
     }
 };
 
