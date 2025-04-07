@@ -5,16 +5,18 @@ const mongoose = require("mongoose");
 const PDFDocument = require("pdfkit");
 const path = require("path");
 const fs = require("fs");
+const { MessageChannel } = require("worker_threads");
 const orderSuccess = async (req, res,next) => {
     try {
         const { orderId } = req.params;
+        const { message } = req.query;
         const order = await Order.findById(orderId);
 
         if (!order) {
             return res.render("page404", { message: "Order not found!" });
         }
 
-        res.render("user/ordersuccess", { order });
+        res.render("user/ordersuccess", { order,message });
     } catch (error) {
         //console.error("Error loading order success page:", error);
         //res.render("page404", { message: "Something went wrong!" });

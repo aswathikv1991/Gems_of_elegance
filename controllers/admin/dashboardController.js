@@ -715,7 +715,8 @@ const getSalesReport = async (req, res) => {
     // Aggregate Top 10 Best-Selling Products
     const topProducts = await Order.aggregate([
       { $unwind: "$items" },
-      { $match: { "items.status": "delivered" } },
+      //{ $match: { "items.status": "delivered" } },
+      { $match: { "items.status": { $in: ["delivered", "ordered"] } } },
       {
         $group: {
           _id: "$items.productId",
@@ -747,7 +748,7 @@ const getSalesReport = async (req, res) => {
     // Aggregate Top 10 Best-Selling Categories
     const topCategories = await Order.aggregate([
       { $unwind: "$items" },
-      { $match: { "items.status": "delivered" } },
+      { $match: { "items.status": { $in: ["delivered", "ordered"] } } },
       {
         $lookup: {
           from: "products",

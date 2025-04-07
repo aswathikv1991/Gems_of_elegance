@@ -4,22 +4,12 @@
     background-color: #f8f9fa; /* Light gray background */
     border-radius: 50px;
     padding: 5px;
-    width: 500px;
+    width: 600px;
     margin: 0 auto; /* Centering */
 }
 
-.input-group input {
-    flex: 1;
-    border: none;
-    outline: none;
-    border-radius: 50px;
-    padding: 10px;
-    font-size: 14px;
-    background-color: transparent; /* Match background */
-}
-
-.input-group button {
-    background-color: #007bff; /* Bootstrap Primary Blue */
+.input-group .btn {
+    background-color: #007bff;
     color: white;
     border: none;
     padding: 8px 15px;
@@ -28,15 +18,22 @@
     transition: background 0.3s;
     display: flex;
     align-items: center;
-    gap: 5px; /* Space between icon and text */
-}
-
-.input-group button i {
+    gap: 5px;
+    text-decoration: none; /* For <a> tag */
     font-size: 14px;
+    margin-right: 10px;
 }
 
-.input-group button:hover {
-    background-color: #0056b3; /* Darker blue on hover */
+.input-group .btn:hover {
+    background-color: #0056b3;
+}
+
+.input-group .clear-btn {
+    background-color: #21a50c; /* Bootstrap secondary gray */
+}
+
+.input-group .clear-btn:hover {
+    background-color: #5a6268;
 }
 .table-header-bg {
     background-color: #204056;
@@ -75,4 +72,8 @@
 
 .wallet-button:hover {
     background-color: #218838;
+}
+.search-input {
+    height: 28px; /* or try 40px for slightly more */
+    margin-right: 10px;
 }

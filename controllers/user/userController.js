@@ -19,17 +19,7 @@ const loadHomepage = async (req, res,next) => {
     }
 };
 
-/*const loadSignup = async (req, res) => {
-    try {
-        if (req.session.user) {
-            return res.redirect("/"); // If the user is already logged in, redirect to homepage
-        }
-        return res.render("user/signup", { user: req.session.user, message: "" });
-    } catch (error) {
-        console.log("Signup page not loading", error);
-        res.status(500).send("Server error");
-    }
-};*/
+
 const loadSignup = async (req, res,next) => {
     try {
         //console.log("Signup page requested.");
@@ -121,89 +111,7 @@ const sendReferralEmail=async (req, res,next) =>{
 }
 
 
-/*const signup = async (req, res) => {
-    try {
-        const { name, email, password, confirmPassword, phone } = req.body;
-        
-        if (password !== confirmPassword) {
-            return res.render("user/signup", { message: "Password do not match", name, email, phone });
-        }
 
-        const findUser = await User.findOne({ email });
-        if (findUser) {
-            return res.render("user/signup", { message: "User with this email id already exists", name, email, phone });
-        }
-
-        const otp = generateOtp();
-        console.log("OTP sent", otp);
-
-        const emailSent = await sendVerificationEmail(email, otp);
-        if (!emailSent) {
-            return res.json("email.error");
-        }
-
-        req.session.userOtp = otp;
-        req.session.user = { name, email, password, phone };
-
-        res.render("user/verifyotp", { user: req.session.user }); // Use req.session.user here
-        console.log("OTP stored in session", req.session.userOtp);
-    } catch (error) {
-        console.error("Signup error", error);
-        res.redirect("/pageNotFound");
-    }
-};*/
-/*const signup = async (req, res) => {
-    try {
-        const { name, email, password, confirmPassword, phone } = req.body;
-
-        if (password !== confirmPassword) {
-            return res.render("user/signup", { 
-                message: "Password do not match", 
-                name, 
-                email, 
-                phone, 
-                user: null // Pass user as null for non-logged-in users
-            });
-        }
-
-        const findUser = await User.findOne({ email });
-        if (findUser) {
-            return res.render("user/signup", { 
-                message: "User with this email id already exists", 
-                name, 
-                email, 
-                phone, 
-                user: null // Pass user as null for non-logged-in users
-            });
-        }
-        const findUserByPhone = await User.findOne({ phone });
-        if (findUserByPhone) {
-            return res.render("user/signup", {
-                message: "User with this phone number already exists",
-                name,
-                email,
-                phone,
-                user: null,
-            });
-        }
-        const otp = generateOtp();
-        console.log("OTP sent", otp);
-
-        const emailSent = await sendVerificationEmail(email, otp);
-        if (!emailSent) {
-            return res.json("email.error");
-        }
-
-        req.session.userOtp = otp;
-        req.session.user = { name, email, password, phone };
-
-        res.render("user/verifyotp", { user: null }); // Pass user as null for non-logged-in users
-        console.log("OTP stored in session", req.session.userOtp);
-    } catch (error) {
-        console.error("Signup error", error);
-        res.redirect("/pageNotFound");
-    }
-};*/
 
 const signup = async (req, res,next) => {
     try {
@@ -452,6 +360,49 @@ const getAboutPage = (req, res) => {
     res.render("user/aboutus", { title: "About Us - Gems of Elegance" });
 };
 
+const getContactPage = (req, res) => {
+    res.render("user/contactus");
+};
+
+
+;
+
+const sendContactMessage=async(req, res) =>{
+    try {
+        const { name, email, message } = req.body;
+        if (!name || !email || !message) {
+            const error = new Error("All fields are required!");
+            error.statusCode = 400; // Custom status code for middleware
+            return next(error); // Pass to Express error handler
+        }
+        
+        const transporter = nodemailer.createTransport({
+            service: "gmail",
+            auth: {
+                user: process.env.NODEMAILER_EMAIL, // Your email (receiving messages)
+                pass: process.env.NODEMAILER_PASSWORD
+            }
+        });
+
+      const info = await transporter.sendMail({
+            from: email, // User's email (who is contacting)
+            to: process.env.NODEMAILER_EMAIL, // Your email (to receive messages)
+            subject: `New Contact Message from ${name}`,
+            text: `Name: ${name}\nEmail: ${email}\nMessage: ${message}`,
+            html: `<p><strong>Name:</strong> ${name}</p>
+                   <p><strong>Email:</strong> ${email}</p>
+                   <p><strong>Message:</strong> ${message}</p>`
+        });
+
+        console.log("Contact message sent:", info.response);
+        res.status(200).json({ success: true, message: "Message sent successfully!" });
+    } catch (error) {
+        console.error("Error sending contact message:", error.message);
+        next(error); 
+    }
+}
+
+;
 
 module.exports = {
     loadHomepage,
@@ -463,6 +414,8 @@ module.exports = {
     loadLogin,
     login,logout,
     sendReferralEmail,
-    getAboutPage
+    getAboutPage,
+    getContactPage,
+    sendContactMessage
    
 }

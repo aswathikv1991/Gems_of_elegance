@@ -74,11 +74,22 @@ table {
     margin-right: 10px;
 }
 
-table th, table td {
-    border: 1px solid #ddd;
-    padding: 10px;
-    text-align: center;
+.table td,
+.table th {
+    vertical-align: middle;
+    font-size: 14px;
+    font-family: inherit;
 }
+
+.badge {
+    font-size: 13px; /* Make badge font match other cells */
+    padding: 5px 10px;
+}
+
+/*.btn-sm {
+    font-size: 13px;
+    padding: 4px 8px;
+}*/
 
 table th {
     background-color: #007bff;
@@ -90,17 +101,7 @@ table th {
     background-color: #f1f1f1;
 }
 
-.badge {
-    padding: 5px 10px;
-    font-size: 12px;
-    border-radius: 5px;
-}
 
-/* Button Styles */
-.btn-sm {
-    padding: 5px 10px;
-    font-size: 12px;
-}
 
 .btn-warning {
     color: #fff;
@@ -149,3 +150,23 @@ table th {
 }
 
 
+.action-btn {
+    padding: 8px 8px;
+    font-size: 14px;
+    min-width: 90px;
+    text-align: center;
+    margin-right: 10px;
+    display: inline-block;
+    line-height: 1.5;
+}
+
+/* Normalize anchor buttons */
+.action-btn:link,
+.action-btn:visited {
+    color: white;
+    text-decoration: none;
+}
+
+.action-btn i {
+    margin-right: 5px;
+}

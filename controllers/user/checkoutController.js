@@ -10,44 +10,7 @@ const Offer = require("../../models/offerschema")
 const Razorpay = require("razorpay");
 const Wallet = require("../../models/wallet")
 
-/*const checkoutPage = async (req, res) => {
-    try {
-        const userId = req.session.user;
-        if (!userId) return res.redirect("/login");
 
-        const addresses = await Address.find({ userId });
-
-        
-        const cartItems = await Cart.find({ userId }).populate("productId");
-
-        // Redirect if cart is empty
-        if (cartItems.length === 0) {
-            return res.redirect("/cart");
-        }
-
-        const cartTotal = cartItems.reduce((total, item) => total + (item.productId.price * item.quantity), 0);
-
-        const cartCategoryIds = [...new Set(cartItems.map(item => item.productId.categoryId.toString()))];
-
-        // Get active & valid coupons
-        const currentDate = new Date();
-        const availableCoupons = await Coupon.find({
-            isActive: true,
-            expsiryDate: { $gte: currentDate },  // Not expired
-            $or: [
-                { appliesTo: "cart", minPurchase: { $lte: cartTotal } }, // Cart-wide coupon
-                { appliesTo: "category", category: { $in: cartCategoryIds } } // Category-based coupon
-            ]
-        });
-
-        res.render("user/checkout", { addresses, cartItems, cartTotal, availableCoupons, userId });
-
-    } catch (error) {
-        console.error("Error loading checkout page:", error);
-        res.redirect("/pageNotFound");
-    }
-};
-*/
 const checkoutPage = async (req, res, next) => {
     try {
         const userId = req.session.user;
@@ -60,14 +23,7 @@ const checkoutPage = async (req, res, next) => {
 
         const addresses = await Address.find({ userId });
         const cartItems = await Cart.find({ userId }).populate("productId");
-        //const cartItems = await Cart.find({ userId })
-        /*.populate({
-            path: "productId",
-            populate: {
-                path: "categoryId", // Populate categoryId from Product schema
-                model: "Category" // Ensure this matches your Category model name
-            }
-        });*/
+       
 
         // Redirect if cart is empty
         if (cartItems.length === 0) {
@@ -161,7 +117,7 @@ const placeOrder = async (req, res, next) => {
         const response = await callPlace(req.body, userId)
         if (response.status === 200) {
 
-            return res.status(200).json({ success: true, message: "Order placed successfully!", orderId: response.orderId, orderID: response.orderID });
+            return res.status(200).json({ success: true, message: "Order placed successfully!", orderId: response.orderId, orderID: response.orderID, });
         }
 
         // console.log("error........",response)
@@ -236,7 +192,8 @@ async function callPlace(orderdata, userId) {
             deliveryCharge: deliveryCharge || 0,
             totalAmount,
             orderStatus: "pending",
-            paymentStatus: paymentMethod === "cod" ? "pending" : "paid",
+            //paymentStatus: paymentMethod === "cod" ? "pending" : "paid",
+            paymentStatus: "pending",
             paymentMethod,
             paymentId: paymentDetails?.paymentId ? paymentDetails.paymentId : null,
             expectedDeliveryDate: null,
@@ -248,48 +205,20 @@ async function callPlace(orderdata, userId) {
         // Handle wallet payment logic
         if (paymentMethod === "wallet") {
             // Fetch backend wallet balance
-            const totalCredit = await Wallet.aggregate([
-                { $match: { userId: new mongoose.Types.ObjectId(userId), type: "Credit" } },
-                { $group: { _id: null, total: { $sum: "$amount" } } }
-            ]);
+            const walletBalance = await checkWalletBalance(userId, totalAmount)
+            if (walletBalance) {
 
-            const totalDebit = await Wallet.aggregate([
-                { $match: { userId: new mongoose.Types.ObjectId(userId), type: "Debit" } },
-                { $group: { _id: null, total: { $sum: "$amount" } } }
-            ]);
-
-            const creditAmount = totalCredit.length > 0 ? totalCredit[0].total : 0;
-            const debitAmount = totalDebit.length > 0 ? totalDebit[0].total : 0;
-            const backendWalletBalance = creditAmount - debitAmount;
-
-            if (backendWalletBalance < totalAmount) {
-                throw { success: false, message: "Insufficient Wallet Balance", status: 400 };
+                newOrder = await createOrder(orderObj);
+                await updateWalletTransaction(newOrder._id, totalAmount,userId)
             }
-
-            // Create the order before processing wallet deduction
-            newOrder = await createOrder(orderObj);
-
-            // Attempt to deduct wallet balance
-            try {
-                const walletTransaction = new Wallet({
-                    userId,
-                    amount: totalAmount,
-                    type: "Debit",
-                    source: "Order Payment",
-                    orderId: newOrder._id // Linking to the created order
-                });
-
-                await walletTransaction.save(); // If successful, wallet transaction is saved
-
-            } catch (error) {
-                // If wallet transaction fails, revert order payment status
-                await Order.findByIdAndUpdate(newOrder._id, { paymentStatus: "pending" });
-
-                console.log("wallet payment error", error);
-                throw { success: false, message: "WALLET_PAYMENT_ERROR", status: 500, orderId: newOrder._id };
+            else{
+                return res.status(404).json({ success: false, message: "INSUFFICIENT_BALANCE" });
+                
             }
-        } else {
-            // For COD and Razorpay, create order directly
+            
+        }
+        else {
+
             newOrder = await createOrder(orderObj);
         }
 
@@ -324,13 +253,18 @@ async function callPlace(orderdata, userId) {
 
     } catch (error) {
         console.error("Error placing order:", error);
-        throw { success: false, message: "Something went wrong while placing the order", status: 500 };
+        throw error;
     }
 }
 async function createOrder(order) {
-
-    const newOrder = new Order(order);
-    return await newOrder.save();
+    try {
+        const newOrder = new Order(order);
+        return await newOrder.save();
+    }
+    catch (error) {
+        console.error("Error placing order:", error);
+        throw { success: false, message: "Something went wrong while placing the order", status: 500 };
+    }
 
 
 }
@@ -383,6 +317,92 @@ const verifyPayment = async (req, res, next) => {
 };
 
 
+
+const updatePayment = async (req, res) => {
+    try {
+        const { paymentId, razorpayorderId, orderId, paymentMethod } = req.body;
+        const userId=req.session.user
+        const order=await Order.findById(orderId)
+        console.log("order**",order)
+        if (paymentMethod == "wallet") {
+            const walletBalance = await checkWalletBalance(userId,order.totalAmount)
+            if (walletBalance) {
+            await updateWalletTransaction(orderId,order.totalAmount,userId)
+            }
+            else{
+                return res.status(404).json({ success: false, message: "INSUFFICIENT_BALANCE" });
+                
+            }
+        }
+        /*else if(paymentMethod == "razorpay"){
+
+
+        }*/
+        const updatedOrder = await Order.findOneAndUpdate(
+            { _id: orderId },
+            {
+                $set: {
+                    paymentId: paymentId ? paymentId : null,
+                    razorpayOrderId: razorpayorderId ? razorpayorderId : null,
+                    paymentStatus: paymentMethod != "cod" ? "paid" : "pending",
+                    paymentMethod
+                }
+            },
+            { new: true }
+        );
+
+        if (!updatedOrder) {
+            return res.status(404).json({ success: false, message: "Order not found" });
+        }
+
+        res.status(200).json({ success: true, message: "Payment details updated", order: updatedOrder });
+    }
+   
+    
+     catch (error) {
+        console.error("Error updating payment:", error);
+        res.status(500).json({ success: false, message: "PAYMENT_ERROR" });
+    }
+}
+
+async function checkWalletBalance(userId, totalAmount) {
+    const totalCredit = await Wallet.aggregate([
+        { $match: { userId: new mongoose.Types.ObjectId(userId), type: "Credit" } },
+        { $group: { _id: null, total: { $sum: "$amount" } } }
+    ]);
+
+    const totalDebit = await Wallet.aggregate([
+        { $match: { userId: new mongoose.Types.ObjectId(userId), type: "Debit" } },
+        { $group: { _id: null, total: { $sum: "$amount" } } }
+    ]);
+
+    const creditAmount = totalCredit.length > 0 ? totalCredit[0].total : 0;
+    const debitAmount = totalDebit.length > 0 ? totalDebit[0].total : 0;
+    const backendWalletBalance = creditAmount - debitAmount;
+
+    if (backendWalletBalance < totalAmount) {
+   return false
+    }
+    return true
+}
+async function updateWalletTransaction(orderId, totalAmount,userId) {
+    try {
+        const walletTransaction = new Wallet({
+            userId,
+            amount: totalAmount,
+            type: "Debit",
+            source: "Order Payment",
+            orderId
+        });
+
+        await walletTransaction.save();
+        return await Order.findByIdAndUpdate(orderId, { paymentStatus: "paid" });
+    } catch (error) {
+        console.log("wallet payment error", error);
+        throw { success: false, message: "PAYMENT_ERROR", status: 500, orderId };
+    }
+}
+
 module.exports = {
-    checkoutPage, placeOrder, createRazorpayOrder, verifyPayment
+    checkoutPage, placeOrder, createRazorpayOrder, verifyPayment, updatePayment
 };

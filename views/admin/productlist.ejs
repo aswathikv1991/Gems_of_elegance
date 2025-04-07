@@ -10,6 +10,8 @@
         <form action="/admin/getproduct" method="GET" class="search-form">
             <input type="text" name="search" value="<%= searchQuery %>" placeholder="Search by Name or SKU..." class="search-input">
             <button type="submit" class="btn btn-primary">Search</button>
+            <a href="/admin/getproduct" class="btn btn-secondary clear-btn">Clear</a>
+
         </form>
         <a href="/admin/addproduct" class="btn add-product-btn">Add Product</a>
     </div>

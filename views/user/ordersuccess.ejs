@@ -1,62 +1,238 @@
 <%- include("../../views/partials/user/header") %>
-<meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
-<meta http-equiv="Pragma" content="no-cache">
-<meta http-equiv="Expires" content="0">
+    <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
 
     <title>Order Successful</title>
     <link rel="stylesheet" href="/css/ordersuccess.css"> <!-- Link to external stylesheet -->
-   
 
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
     <div class="main-content">
-    <div class="success-container">
-        <div class="success-icon">✅</div>
-        <div class="success-message">Thank you for your purchase!</div>
-        <div class="order-details">
-            Your order <strong>#<%= order.orderID%></strong> has been placed successfully.<br>
-            Payment Method: <strong><%= order.paymentMethod.toUpperCase() %></strong><br>
-            Total Amount: <strong>₹<%=order.totalAmount %></strong>
+        <div class="success-container">
+            <div class="success-icon">✅</div>
+
+            <% if (message==='PAYMENT_ERROR'||message==="INSUFFICIENT_BALANCE") { %>
+                <div class="error-message" style="color: red; font-weight: bold; margin-bottom: 10px;">
+                   Payment failed! <%= (message=="INSUFFICIENT_BALANCE")? "Insufficient wallet balance"  :"" %> Please try again. 
+                </div>
+                <div class="order-details">
+                    Your order <strong>#<%= order.orderID %></strong> is pending due to payment failure.<br>
+                    Payment Method: <strong>
+                        <%= order.paymentMethod.toUpperCase() %>
+                    </strong><br>
+                    Total Amount: <strong>₹<%= order.totalAmount %></strong>
+                </div>
+
+                <!-- Retry Payment Button -->
+                <button type="button" class="btn btn-warning" onclick="showPaymentOptions()">🔁 Retry Payment</button>
+
+                <!-- Payment Options (initially hidden) -->
+                <div id="paymentOptions" style="display: none; margin-top: 15px;">
+                    <label><input type="radio" name="paymentMethod" value="cod"> Cash on Delivery</label><br>
+                    <label><input type="radio" name="paymentMethod" value="razorpay"> Razorpay</label><br>
+                    <label><input type="radio" name="paymentMethod" value="wallet"> Wallet</label><br><br>
+
+                    <!-- Proceed Button (initially hidden) -->
+                    <button type="submit" class="btn btn-success" id="proceedBtn" style="display: none;"
+                        onclick="submitPayment('<%= order._id %>','<%= order.totalAmount %>')">✅ Proceed</button>
+                </div>
+
+
+
+                <% } else { %>
+
+                    <div class="success-message">Thank you for your purchase!</div>
+                    <div class="order-details">
+                        Your order <strong>#<%= order.orderID%></strong> has been placed successfully.<br>
+                        Payment Method: <strong>
+                            <%= order.paymentMethod.toUpperCase() %>
+                        </strong><br>
+                        Total Amount: <strong>₹<%=order.totalAmount %></strong>
+                    </div>
+                    <% } %>
+                        <a href="/order/<%= order._id %>" class="btn btn-primary">📦 View Order Details</a>
+
+                        <a href="/products " class="btn btn-secondary">🛍️ Continue Shopping</a>
         </div>
-      
-        <a href="/order/<%= order._id %>" class="btn btn-primary">📦 View Order Details</a>
-
-        <a href="/products " class="btn btn-secondary">🛍️ Continue Shopping</a>
     </div>
-</div>
-<script>
-   
-   // Remove the checkout page from history
-   window.onload = function () {
-    history.replaceState(null, null, document.URL);
-    setTimeout(function () {
-        window.onpopstate = function () {
-            window.location.href = "/orders"; // Redirect to orders page
+    <script>
+        function showPaymentOptions() {
+            document.getElementById('paymentOptions').style.display = 'block';
+
+            // Add listener to payment options
+            const radios = document.getElementsByName('paymentMethod');
+            radios.forEach(radio => {
+                radio.addEventListener('change', () => {
+                    document.getElementById('proceedBtn').style.display = 'inline-block';
+                });
+            });
+        }
+
+        async function submitPayment(orderId, totalAmount) {
+            try {
+                const selectedMethod = document.querySelector('input[name="paymentMethod"]:checked');
+                if (selectedMethod) {
+                    //alert("Selected Payment Method: " + selectedMethod.value);
+                    //const orderId= order.orderID
+                    console.log("orderid*****", orderId)
+
+                    if (selectedMethod.value == "razorpay") {
+                        const orderDetails = { totalAmount: totalAmount, orderId }
+                        const razorresult = await initiateRazorpayPayment(orderDetails)
+                    }
+                    else {
+                        const paymentDetails = { paymentMethod: selectedMethod.value, orderId }
+                        await updatePaymentDetails(paymentDetails)
+                    }
+
+                } else {
+                    alert("Please select a payment method.");
+                }
+            }
+            catch (error) {
+                console.log("error at retry payment", error)
+            }
+        }
+
+
+
+        async function initiateRazorpayPayment(orderDetails) {
+            try {
+                let keyResponse = await fetch("/get-razorpay-key");
+                let keyData = await keyResponse.json();
+
+                // Step 1: Create a Razorpay order
+                let response = await fetch("/create-razorpay-order", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ amount: orderDetails.totalAmount }) // Send total amount to backend
+                });
+
+                let razorpayOrder = await response.json();
+                if (!razorpayOrder.success) {
+                    alert("Failed to initiate payment. Please try again.");
+                    return;
+                }
+
+
+                let razorpayOptions = {
+                    key: keyData.key, // Replace with your Razorpay key
+                    amount: razorpayOrder.amount,
+                    currency: "INR",
+                    name: "gems of elegance",
+                    description: "Order Payment",
+                    order_id: razorpayOrder.order.id,
+                    handler: async function (response) {
+                        // Step 2: Payment Success - Verify with backend
+                        //console.log("razor***********",response)
+                        let verifyResponse = await fetch("/razorpay/verify-payment", {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({
+                                razorpay_payment_id: response.razorpay_payment_id,
+                                razorpay_order_id: response.razorpay_order_id,
+                                razorpay_signature: response.razorpay_signature,
+
+                            })
+                        });
+
+                        let verifyResult = await verifyResponse.json();
+                        if (verifyResult.success) {
+                            // Step 3: Payment Verified - Place the Order
+                            const paymentDetails = {
+                                paymentId: response.razorpay_payment_id,
+                                razorpayorderId: response.razorpay_order_id,
+
+                                orderId: orderDetails.orderId,
+                                paymentMethod: "razorpay"
+
+                            };
+                            
+                            console.log("return paymentdetails", paymentDetails)
+                            await updatePaymentDetails(paymentDetails)
+                        } else {
+                            alert("Payment verification failed. Please contact support.");
+                        }
+                    },
+                    theme: {
+                        color: "#F37254"
+                    }
+                };
+
+                let razorpayInstance = new Razorpay(razorpayOptions);
+                razorpayInstance.open();
+
+                razorpayInstance.on("payment.failed", function (response) {
+                    alert("Payment failed. Please try again.");
+                    console.log(response);
+                    location.href = `/order-success/${orderDetails.orderId}?message=PAYMENT_ERROR`;
+                });
+
+            } catch (error) {
+                console.error("Error in Razorpay payment:", error);
+                alert("Something went wrong. Please try again later.");
+            }
+        }
+        async function updatePaymentDetails(paymentDetails) {
+            const response = await fetch("/update-payment-details", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(paymentDetails)
+            });
+            let result = await response.json();
+            console.log("Result:", result);
+            if (result.success) {
+                Swal.fire({
+                    title: "Payment Completed ",
+                    text: "Payment has been completed successfully.",
+                    icon: "success",
+                    confirmButtonText: "OK"
+                }).then(() => {
+                    location.href = `/order-success/${paymentDetails.orderId}`;
+                });
+            } else {
+              
+                    location.href = `/order-success/${paymentDetails.orderId}?message=${result.message}`;
+                }
+                
+            }
+        
+
+
+        // Remove the checkout page from history
+        window.onload = function () {
+            history.replaceState(null, null, document.URL);
+            setTimeout(function () {
+                window.onpopstate = function () {
+                    window.location.href = "/orders"; // Redirect to orders page
+                };
+            }, 0);
         };
-    }, 0);
-};
 
 
 
-// Push an initial state to history
-// Store a state in history to detect back navigation
-//window.history.pushState({ page: "ordersuccess" }, "", window.location.href);
+        // Push an initial state to history
+        // Store a state in history to detect back navigation
+        //window.history.pushState({ page: "ordersuccess" }, "", window.location.href);
 
-// Listen for back navigation
-/*window.addEventListener("popstate", function (event) {
-    location.reload();
-    alert("Reload detected!");
+        // Listen for back navigation
+        /*window.addEventListener("popstate", function (event) {
+            location.reload();
+            alert("Reload detected!");
+        
+            console.log("Event state:", event.state); // Corrected console.log()
+        
+           /* if (event.state && event.state.page === "ordersuccess") {
+                alert("Redirecting to home...");
+                window.location.href = "/"; // Redirect user to home page
+            } else {
+                // Re-push state to prevent going back
+                window.history.pushState({ page: "ordersuccess" }, "", window.location.href);
+            }
+        });*/
 
-    console.log("Event state:", event.state); // Corrected console.log()
 
-   /* if (event.state && event.state.page === "ordersuccess") {
-        alert("Redirecting to home...");
-        window.location.href = "/"; // Redirect user to home page
-    } else {
-        // Re-push state to prevent going back
-        window.history.pushState({ page: "ordersuccess" }, "", window.location.href);
-    }
-});*/
-
-
-</script>
+    </script>
     <%- include("../../views/partials/user/footer") %>
-

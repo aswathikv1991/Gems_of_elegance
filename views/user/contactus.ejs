@@ -1,0 +1,88 @@
+<%- include("../../views/partials/user/header") %>
+<link rel="stylesheet" href="/css/contactus.css">
+
+<div class="contact-container">
+    <h1>Contact Us</h1>
+
+    <section class="contact-info">
+        <h2>Get in Touch</h2>
+        <p>Have questions? We're here to help!</p>
+        <ul>
+            <li><strong>📍 Address:</strong> 123 Jewelry Street, cheruthazham, Kannur,Kerala</li>
+            <li><strong>📞 Phone:</strong> +1 234 567 890</li>
+            <li><strong>📧 Email:</strong> support@gemsofelegance.com</li>
+        </ul>
+    </section>
+
+    <section class="contact-form">
+        <h2>Send Us a Message</h2>
+        <form id="contactForm">
+            <div class="form-group">
+                <label for="name">Name:</label>
+                <input type="text" id="name" name="name" required>
+            </div>
+            <div class="form-group">
+                <label for="email">Email:</label>
+                <input type="email" id="email" name="email" required>
+            </div>
+            <div class="form-group">
+                <label for="message">Message:</label>
+                <textarea id="message" name="message" rows="4" required></textarea>
+            </div>
+            <button type="submit" class="send-btn">Send Message</button>
+        </form>
+    
+     
+    </section>
+
+    <section class="location">
+        <h2>Visit Our Store</h2>
+        <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3151.835434509369!2d144.95373631535734!3d-37.81720974202153!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x6ad642af0f11fd81%3A0xf0727f4b31df5df8!2sYour+Store+Location!5e0!3m2!1sen!2sin!4v1633021626296!5m2!1sen!2sin" width="600" height="450" style="border:0;" allowfullscreen="" loading="lazy"></iframe>
+    </section>
+</div>
+<script>
+    document.getElementById("contactForm").addEventListener("submit", async function (event) {
+        event.preventDefault();
+
+        const formData = new FormData(this);
+        const responseMessage = document.getElementById("responseMessage");
+
+        try {
+            const response = await fetch("/contact", {
+                method: "POST",
+                body: new URLSearchParams(formData), // Convert FormData to URL-encoded format
+                headers: {
+                    "Content-Type": "application/x-www-form-urlencoded"
+                }
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                Swal.fire({
+                    icon: "success",
+                    title: "Success!",
+                    text: result.message,
+                    confirmButtonColor: "#4CAF50"
+                });
+                this.reset(); // Clear form fields on success
+            } else {
+                Swal.fire({
+                    icon: "error",
+                    title: "Oops...",
+                    text: result.message,
+                    confirmButtonColor: "#d33"
+                });
+            }
+        } catch (error) {
+            Swal.fire({
+                icon: "error",
+                title: "Error!",
+                text: "Error sending message!",
+                confirmButtonColor: "#d33"
+            });
+        }
+    });
+</script>
+
+<%- include("../../views/partials/user/footer") %>

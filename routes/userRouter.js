@@ -68,11 +68,13 @@ router.post("/request-return", userAuth, OrderController.requestReturn);
 router.post("/send-invite",userAuth,userController.sendReferralEmail);
 router.post("/create-razorpay-order",userAuth, CheckoutController.createRazorpayOrder);
 router.post("/razorpay/verify-payment",userAuth, CheckoutController.verifyPayment);
+router.post("/update-payment-details",userAuth,CheckoutController.updatePayment)
 router.get("/wallet-balance",userAuth, OrderController.getWallet)
 router.get('/wallet-transactions', userAuth,OrderController.getWalletTransactions);
  router.get("/download-invoice/:orderId",userAuth,OrderController.dowloadInvoice)
  router.get("/about",userController.getAboutPage);
-
+ router.get("/contactus",userController.getContactPage);
+ router.post("/contact",userController.sendContactMessage);
 
 
 

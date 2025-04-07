@@ -1,6 +1,7 @@
 <%- include("../../views/partials/admin/header") %>
 <link rel="stylesheet" href="/css/salesreport.css">
 <title>Admin Dashboard - Sales Report</title>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <div class="container">
     <h2>📊 Sales Report</h2>
@@ -17,7 +18,8 @@
 
         <input type="date" id="startDate" class="date-picker" value="<%= startDate ? startDate : '' %>">
         <input type="date" id="endDate" class="date-picker" value="<%= endDate ? endDate : '' %>">
-        <button id="applyDateFilter">Apply</button>
+       <button id="applyDateFilter" class="apply-btn">Apply</button>
+
     </div>
 
     <!-- 📌 Summary Table -->
@@ -49,7 +51,7 @@
                 <% }) %>
             <% } else { %>
                 <tr>
-                    <td colspan="7">No summary data available</td>
+                    <td colspan="7">No sales summary data available</td>
                 </tr>
             <% } %>
         </tbody>
@@ -108,10 +110,33 @@
     document.getElementById('applyDateFilter').addEventListener('click', function() {
         let startDate = document.getElementById('startDate').value;
         let endDate = document.getElementById('endDate').value;
-        if (startDate && endDate) {
-            window.location.href = `/admin/getSales?filterType=custom&startDate=${startDate}&endDate=${endDate}`;
-        } else {
-            alert("Please select both start and end dates.");
-        }
+        const today = new Date().toISOString().split("T")[0]; 
+        if (!startDate || !endDate) {
+        Swal.fire({
+            icon: 'warning',
+            title: 'Missing Dates',
+            text: 'Please select both start and end dates.',
+        });
+        return;
+    }
+
+    if (new Date(startDate) > new Date(endDate)) {
+        Swal.fire({
+            icon: 'error',
+            title: 'Invalid Date Range',
+            text: 'Start date should be earlier than end date.',
+        });
+        return;
+    }
+    if (startDate > today || endDate > today) {
+                Swal.fire({
+                    icon: 'info',
+                    title: 'Future Date Selected',
+                    text: 'Sales data is only available up to today. Please select a valid date range.',
+                });
+                return;
+            }
+     window.location.href = `/admin/getSales?filterType=custom&startDate=${startDate}&endDate=${endDate}`;
+        
     });
 </script>
