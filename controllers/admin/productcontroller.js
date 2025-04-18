@@ -54,7 +54,7 @@ const getAddProduct = async (req, res) => {
 
 
 
-const addProduct = async (req, res) => {
+const postAddProduct = async (req, res) => {
     try {
        
         const { name, categoryId, material, color, description, price, sku, quantity, isFeatured } = req.body;
@@ -88,7 +88,7 @@ const addProduct = async (req, res) => {
         await newProduct.save();
        
 
-        return res.redirect("/admin/getproduct"); 
+        return res.redirect("/admin/products"); 
 
     } catch (error) {
         console.error("Error adding product:", error);
@@ -139,13 +139,13 @@ const postEditProduct = async (req, res) => {
         let product = await Product.findById(productId);
         if (!product) {
            
-            return res.status(404).send("Product not found");
+            return res.redirect(`/admin/products/${productId}/edit?error=Product not found`);
         }
 
         const categoryData = await Category.findById(category);
         if (!categoryData) {
            
-            return res.status(400).send("Error: Selected category does not exist.");
+            return res.redirect(`/admin/products/${productId}/edit?error=Selected category does not exist`);
         }
 
     
@@ -197,17 +197,12 @@ const postEditProduct = async (req, res) => {
         await product.save();
 
        
-
-        //res.redirect("/admin/getproduct"); // Redirect after update
-        res.send(`<script>
-            alert("Product updated successfully!");
-            window.location.href = "/admin/getproduct";
-        </script>`)
-        
+        res.redirect(`/admin/products/${productId}/edit?success=Product updated successfully!`);
 
     } catch (error) {
         console.error("Error updating product:", error);
-        res.status(500).send("Server Error");
+        res.redirect(`/admin/products/${productId}/edit?error=Server error, please try again later`);
+    
     }
 };
 
@@ -221,7 +216,10 @@ const getEditProduct= async (req, res) => {
         const categories = await Category.find(); 
         res.render("admin/editProduct", { 
             product, 
-            categories
+            categories,
+            successMessage: req.query.success || null,
+            errorMessage: req.query.error || null
+            
         });
     } catch (error) {
         console.error("Error fetching product for edit:", error);
@@ -261,4 +259,4 @@ const deleteProduct = async (req, res) => {
 
 
 
-module.exports={getAllProducts,getAddProduct,addProduct,getEditProduct,postEditProduct,viewProduct,deleteProduct}
+module.exports={getAllProducts,getAddProduct,postAddProduct,getEditProduct,postEditProduct,viewProduct,deleteProduct}

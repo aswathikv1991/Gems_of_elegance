@@ -9,9 +9,14 @@ const setUser = require("./middlewares/setUserMiddleware")
 const userRouter=require("./routes/userRouter")
 const adminRouter=require("./routes/adminRouter")
 const errorHandler=require("./middlewares/errorMiddleware")
+
+
+
 db()
+
 app.use(express.json())
 app.use(express.urlencoded({extended:true}))
+
 app.use(session({
     secret: process.env.SESSION_SECRET, 
     resave: false,

@@ -44,31 +44,27 @@ const customerInfo = async (req, res) => {
     }
 };
 
-const customerBlocked=async(req,res)=>{
-    try{
-        let id=req.query.id
-        await User.updateOne({_id:id},{$set:{isBlocked:true}})
-        res.redirect("/admin/users")
+const blockCustomer = async (req, res) => {
+    try {
+        const id = req.params.id;
+        await User.updateOne({ _id: id }, { $set: { isBlocked: true } });
+        res.status(200).json({ success: true, message: "Customer blocked" });
+    } catch (error) {
+        console.log("Error blocking customer:", error);
+        res.status(500).json({ success: false, message: "Server error" });
     }
-    catch(error){
-        console.log("error customer ",error)
-        res.redirect("/admin/pageError")
-    }
-    
-}
+};
 
-const customerunBlocked=async(req,res)=>{
-    try{
-        let id=req.query.id
-        await User.updateOne({_id:id},{$set:{isBlocked:false}})
-        res.redirect("/admin/users")
+const unblockCustomer = async (req, res) => {
+    try {
+        const id = req.params.id;
+        await User.updateOne({ _id: id }, { $set: { isBlocked: false } });
+        res.status(200).json({ success: true, message: "Customer unblocked" });
+    } catch (error) {
+        console.log("Error unblocking customer:", error);
+        res.status(500).json({ success: false, message: "Server error" });
     }
-    catch(error){
-        console.log("customer blocking error ",error)
-        res.redirect("/admin/pageError")
-    }
-    
-}
+};
 
 
-module.exports = { customerInfo,customerBlocked,customerunBlocked };
+module.exports = { customerInfo,blockCustomer,unblockCustomer};

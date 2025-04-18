@@ -30,7 +30,7 @@
                         <td><%= transaction.source %></td>
                         <td>
                             <% if (transaction.orderId && (transaction.source === "Order Cancellation Refund" || transaction.source === "Order Return Refund")) { %>
-                                <a href="/admin/vieworder/<%= transaction.orderId._id %>" class="btn btn-info btn-sm">View Order</a>
+                                <a href="/admin/orders/<%= transaction.orderId._id %>" class="btn btn-info btn-sm">View Order</a>
                             <% } else { %>
                                 N/A
                             <% } %>

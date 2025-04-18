@@ -17,7 +17,7 @@ const getAllProducts = async (req, res,next) => {
 
       let filter = {};
       let sortOption = {};
-     // console.log("Query Params:", req.query);
+    
 
      
       if (req.query.category) {
@@ -53,7 +53,7 @@ const getAllProducts = async (req, res,next) => {
             sortOption.createdAt = 1; // Sort by oldest (first added products first)
         }
     }
-      //console.log("Final Filter Applied:", JSON.stringify(filter, null, 2));
+   
 
       // Fetch Products
       const products = await Product.find(filter).sort(sortOption).skip(skip).limit(limit);
@@ -61,7 +61,7 @@ const getAllProducts = async (req, res,next) => {
       const totalProducts = await Product.countDocuments(filter);
       const totalPages = Math.ceil(totalProducts / limit);
 
-     // console.log("Filtered Products Found:", products.length);
+    
 
       // Fetch Categories
       let wishlistItems = [];
@@ -111,8 +111,7 @@ const updatedProducts = products.map(product => {
           wishlistItems
       });
   } catch (error) {
-      //console.error("Error fetching products:", error);
-     // res.status(500).send("Internal Server Error");
+ 
      next(error);
   }
 };
@@ -121,14 +120,13 @@ const updatedProducts = products.map(product => {
 const getProductDetail = async (req, res,next) => {
   try {
       const productId = req.params.id;
-      //console.log("Fetching product with ID:", productId); 
+      
 
       const product = await Product.findById(productId).populate('categoryId');
-      //console.log("Product fetched:", product); // Debug log
+     
       const reviews = await Review.find({productId}).populate("userId", "name");
       if (!product) {
-          //console.log("Product not found");
-          //return res.status(404).send("Product not found");
+    
           const error = new Error("Product not found");
           error.statusCode = 404;
           return next(error);
@@ -161,8 +159,7 @@ const getProductDetail = async (req, res,next) => {
           reviews
       });
   } catch (error) {
-      //console.error("Error fetching product details:", error);
-      //res.status(500).send("Internal Server Error");
+      
       next(error);
   }
 };
@@ -233,13 +230,12 @@ const getWishlist = async (req, res,next) => {
       totalPages,
     });
   } catch (error) {
-    //console.error("Error fetching wishlist:", error);
-    //res.status(500).send("Internal Server Error");
+    
     next(error); 
   }
 };
 
-const loginstatus=(req,res)=>{
+const loginStatus=(req,res)=>{
   if (req.session.user) {
     res.json({ loggedIn: true });
 } else {
@@ -270,8 +266,7 @@ const addToWishlist = async (req, res,next) => {
 
       res.json({ success: true, message: "Item added to wishlist" });
   } catch (error) {
-      //console.error("Error adding to wishlist:", error);
-      //res.redirect("/pageNotFound")
+     
       next(error);
   }
 };
@@ -291,15 +286,15 @@ const removeFromWishlistByProduct = async (req, res,next) => {
       res.json({ success: true, message: "Removed from wishlist." });
   } catch (error) {
     next(error);
-      //console.error(error);
-      //res.json({ success: false, message: "Error removing from wishlist." });
+     
   }
 };
 
 
 const removeFromWishlist = async (req, res,next) => {
   try {
-    const { id } = req.params; // Get wishlist item ID from URL
+    const { productId } = req.body; // Get wishlist item ID from URL
+    
     const userId = req.session.user; // Get logged-in user
 
     if (!userId) {
@@ -308,7 +303,7 @@ const removeFromWishlist = async (req, res,next) => {
       return next(error)
     }
 
-    const deletedItem = await Wishlist.findOneAndDelete({ _id: id, userId });
+    const deletedItem = await Wishlist.findOneAndDelete({productId, userId });
 
     if (!deletedItem) {
       const error = new Error("Item not found");
@@ -318,55 +313,14 @@ const removeFromWishlist = async (req, res,next) => {
 
     res.json({ success: true, message: "Item removed successfully" });
   } catch (error) {
-    //console.error("Error removing item from wishlist:", error);
-    //res.redirect("/pageNotFound")
+   
     next(error);
   }
 };
 
 
-/*const getReview = async (req, res) => {
-  try {
-    const { productId } = req.params;
-    
-    // 1. Find all OrderItems for the given product
-    const orderItems = await OrderItem.find({ productId: productId })
-      .populate({
-        path: "orderId",
-        select: "userId orderStatus"
-      });
-    
-    // 2. Filter OrderItems to include only those where the order status is "delivered"
-    const verifiedUserIds = orderItems
-      .filter(item => item.orderId && item.orderId.orderStatus === "delivered")
-      .map(item => item.orderId.userId.toString());
-    
-    // 3. Remove duplicate user IDs
-    const uniqueUserIds = [...new Set(verifiedUserIds)];
-    
-    // 4. Fetch reviews for this product written by the verified buyers
-    const reviews = await Review.find({ 
-      product: productId, 
-      user: { $in: uniqueUserIds }
-    }).populate("user", "name");
-    
-    res.json({ success: true, reviews });
-  } catch (error) {
-    console.error("Error fetching reviews:", error);
-    res.status(500).json({ success: false, message: "Error fetching reviews" });
-  }
-};*/
-/*const getReview = async (req, res) => {
-    try {
-      const { productId } = req.params;
-      const reviews = await Review.find({ product: productId }).populate("user", "name");
-      res.json({ success: true, reviews });
-    } catch (error) {
-      console.error("Error fetching reviews:", error);
-      res.status(500).json({ success: false, message: "Error fetching reviews" });
-    }
-  };*/
-  const addReview= async (req, res,next) => {
+
+  const canReview= async (req, res,next) => {
     try {
         const userId = req.session.user; 
         const productId = req.params.productId;
@@ -385,8 +339,7 @@ const removeFromWishlist = async (req, res,next) => {
         }
     } catch (error) {
       next(error);
-        //console.error("Error checking review eligibility:", error);
-        //res.status(500).json({ message: "Server error" });
+ 
     }
 };
 
@@ -415,16 +368,14 @@ const submitReview= async (req, res,next) => {
       await review.populate("userId", "name")
       res.json({ success: true ,review});
   } catch (error) {
-      //console.error(error);
-     
-      // res.json({ success: false, message: "Something went wrong" });
+    
       next(error);
     }
 };
 
 
 
-  const addtocart = async (req, res,next) => {
+  const addToCart = async (req, res,next) => {
     try {
         const { productId, quantity } = req.body;
        // console.log("Product ID:", productId);
@@ -501,8 +452,7 @@ const submitReview= async (req, res,next) => {
 
         res.status(200).json({ success: true, message: "Product added to cart", cartItem: newCartItem });
     } catch (error) {
-       // console.error("Cart Error:", error);
-        //res.status(500).json({ success: false, message: "Something went wrong" });
+      
         next(error);
       }
 };
@@ -536,15 +486,14 @@ const submitReview= async (req, res,next) => {
   
       return res.json({ success: true, message: "Quantity updated!", newTotal: newTotal });
     } catch (error) {
-      //console.error("Error updating cart:", error);
-      //res.status(500).json({ success: false, message: "Internal server error." });
+      
       next(error);
     }
   }
 
 // Assuming you have the necessary imports and setup
 
-const getcart = async (req, res,next) => {
+const getCart = async (req, res,next) => {
   try {
     const userId = req.session.user;
     if (!userId) {
@@ -603,8 +552,7 @@ const getcart = async (req, res,next) => {
       totalPages,
     });
   } catch (error) {
-    //console.error("Error fetching cart:", error);
-    //res.status(500).send("Internal Server Error");
+  
     next(error);
   }
 };
@@ -630,12 +578,11 @@ const deleteCartItem = async (req,res,next) => {
     const newTotal = cartItems.length > 0
       ? cartItems.reduce((total, item) => total + item.productId.price * item.quantity, 0)
       : 0;
-   // const newTotal = cartItems.reduce((total, item) => total + item.productId.price * item.quantity, 0);
+
 
     return res.json({ success: true, message: "Item removed!", newTotal: newTotal });
   } catch (error) {
-    //console.error("Error removing item:", error);
-    //res.status(500).json({ success: false, message: "Internal server error." });
+   
     next(error);
   }
 };
@@ -644,8 +591,8 @@ const deleteCartItem = async (req,res,next) => {
 
 
 
-module.exports = { getAllProducts,getProductDetail,addReview,submitReview,getWishlist,loginstatus,addToWishlist ,removeFromWishlist,addtocart,updateQuantity,
-  getcart,deleteCartItem,removeFromWishlistByProduct};
+module.exports = { getAllProducts,getProductDetail,canReview,submitReview,getWishlist,loginStatus,addToWishlist ,removeFromWishlist,addToCart,updateQuantity,
+  getCart,deleteCartItem,removeFromWishlistByProduct};
 
 
 

@@ -24,7 +24,7 @@
                 <p><strong>Phone:</strong> <span><%= user.phone || 'Not provided' %></span></p>
             </div>
             <div class="profile-actions">
-                <a href="/editprofile" class="edit-btn">Edit Profile</a>
+                <a href="/profile/edit" class="edit-btn">Edit Profile</a>
             </div>
         </div>
 
@@ -37,7 +37,7 @@
             </div>
         
             <!-- Add New Address Button (Redirect to New Page) -->
-            <a href="/addnewaddress" class="add-btn">Add New Address</a>
+            <a href="/addresses/new" class="add-btn">Add New Address</a>
         </div>
         
         <!-- My Wallet Section -->
@@ -95,7 +95,7 @@
 // Fetch and Display Addresses
 async function loadAddresses() {
     try {
-        const response = await fetch("/getaddresses");
+        const response = await fetch("/addresses");
         const data = await response.json();
         const addressList = document.getElementById("addressList");
 
@@ -135,7 +135,7 @@ async function loadAddresses() {
 
 async function loadWalletBalance() {
     try {
-        const response = await fetch("/wallet-balance");
+        const response = await fetch("/wallet/balance");
         const data = await response.json();
         const walletSection = document.getElementById("wallet");
 
@@ -161,7 +161,7 @@ async function loadWalletBalance() {
 
 async function loadTransactions() {
   try {
-    const response = await fetch("/wallet-transactions");  // Fetch all transactions without pagination
+    const response = await fetch("/wallet/transactions");  // Fetch all transactions without pagination
     const data = await response.json();
 
     const walletSection = document.getElementById("wallet");
@@ -191,7 +191,7 @@ async function loadTransactions() {
         // If the transaction is a "Credit" and has an associated orderId, create a button
         if (transaction.type === 'Credit' && transaction.orderId) {
           orderLink = transaction.orderId._id;
-          actionButton = `<button onclick="window.location.href='/order/${orderLink}'">View Order</button>`;
+          actionButton = `<button onclick="window.location.href='/orders/${orderLink}'">View Order</button>`;
         }
 
         tableHTML += `
@@ -232,13 +232,13 @@ async function loadOrders() {
 
 
 function redirectToEdit(addressId) {
-    window.location.href = `/editaddress/${addressId}`;
+    window.location.href = `/addresses/${addressId}/edit`;
 }
 
 // Set as Default Function
 async function setAsDefault(addressId) {
     try {
-        const response = await fetch(`/setdefaultaddress/${addressId}`, { method: "POST" });
+        const response = await fetch(`/addresses/${addressId}/default`, { method: "PUT" });
         const data = await response.json();
 
         if (data.success) {
@@ -274,7 +274,7 @@ async function deleteAddress(addressId) {
     if (!confirm("Are you sure you want to delete this address?")) return;
 
     try {
-        const response = await fetch(`/deleteaddress/${addressId}`, { method: "DELETE" });
+        const response = await fetch(`/addresses/${addressId}`, { method: "DELETE" });
         const data = await response.json();
 
         if (data.success) {

@@ -94,7 +94,7 @@ const checkoutPage = async (req, res, next) => {
 
     } catch (error) {
         console.error("Error loading checkout page:", error);
-        // res.redirect("/pageNotFound");
+       
         next(error)
     }
 };
@@ -112,7 +112,7 @@ const placeOrder = async (req, res, next) => {
         }
 
 
-        //const { shippingAddress, paymentMethod, items, amountBeforeDelivery, discountAmount, deliveryCharge, totalAmount, couponId } = req.body;
+     
 
         const response = await callPlace(req.body, userId)
         if (response.status === 200) {
@@ -120,13 +120,11 @@ const placeOrder = async (req, res, next) => {
             return res.status(200).json({ success: true, message: "Order placed successfully!", orderId: response.orderId, orderID: response.orderID, });
         }
 
-        // console.log("error........",response)
         return res.status(response.status).json({ success: response.success, message: response.message })
 
     }
     catch (error) {
-        // console.error("Error placing order:", error);
-        // return res.status(500).json({ success: false, message: "Something went wrong. Please try again." });
+        
         next(error)
     }
 };

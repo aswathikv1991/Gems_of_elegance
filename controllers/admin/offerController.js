@@ -3,7 +3,7 @@ const Product=require("../../models/productschema")
 const Category=require("../../models/categoryschema")
 
 
-const  getOffers = async (req, res) => {
+const  getAllOffers = async (req, res) => {
         try {
             const offers = await Offer.find().populate("categoryId").populate("productId");
             res.render("admin/offerManagement", { offers });
@@ -13,7 +13,7 @@ const  getOffers = async (req, res) => {
         }
     }
 
-    const addOfferfun= async (req, res) => {
+    const renderAddOffer= async (req, res) => {
         try {
             const products = await Product.find({ status: "Listed" });
             const categories = await Category.find({ status: "Listed" });
@@ -21,11 +21,11 @@ const  getOffers = async (req, res) => {
             res.render("admin/addoffer", { products, categories });
         } catch (error) {
             console.error(error);
-            res.redirect("/admin/getoffers");
+            res.redirect("/admin/offers");
         }
     }
 
-    const postaddOffer = async (req, res) => {
+    const postAddOffer = async (req, res) => {
         try {
             const { name, type, productId, categoryId, endDate, discount } = req.body;
     
@@ -71,7 +71,7 @@ const  getOffers = async (req, res) => {
             return res.json({ success: false, message: "Server error!" });
         }
     };
-    const geteditOffer=async (req, res) => {
+    const getEditOffer=async (req, res) => {
         try {
             const offer = await Offer.findById(req.params.id);
             const products = await Product.find(); // Fetch all products
@@ -79,12 +79,12 @@ const  getOffers = async (req, res) => {
             res.render("admin/editoffer", { offer, products, categories });
         } catch (error) {
             console.log("offer error ",error)
-            res.redirect("/admin/getoffers");
+            res.redirect("/admin/offers");
         }
     }
    
 
-    const posteditOffer = async (req, res) => {
+    const postEditOffer = async (req, res) => {
         try {
             const { name, type, productId, categoryId, discount, endDate } = req.body;
             const offerId = req.params.id;
@@ -161,4 +161,4 @@ const enableOffer = async (req, res) => {
 };
 
 
-module.exports = {getOffers,addOfferfun,postaddOffer,geteditOffer,posteditOffer,enableOffer,disableOffer};
+module.exports = {getAllOffers,renderAddOffer,postAddOffer,getEditOffer,postEditOffer,enableOffer,disableOffer};

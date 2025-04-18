@@ -202,7 +202,7 @@
             async function fetchWalletBalance() {
                 try {
                     console.log("Fetching wallet balance...");
-                    let response = await fetch("/wallet-balance");
+                    let response = await fetch("/wallet/balance");
                     let data = await response.json();
                     // console.log("Wallet API Response:", data);
 
@@ -262,7 +262,7 @@
                 const formData = new FormData(event.target);
                 const addressData = Object.fromEntries(formData.entries());
 
-                const response = await fetch("/addnewaddress", {
+                const response = await fetch("/addresses/new", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify(addressData)
@@ -382,7 +382,7 @@
                     let keyData = await keyResponse.json();
 
                     // Step 1: Create a Razorpay order
-                    let response = await fetch("/create-razorpay-order", {
+                    let response = await fetch("/razorpay/orders", {
                         method: "POST",
                         headers: { "Content-Type": "application/json" },
                         body: JSON.stringify({ amount: orderDetails.totalAmount }) // Send total amount to backend
@@ -443,7 +443,7 @@
                     razorpayInstance.on("payment.failed", function (response) {
                         alert("Payment failed. Please try again.");
                         console.log(response);
-                        location.href = `/order-success/${orderDetails.orderId}?message=PAYMENT_ERROR`;
+                        location.href = `/orders-success/${orderDetails.orderId}?message=PAYMENT_ERROR`;
                     });
 
                 } catch (error) {
@@ -472,11 +472,11 @@
                             icon: "success",
                             confirmButtonText: "OK"
                         }).then(() => {
-                            location.href = `/order-success/${paymentDetails.orderId}`;
+                            location.href = `/orders-success/${paymentDetails.orderId}`;
                         });
                     } else {
                         if (result.message == "PAYMENT_ERROR") {
-                            location.href = `/order-success/${paymentDetails.orderId}?message=${result.message}`;
+                            location.href = `/orders-success/${paymentDetails.orderId}?message=${result.message}`;
                         }
                         else {
                             Swal.fire({
@@ -496,7 +496,7 @@
 
             async function placeOrder(orderData) {
                 try {
-                    let response = await fetch("/order/place", {
+                    let response = await fetch("/orders/place", {
                         method: "POST",
                         headers: { "Content-Type": "application/json" },
                         body: JSON.stringify(orderData)
@@ -514,11 +514,11 @@
                             icon: "success",
                             confirmButtonText: "OK"
                         }).then(() => {
-                            location.href = `/order-success/${result.orderId}`;
+                            location.href = `/orders-success/${result.orderId}`;
                         });
                     } else {
                         if (result.message == "PAYMENT_ERROR") {
-                            location.href = `/order-success/${result.orderId}?message=${result.message}`;
+                            location.href = `/orders-success/${result.orderId}?message=${result.message}`;
                         }
                         else {
                             Swal.fire({

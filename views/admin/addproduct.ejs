@@ -9,7 +9,7 @@
 <div class="add-product-container">
   <div class="container mt-5">
     <h2 class="text-center mb-4">Add New Product</h2>
-    <form id="addProductForm" action="/admin/addproduct" method="POST" enctype="multipart/form-data" class="p-4 bg-light shadow rounded">
+    <form id="addProductForm" action="/admin/products/add" method="POST" enctype="multipart/form-data" class="p-4 bg-light shadow rounded">
       <div class="mb-3">
         <label for="productName" class="form-label">Product Name</label>
         <input type="text" name="name" class="form-control" required>
@@ -98,26 +98,6 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   });
 
-  /*function processNextFile() {
-    if (currentFileIndex < filesToProcess.length) {
-      const file = filesToProcess[currentFileIndex];
-      const objectUrl = URL.createObjectURL(file);
-      cropImage.src = objectUrl;
-      cropModal.style.display = "flex";
-
-      if (cropper) { cropper.destroy(); }
-      cropper = new Cropper(cropImage, {
-        aspectRatio: 1,
-        viewMode: 1,
-      });
-
-      setTimeout(() => { URL.revokeObjectURL(objectUrl); }, 1000);
-    } else {
-      const dataTransfer = new DataTransfer();
-      croppedFiles.forEach(file => dataTransfer.items.add(file));
-      fileInput.files = dataTransfer.files;
-    }
-  }*/
   function processNextFile() {
   if (currentFileIndex < filesToProcess.length) {
     const file = filesToProcess[currentFileIndex];

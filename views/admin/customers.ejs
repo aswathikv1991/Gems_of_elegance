@@ -1,5 +1,7 @@
 <%- include("../../views/partials/admin/header") %>
 <link rel="stylesheet" href="/css/customers.css"/>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
 <div class="main-content">
     <div class="content-header row">
         <div class="d-flex justify-content-between align-items-center">
@@ -43,11 +45,11 @@
                             <td><%= customer.phone %></td>
                             <td>
                                 <% if (customer.isBlocked) { %>
-                                    
-                                        <a href="/admin/unblockCustomer?id=<%= customer._id %>" class="btn btn-success action-button text-white" style="text-decoration: none;">Unblock</a>
-                                    <% } else { %>
-                                        <a href="/admin/blockCustomer?id=<%= customer._id %>" class="btn btn-danger action-button text-white" style="text-decoration: none;">Block</a>
-                                    <% } %>
+                                    <button class="btn btn-success action-button unblock-btn" data-id="<%= customer._id %>">Unblock</button>
+                                <% } else { %>
+                                    <button class="btn btn-danger action-button block-btn" data-id="<%= customer._id %>">Block</button>
+                                <% } %>
+                                
                                 <button class="action-button wallet-button">
                                     <a href="/admin/wallet/<%= customer._id %>" class="text-white">Wallet</a>
                                 </button>
@@ -76,6 +78,73 @@
         </nav>
     </div>
 </div>
+<script>
+    // Block Customer
+    document.querySelectorAll('.block-btn').forEach(button => {
+        button.addEventListener('click', () => {
+            const id = button.getAttribute('data-id');
+
+            Swal.fire({
+                title: 'Are you sure?',
+                text: "You are about to block this customer.",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Yes, block!'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    fetch(`/admin/customers/${id}/block`, {
+                        method: 'PATCH'
+                    })
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.success) {
+                            Swal.fire('Blocked!', data.message, 'success')
+                                .then(() => location.reload());
+                        } else {
+                            Swal.fire('Error', data.message, 'error');
+                        }
+                    })
+                    .catch(() => Swal.fire('Error', 'Something went wrong!', 'error'));
+                }
+            });
+        });
+    });
+
+    // Unblock Customer
+    document.querySelectorAll('.unblock-btn').forEach(button => {
+        button.addEventListener('click', () => {
+            const id = button.getAttribute('data-id');
+
+            Swal.fire({
+                title: 'Are you sure?',
+                text: "You are about to unblock this customer.",
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#28a745',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'Yes, unblock!'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    fetch(`/admin/customers/${id}/unblock`, {
+                        method: 'PATCH'
+                    })
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.success) {
+                            Swal.fire('Unblocked!', data.message, 'success')
+                                .then(() => location.reload());
+                        } else {
+                            Swal.fire('Error', data.message, 'error');
+                        }
+                    })
+                    .catch(() => Swal.fire('Error', 'Something went wrong!', 'error'));
+                }
+            });
+        });
+    });
+</script>
 
 
 <%- include("../../views/partials/admin/footer") %>

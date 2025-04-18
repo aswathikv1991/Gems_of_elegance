@@ -136,7 +136,7 @@ function cancelOrder(orderId) {
         return;
     }
 
-    fetch("/order/cancel", {
+    fetch("/orders/cancel", {
         method: "POST",
         headers: {
             "Content-Type": "application/json"
@@ -190,7 +190,7 @@ function requestReturn(orderId, productId) {
         }
     }).then((result) => {
         if (result.isConfirmed) {
-            fetch("/request-return", {
+            fetch("/orders/return", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"
@@ -275,7 +275,7 @@ async function submitPayment(orderId, totalAmount) {
                 let keyData = await keyResponse.json();
 
                 // Step 1: Create a Razorpay order
-                let response = await fetch("/create-razorpay-order", {
+                let response = await fetch("/razorpay/orders", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ amount: orderDetails.totalAmount }) // Send total amount to backend
@@ -338,7 +338,7 @@ async function submitPayment(orderId, totalAmount) {
                 razorpayInstance.on("payment.failed", function (response) {
                     alert("Payment failed. Please try again.");
                     console.log(response);
-                    location.href = `/order-success/${orderDetails.orderId}?message=PAYMENT_ERROR`;
+                    location.href = `/orders-success/${orderDetails.orderId}?message=PAYMENT_ERROR`;
                 });
 
             } catch (error) {
@@ -363,11 +363,11 @@ async function submitPayment(orderId, totalAmount) {
                     icon: "success",
                     confirmButtonText: "OK"
                 }).then(() => {
-                    location.href = `/order-success/${paymentDetails.orderId}`;
+                    location.href = `/orders-success/${paymentDetails.orderId}`;
                 });
             } else {
               
-                    location.href = `/order-success/${paymentDetails.orderId}?message=${result.message}`;
+                    location.href = `/orders-success/${paymentDetails.orderId}?message=${result.message}`;
                 }
                 
             }

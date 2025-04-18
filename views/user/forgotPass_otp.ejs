@@ -14,7 +14,7 @@
          <% } %>
          
 
-           <form method="POST" action="/verify_forgot_otp" onsubmit="return validateOtpForm()">
+           <form method="POST" action="/password/forgot/verify-otp" onsubmit="return validateOtpForm()">
                <div class="mb-3">
                    <input class="form-control" name="otp" placeholder="Enter OTP" type="text" id="otp">
                    <div class="error-message" id="otp-error"></div>
@@ -92,7 +92,7 @@
 
         $.ajax({
             type: "POST",
-            url: "/resend_forgot_otp",  // New route to resend OTP
+            url: "/password/forgot/resend-otp",  // New route to resend OTP
             success: function(response) {
                 if (response.success) {
                     Swal.fire({

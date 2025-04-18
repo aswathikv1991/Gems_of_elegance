@@ -27,6 +27,7 @@ const adminAuth = async (req, res, next) => {
             return res.redirect("/admin/login");  
         }
       
+        //console.log("Admin session:", req.session.admin);
 
        
         const adminUser = await User.findById(req.session.admin);

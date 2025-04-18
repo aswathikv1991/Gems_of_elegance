@@ -29,7 +29,7 @@
             
               <button class="add-to-cart-btn" data-id="<%= item.productId._id %>">Add to Cart</button>
 
-              <button class="delete-btn" data-id="<%= item._id %>">Delete</button>
+              <button class="delete-btn" data-id="<%= item.productId._id %>">Delete</button>
 
             </div>
           </div>
@@ -64,7 +64,7 @@
         button.addEventListener("click", function () {
             const productId = button.getAttribute("data-id");
 
-            fetch("/cart/add", {
+            fetch("/cart", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ productId, quantity: 1 })
@@ -105,9 +105,10 @@
             confirmButtonText: "Yes, delete it!"
           }).then((result) => {
             if (result.isConfirmed) {
-              fetch(`/wishlist/remove/${wishlistItemId}`, {
+              fetch("/wishlist", {
                 method: "DELETE",
-                headers: { "Content-Type": "application/json" }
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({productId: wishlistItemId })
               })
               .then(response => response.json())
               .then(data => {

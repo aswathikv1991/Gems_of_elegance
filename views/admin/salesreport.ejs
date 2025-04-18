@@ -61,10 +61,10 @@
 
     <!-- 📥 Download Buttons -->
     <div class="download-buttons">
-        <a href="/admin/download-sales-report?filter=<%= filterType %>&startDate=<%= startDate %>&endDate=<%= endDate %>&format=excel" class="btn btn-success">
+        <a href="/admin/dashboard/sales/report?filter=<%= filterType %>&startDate=<%= startDate %>&endDate=<%= endDate %>&format=excel" class="btn btn-success">
             📊 Download Excel
         </a>
-        <a href="/admin/download-sales-report?filter=<%= filterType %>&startDate=<%= startDate %>&endDate=<%= endDate %>&format=pdf" class="btn btn-danger">
+        <a href="/admin/dashboard/sales/report?filter=<%= filterType %>&startDate=<%= startDate %>&endDate=<%= endDate %>&format=pdf" class="btn btn-danger">
             📄 Download PDF
         </a>
     </div>
@@ -103,7 +103,7 @@
             startDateInput.style.display = "none";
             endDateInput.style.display = "none";
             applyButton.style.display = "none";
-            window.location.href = `/admin/getSales?filterType=${filter}`;
+            window.location.href = `/admin/dashboard/sales?filterType=${filter}`;
         }
     });
 
@@ -136,7 +136,7 @@
                 });
                 return;
             }
-     window.location.href = `/admin/getSales?filterType=custom&startDate=${startDate}&endDate=${endDate}`;
+     window.location.href = `/admin/dashboard/sales?filterType=custom&startDate=${startDate}&endDate=${endDate}`;
         
     });
 </script>

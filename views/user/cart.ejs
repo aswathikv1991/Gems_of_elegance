@@ -76,7 +76,7 @@
   
  
     function updateCartItemQuantity(cartItemId, quantity) {
-  fetch("/update-cart-quantity", {
+  fetch("/cart", {
     method: "PUT",
     headers: {
       "Content-Type": "application/json",
@@ -96,7 +96,7 @@
     
       const totalPriceElement = document.getElementById("total-price");
       if (totalPriceElement) {
-        totalPriceElement.textContent = `$${data.newTotal}`;
+        totalPriceElement.textContent = `${data.newTotal}`;
       }
 
       const quantityInput = document.querySelector(`.quantity-input[data-id="${cartItemId}"]`);
@@ -115,43 +115,10 @@
 }
 
    
-/*function deleteCartItem(cartItemId) {
-  fetch(`/cart/remove/${cartItemId}`, {
-    method: "DELETE",
-  })
-    .then(response => response.json())
-    .then(data => {
-      if (data.success) {
-        Swal.fire("Success", "Item removed from your cart!", "success");
 
-  
-        const cartItem = document.querySelector(`.cart-item[data-id="${cartItemId}"]`);
-        if (cartItem) cartItem.remove();
-
-     
-        const cartTotal = document.getElementById("cart-total");
-        if (cartTotal) {
-          cartTotal.innerHTML = `<p>Total: $${data.newTotal.toFixed(2)}</p><button id="checkout">Proceed to Checkout</button>`;
-        }
-
-     
-        const cartItems = document.querySelectorAll(".cart-item");
-        if (cartItems.length === 0) {
-          document.getElementById("cart-container").innerHTML = "<p>No items found</p>";
-        }
-      } else {
-        Swal.fire("Error", data.message, "error");
-      }
-    })
-    .catch(error => {
-      console.error("Error removing item:", error);
-      Swal.fire("Error", "Something went wrong while removing the item.", "error");
-    });
-}
-*/
 
 function deleteCartItem(cartItemId) {
-  fetch(`/cart/remove/${cartItemId}`, {
+  fetch(`/cart/${cartItemId}`, {
     method: "DELETE",
   })
     .then(response => response.json())

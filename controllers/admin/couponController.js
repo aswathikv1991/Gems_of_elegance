@@ -1,5 +1,5 @@
 const Category = require("../../models/categoryschema");
-const  Coupon=require("../../models/couponschema")
+const Coupon = require("../../models/couponschema")
 
 const getCouponsPage = async (req, res) => {
     try {
@@ -16,7 +16,7 @@ const getCouponsPage = async (req, res) => {
 
 const renderAddCouponPage = async (req, res) => {
     try {
-        const categories = await Category.find({ status: 'Listed' }); 
+        const categories = await Category.find({ status: 'Listed' });
         res.render('admin/addCoupon', { title: "Add New Coupon", categories });
     } catch (error) {
         console.error("Error fetching categories:", error);
@@ -106,6 +106,7 @@ const getEditCoupon = async (req, res) => {
         if (!coupon) return res.redirect('/admin/coupons');
 
         res.render('admin/editCoupon', { coupon, categories });
+        
     } catch (error) {
         console.error(error);
         res.redirect('/admin/coupons');
@@ -129,14 +130,28 @@ const postEditCoupon = async (req, res) => {
             usageLimit: usageLimit || 1
         };
 
-        await Coupon.findByIdAndUpdate(req.params.id, updatedCoupon);
-        
-       
-        res.redirect(`/admin/editcoupon/${req.params.id}?success=true`);
+        const coupon = await Coupon.findByIdAndUpdate(req.params.id, updatedCoupon, { new: true });
+
+
+        if (coupon) {
+            return res.status(200).json({
+                success: true,
+                message: "Coupon updated successfully",
+                coupon  // Optionally include the updated coupon data
+            });
+        } else {
+            return res.status(404).json({
+                success: false,
+                error: "Coupon not found"
+            });
+        }
     } catch (error) {
-        console.error(error);
-        res.redirect(`/admin/editcoupon/${req.params.id}?error=true`);
+        console.error("Error updating coupon:", error);
+        return res.status(500).json({
+            success: false,
+            error: "Internal server error"
+        });
     }
 }
 
-module.exports={getCouponsPage,renderAddCouponPage,postAddCouponPage,deleteCoupon,getEditCoupon,postEditCoupon}
+module.exports = { getCouponsPage, renderAddCouponPage, postAddCouponPage, deleteCoupon, getEditCoupon, postEditCoupon }

@@ -17,44 +17,52 @@ router.get("/dashboard",adminAuth,adminController.loadDashboard)
 router.get("/pageError",adminController.pageError)
 router.get("/logout",adminController.logout)
 router.get("/users",adminAuth,customerController.customerInfo)
-router.get("/blockCustomer",adminAuth,customerController.customerBlocked)
-router.get("/unblockCustomer",adminAuth,customerController.customerunBlocked)
-router.get("/category",adminAuth,categoryController.categoryInfo)
-router.post("/addCategory",adminAuth,categoryController.addCategory)
-router.get("/editCategory",adminAuth,categoryController.editCategory)
-router.post("/editCategory/:id",adminAuth,categoryController.editedCategory)
-router.delete("/deleteCategory/:id",adminAuth,categoryController.deleteCategory)
+router.patch("/customers/:id/block", adminAuth, customerController.blockCustomer);
+router.patch("/customers/:id/unblock", adminAuth, customerController.unblockCustomer);
 
-router.get("/getproduct", adminAuth,ProductController.getAllProducts);
+router.get("/categories", adminAuth, categoryController.getAllCategories);
+router.post("/categories",adminAuth,categoryController.addCategory)
+router.get("/categories/edit",adminAuth,categoryController.getEditCategory)
+router.put("/categories/:id/edit",adminAuth,categoryController.updateCategory)
+router.delete("/deleteCategories/:id",adminAuth,categoryController.deleteCategory)
 
-router.post("/addproduct", adminAuth,upload.array("images", 3), ProductController.addProduct);
-router.get("/editproduct/:id",adminAuth, ProductController.getEditProduct);
-router.post("/editproduct/:id",adminAuth,upload.array("newImages", 3), ProductController.postEditProduct);
-router.delete("/deleteproduct/:id", ProductController.deleteProduct);
-router.get("/viewproduct/:id", adminAuth, ProductController.viewProduct);
-router.get("/addproduct",adminAuth,ProductController.getAddProduct);
+
+router.get("/products", adminAuth,ProductController.getAllProducts);
+router.get("/products/add",adminAuth,ProductController.getAddProduct);
+router.post("/products/add", adminAuth,upload.array("images", 3), ProductController.postAddProduct);
+router.get("/products/:id/edit",adminAuth, ProductController.getEditProduct);
+router.post("/products/:id/edit",adminAuth,upload.array("newImages", 3), ProductController.postEditProduct);
+router.delete("/products/:id", ProductController.deleteProduct);
+router.get("/products/:id", adminAuth, ProductController.viewProduct);
+
+
+
 router.get("/coupons",adminAuth,couponController.getCouponsPage)
 router.get('/coupons/add',adminAuth,couponController.renderAddCouponPage);
 router.post("/coupons/add",adminAuth,couponController.postAddCouponPage)
+router.get('/coupons/:id/edit',adminAuth,couponController.getEditCoupon);
+router.put('/coupons/:id/edit',adminAuth,couponController.postEditCoupon);
 router.delete("/coupons/delete/:id", adminAuth,couponController.deleteCoupon);
-router.get('/editcoupon/:id', couponController.getEditCoupon);
-router.post('/editcoupon/:id', couponController.postEditCoupon);
-router.get("/getorders",adminAuth,orderController.getAllOrders)
-router.get("/vieworder/:orderId", adminAuth, orderController.getOrderDetails);
-router.post("/order/status/:orderId", adminAuth, orderController.updateOrderStatus);
+
+router.get("/orders",adminAuth,orderController.getAllOrders)
+router.get("/orders/:orderId", adminAuth, orderController.getOrderDetails);
+router.patch("/order/status/:orderId", adminAuth, orderController.updateOrderStatus);
 router.post("/approve-return/:orderId/:productId", adminAuth, orderController.approveReturn);
-router.get("/getoffers",adminAuth,offerController.getOffers);
-router.get("/addoffer",adminAuth,offerController.addOfferfun)
-router.post("/addoffer",adminAuth,offerController.postaddOffer)
-router.get("/editoffer/:id",adminAuth,offerController.geteditOffer)
-router.post("/editoffer/:id",adminAuth,offerController.posteditOffer );
-router.post("/disableoffer/:id",adminAuth, offerController.disableOffer);
-router.post("/enableoffer/:id",adminAuth,offerController.enableOffer);
-router.get("/dashboard-summary",AdminDashboardController.getDashboardSummary);
-router.get("/total-sales", AdminDashboardController.calculateTotalSales);
-router.get("/getSales",AdminDashboardController.getSalesCount);
-router.get("/download-sales-report", AdminDashboardController.downloadSalesReport);
-router.get("/wallet/:userId", orderController.getUserWalletDetails);
-router.get("/dashboard-sales",AdminDashboardController.getSalesReport);
-router.get("/sales-chart",AdminDashboardController.getSalesChart);
+router.get("/wallet/:userId",adminAuth,orderController.getUserWalletDetails);
+
+router.get("/offers",adminAuth,offerController.getAllOffers);
+router.get("/offers/add",adminAuth,offerController.renderAddOffer)
+router.post("/offers/add",adminAuth,offerController.postAddOffer)
+router.get("/offers/:id/edit",adminAuth,offerController.getEditOffer)
+router.put("/offers/:id/edit",adminAuth,offerController.postEditOffer );
+router.patch("/offers/:id/disable",adminAuth, offerController.disableOffer);
+router.patch("/offers/:id/enable",adminAuth,offerController.enableOffer);
+
+router.get("/dashboard/summary",adminAuth,AdminDashboardController.getDashboardSummary);
+router.get("/dashboard/sales/total",adminAuth, AdminDashboardController.getTotalSales);
+router.get("/dashboard/sales",adminAuth,AdminDashboardController.getSalesData);
+router.get("/dashboard/sales/report",adminAuth, AdminDashboardController.downloadSalesReport);
+router.get("/dashboard/top-sales",adminAuth,AdminDashboardController.getTopSales);
+router.get("/sales-chart",adminAuth,AdminDashboardController.getSalesChart);
+
 module.exports=router

@@ -6,7 +6,7 @@
 <div class="container">
     <h2>Edit Coupon</h2>
 
-    <form id="couponForm" action="/admin/editcoupon/<%= coupon._id %>" method="POST" onsubmit="return validateCouponForm()">
+    <form id="couponForm" >
         <div class="form-group">
             <label for="code">Coupon Code:</label>
             <input type="text" id="code" name="code" value="<%= coupon.code %>" required>
@@ -73,30 +73,6 @@
 
 <script>
    document.addEventListener("DOMContentLoaded", function () {
-    // Coupon success/error alert logic
-    const urlParams = new URLSearchParams(window.location.search);
-    
-    if (urlParams.get("success") === "true") {
-        Swal.fire({
-            title: "Coupon Updated!",
-            text: "The coupon has been successfully updated.",
-            icon: "success",
-            confirmButtonText: "OK"
-        }).then(() => {
-            window.history.replaceState(null, "", window.location.pathname);
-            window.location.href = "/admin/coupons"; // Redirect to the coupon list page
-        });
-    } else if (urlParams.get("error") === "true") {
-        Swal.fire({
-            title: "Error!",
-            text: "Something went wrong. Please try again.",
-            icon: "error",
-            confirmButtonText: "OK"
-        }).then(() => {
-            window.history.replaceState(null, "", window.location.pathname);
-        });
-    }
-
     // Category dropdown toggle logic
     toggleCategoryField();
     document.getElementById("appliesTo").addEventListener("change", toggleCategoryField);
@@ -114,37 +90,89 @@
             document.getElementById("category").value = "";
         }
     }
+
+    // Form submission handling
+    document.getElementById("couponForm").addEventListener("submit", async function (event) {
+        event.preventDefault();
+
+        if (validateCouponForm()) { // Ensure form validation passes
+            const couponId = "<%= coupon._id %>"; // Ensure this is correctly set
+            const url = `/admin/coupons/${couponId}/edit`;
+            //const form = document.getElementById("couponForm");
+            const formData = {
+            code: document.getElementById("code").value,
+            discountType: document.getElementById("discountType").value,
+            discountValue: document.getElementById("discountValue").value,
+            appliesTo: document.getElementById("appliesTo").value,
+            category: document.getElementById("category").value,
+            minPurchase: document.getElementById("minPurchase").value,
+            maxDiscount: document.getElementById("maxDiscount").value,
+            expiryDate: document.getElementById("expiryDate").value,
+            usageLimit: document.getElementById("usageLimit").value
+        };
+         console.log("********",formData)
+            try {
+                const response = await fetch(url, {
+                    method: "PUT",
+                    headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(formData)
+
+                });
+                const data = await response.json();
+                if (response.ok && data.success) {
+                    // Show success message
+                    Swal.fire({
+                        title: "Coupon Updated!",
+                        text: data.message ||"The coupon has been successfully updated.",
+                        icon: "success",
+                        confirmButtonText: "OK"
+                    }).then(() => {
+                        window.location.href = "/admin/coupons"; // Redirect after success
+                    });
+                } else {
+                    // Show error message
+                    Swal.fire("Error", data.error || "Failed to update coupon. Please try again.", "error");
+                }
+            } catch (error) {
+                console.error("Fetch error:", error);
+                Swal.fire("Error", "An unexpected error occurred.", "error");
+            }
+        }
+    });
 });
 
-    function validateCouponForm() {
-        let code = document.getElementById("code").value.trim();
-        let discountValue = parseFloat(document.getElementById("discountValue").value);
-        let expiryDate = document.getElementById("expiryDate").value;
-        let minPurchase = document.getElementById("minPurchase").value.trim();
-        let maxDiscount = document.getElementById("maxDiscount").value.trim();
-        let today = new Date().toISOString().split("T")[0];
+function validateCouponForm() {
+    let code = document.getElementById("code").value.trim();
+    let discountValue = parseFloat(document.getElementById("discountValue").value);
+    let expiryDate = document.getElementById("expiryDate").value;
+    let minPurchase = document.getElementById("minPurchase").value.trim();
+    let maxDiscount = document.getElementById("maxDiscount").value.trim();
+    let today = new Date().toISOString().split("T")[0];
 
-        if (code === "") {
-            Swal.fire("Error", "Coupon code is required!", "error");
-            return false;
-        }
-        if (isNaN(discountValue) || discountValue <= 0) {
-            Swal.fire("Error", "Discount value must be a positive number!", "error");
-            return false;
-        }
-        if (new Date(expiryDate) < new Date(today)) {
-            Swal.fire("Error", "Expiry date cannot be in the past!", "error");
-            return false;
-        }
-        if (minPurchase !== "" && parseFloat(minPurchase) < 0) {
-            Swal.fire("Error", "Minimum purchase must be a positive number!", "error");
-            return false;
-        }
-        if (maxDiscount !== "" && parseFloat(maxDiscount) < 0) {
-            Swal.fire("Error", "Maximum discount must be a positive number!", "error");
-            return false;
-        }
-
-        return true;
+    if (code === "") {
+        Swal.fire("Error", "Coupon code is required!", "error");
+        return false;
     }
+    if (isNaN(discountValue) || discountValue <= 0) {
+        Swal.fire("Error", "Discount value must be a positive number!", "error");
+        return false;
+    }
+    if (new Date(expiryDate) < new Date(today)) {
+        Swal.fire("Error", "Expiry date cannot be in the past!", "error");
+        return false;
+    }
+    if (minPurchase !== "" && parseFloat(minPurchase) < 0) {
+        Swal.fire("Error", "Minimum purchase must be a positive number!", "error");
+        return false;
+    }
+    if (maxDiscount !== "" && parseFloat(maxDiscount) < 0) {
+        Swal.fire("Error", "Maximum discount must be a positive number!", "error");
+        return false;
+    }
+
+    return true;
+}
+
 </script>

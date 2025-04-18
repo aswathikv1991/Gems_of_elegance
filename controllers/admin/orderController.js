@@ -98,10 +98,11 @@ const updateOrderStatus = async (req, res) => {
         await order.save();
 
         // Redirect back to the order details page with a success message
-        res.redirect(`/admin/vieworder/${orderId}?statusUpdated=true`);
+        res.status(200).json({ success: true, message: "Order status updated successfully" });
+
     } catch (error) {
         console.error("Error updating order status:", error);
-        res.status(500).send("Internal Server Error");
+        res.status(500).json({ success: false, message: "Internal Server Error" });
     }
 };
 

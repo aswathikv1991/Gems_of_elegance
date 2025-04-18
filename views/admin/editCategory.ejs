@@ -4,6 +4,7 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" />
   <link rel="stylesheet" href="/css/category.css" />
 </head>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <div class="container">
     <div class="row justify-content-center">
@@ -18,7 +19,9 @@
             <% } %>
             
 
-            <form method="post" action="/admin/editCategory/<%= category._id %>">
+            
+            <form id="editCategoryForm">
+              
                 <div class="mb-4 mt-30">
                     <label for="category_name" class="form-label fw-bold">Name</label>
                     <input type="text" name="categoryName" id="category_name" class="form-control border" 
@@ -26,7 +29,7 @@
                 </div>
 
                 <div class="mb-4">
-                    <label for="description" class="form-label fw-bold">Description</label>
+                    <label for="description" clas="form-label fw-bold">Description</label>
                     <textarea name="description" id="description" class="form-control border" required><%= category.description %></textarea>
                 </div>
 
@@ -41,11 +44,63 @@
 
                 <div class="d-flex justify-content-end gap-2 mt-30">
                     <button class="btn btn-primary w-50" type="submit">Update Category</button>
-                    <button class="btn btn-secondary w-50" type="button" onclick="window.location.href='/admin/category'">Cancel</button>
+                    <button class="btn btn-secondary w-50" type="button" onclick="window.location.href='/admin/categories'">Cancel</button>
                 </div>
             </form>
         </div>
     </div>
 </div>
+<script>
+document.getElementById('editCategoryForm').addEventListener('submit', async function (e) {
+    e.preventDefault();
 
+    const categoryId = "<%= category._id %>";
+    const formData = {
+        categoryName: document.getElementById('category_name').value,
+        description: document.getElementById('description').value,
+        status: document.getElementById('status').value,
+    };
+
+    try {
+        const response = await fetch(`/admin/categories/${categoryId}/edit`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(formData),
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+            // Display success message
+            Swal.fire({
+                title: 'Success!',
+                text: data.message || 'Category updated successfully.',
+                icon: 'success',
+                confirmButtonText: 'OK'
+            }).then(() => {
+                // Redirect after user acknowledges the success message
+                window.location.href = '/admin/categories';
+            });
+        } else {
+            // Display error message
+            Swal.fire({
+                title: 'Error!',
+                text: data.error || 'Failed to update category.',
+                icon: 'error',
+                confirmButtonText: 'OK'
+            });
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        Swal.fire({
+            title: 'Error!',
+            text: 'Something went wrong while updating.',
+            icon: 'error',
+            confirmButtonText: 'OK'
+        });
+    }
+});
+</script>
 <%- include("../../views/partials/admin/footer") %>

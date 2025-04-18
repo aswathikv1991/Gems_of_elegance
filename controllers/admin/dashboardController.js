@@ -46,56 +46,8 @@ const getDashboardSummary = async (req, res) => {
 
 
 
-const calculateTotalSales = async (req, res) => {
-   
-      /*  try {
-          const totalSalesData = await Order.aggregate([
-            { 
-              $match: { 
-                paymentStatus: "paid", 
-                orderStatus: { $ne: "cancelled" } 
-              } 
-            },
-            {
-              $group: {
-                  _id: "$_id",
-                  createdAt: { $first: "$createdAt" },
-                  amountBeforeDelivery: { $first: "$amountBeforeDelivery" },
-                  discountAmount: { $first: "$discountAmount" },
-                  totalAmount: { $first: "$totalAmount" },
-                  deliveryCharge: { $first: "$deliveryCharge" },
-                  items: { $push: "$items" } // Keep items array intact
-              }
-            },
-            { $unwind: "$items" }, // Unwind items array
-            { $match: { "items.status": "delivered" } }, // Count only delivered items
-      
-            // **Final Grouping Based on Time Period**
-            {
-              $group: {
-                  _id: null, 
-      
-                 
-                  totalOrders: { $addToSet: "$_id" },
-      
-                  // Total Order Value (Before discounts & delivery charges)
-                  totalOrderValue: { $sum: "$amountBeforeDelivery" },
-      
-                  // Total Discounts Applied
-                  totalDiscounts: { $sum: "$discountAmount" },
-      
-                  // Total Sales (Amount Before Delivery - Discounts)
-                  totalSales: { $sum: { $subtract: ["$amountBeforeDelivery", "$discountAmount"] } },
-      
-                  // Total Delivery Charges
-                  totalDeliveryCharges: { $sum: "$deliveryCharge" },
-      
-                  // Total Revenue (Final amount after discounts & delivery)
-                  totalRevenue: { $sum: "$totalAmount" }
-              }
-            }
-          ]);*/
-          try{
+const 	getTotalSales= async (req, res) => {
+         try{
 
             const totalSalesData = await Order.aggregate([
                 { $unwind: "$items" },   // Expand items array to access individual item details
@@ -145,100 +97,8 @@ const calculateTotalSales = async (req, res) => {
         }
       };
       
-/*const getSalesCount = async (req, res) => {
-  try {
-      const filter = req.query.filter || "daily"; // Default to "daily"
-      let startDate = req.query.startDate || "";
-      let endDate = req.query.endDate || "";
-     
-      let matchQuery = {
-          paymentStatus: "paid",
-          orderStatus: "delivered" // Only delivered orders count as sales
-      };
 
-      let groupByField = { format: "%Y-%m-%d", date: "$createdAt" }; // Default: Daily
-
-      // Handle Different Filters
-      if (filter === "weekly") {
-          groupByField.format = "%Y-%U"; // Week of the year
-      } else if (filter === "monthly") {
-          groupByField.format = "%Y-%m"; // Year-Month
-      } else if (filter === "yearly") {
-          groupByField.format = "%Y"; // Year only
-      } else if (filter === "custom") {
-          if (startDate && endDate) {
-              matchQuery.createdAt = {
-                  $gte: new Date(startDate),
-                  $lte: new Date(endDate)
-              };
-          }
-      }
-
-      const salesData = await Order.aggregate([
-          { $match: matchQuery }, // Match only delivered & paid orders
-
-          // **First Grouping to Remove Duplicates & Prepare Order-Level Data**
-          {
-              $group: {
-                  _id: "$_id",
-                  createdAt: { $first: "$createdAt" },
-                  amountBeforeDelivery: { $first: "$amountBeforeDelivery" },
-                  discountAmount: { $first: "$discountAmount" },
-                  totalAmount: { $first: "$totalAmount" },
-                  deliveryCharge: { $first: "$deliveryCharge" },
-                  items: { $push: "$items" } // Keep items array intact
-              }
-          },
-
-          { $unwind: "$items" }, // Unwind items array
-
-          { $match: { "items.status": "delivered" } }, // Count only delivered items
-
-          // **Final Grouping Based on Time Period**
-          {
-              $group: {
-                  _id: filter === "custom" ? null : { $dateToString: groupByField },
-
-                  //  Count total distinct delivered orders
-                  totalOrders: { $addToSet: "$_id" },
-
-                  // Total Order Value (Before discounts & delivery charges)
-                  totalOrderValue: { $sum: "$amountBeforeDelivery" },
-
-                  //  Total Discounts Applied
-                  totalDiscounts: { $sum: "$discountAmount" },
-
-                  //  Total Amount Before Delivery (After discounts, before delivery)
-                  totalAmountBeforeDelivery: {
-                      $sum: { $subtract: ["$amountBeforeDelivery", "$discountAmount"] }
-                  },
-
-                  //  Total Delivery Charges
-                  totalDeliveryCharges: { $sum: "$deliveryCharge" },
-
-                  //  Total Revenue (Final amount after discounts & delivery)
-                  totalRevenue: { $sum: "$totalAmount" }
-              }
-          },
-
-          // Convert `totalOrders` from Set to Count
-          {
-              $addFields: {
-                  totalOrders: { $size: "$totalOrders" }
-              }
-          },
-
-          { $sort: { _id: -1 } } // Sort by latest date
-      ]);
-
-      res.render("admin/salesreport", { salesData, filter, startDate, endDate });
-
-  } catch (error) {
-      console.error("Error fetching sales report:", error);
-      res.status(500).send("Server Error");
-  }
-};*/
-const getSalesCount = async (req, res) => {
+const getSalesData = async (req, res) => {
     let { filterType = "daily", startDate, endDate } = req.query;
 
     let matchQuery={} ;
@@ -279,48 +139,7 @@ const getSalesCount = async (req, res) => {
             $lt: new Date(endDate)
         };
     }
-
-    /*try {
-        // **Check if Orders Exist for the Given Date Range**
-        console.log("Filter Type:", filterType);
-        console.log("Match Query:", matchQuery);
-
-        const reportData = await Order.aggregate([
-            { $match: matchQuery },
-            {
-                $lookup: {
-                    from: "users",
-                    localField: "userId",
-                    foreignField: "_id",
-                    as: "customer"
-                }
-            },
-            { $unwind: "$customer" },
-            { $unwind: "$items" },
-            {
-                $project: {
-                    orderID: 1,
-                    createdAt: 1,
-                    "customer.name": 1,
-                    "items.productId": 1,
-                    "items.quantity": 1,
-                    "items.price": 1,
-                    "items.total": 1,
-                    "items.status": 1,
-                    "items.salePrice": 1,
-                    discountAmount: 1
-                }
-            }
-        ]);
-
-        if (reportData.length === 0) {
-            console.log("No matching sales report data found.");
-        } else {
-            console.log("Report Data:", reportData);
-        }*/
-
-       // Summary Calculation (Only Delivered Orders)
-       
+  
        try{
         const summaryData = await Order.aggregate([
             { $match: { ...matchQuery,  orderStatus: { $in: ["delivered", "pending"] }}},
@@ -710,7 +529,7 @@ doc.text(totalDiscount.toFixed(2), startX + columnWidths.slice(0, 6).reduce((a, 
 
 
 
-const getSalesReport = async (req, res) => {
+const getTopSales = async (req, res) => {
   try {
     // Aggregate Top 10 Best-Selling Products
     const topProducts = await Order.aggregate([
@@ -801,85 +620,63 @@ const getSalesChart = async (req, res) => {
     try {
         const { filter } = req.query; // Get filter type (daily, weekly, monthly, yearly)
         const today = new Date();
-        let matchQuery = {}; // This will hold the date filter
+        let startDate;
+        let groupByFormat;
 
-        // Apply Date Filters
+        // Determine startDate and groupByFormat based on filter
         if (filter === "daily") {
-            const startOfDay = new Date(today);
-            startOfDay.setUTCHours(0, 0, 0, 0)
-            const endOfDay = new Date(today);
-            endOfDay.setUTCHours(23, 59, 59, 999);
-            matchQuery.createdAt = { $gte: startOfDay, $lt: endOfDay };
+            startDate = new Date(today);
+            startDate.setUTCHours(0, 0, 0, 0);
+            groupByFormat = { year: { $year: "$createdAt" }, month: { $month: "$createdAt" }, day: { $dayOfMonth: "$createdAt" } };
         } else if (filter === "weekly") {
-            const startOfWeek = new Date(today);
-            startOfWeek.setDate(today.getDate() - 7);
-            matchQuery.createdAt = { $gte: startOfWeek, $lt: today };
+            startDate = new Date(today);
+            startDate.setDate(today.getDate() - 28); // Last 4 weeks
+            groupByFormat = { year: { $isoWeekYear: "$createdAt" }, week: { $isoWeek: "$createdAt" } };
         } else if (filter === "monthly") {
-            matchQuery.createdAt = { 
-                $gte: new Date(today.getFullYear(), today.getMonth(), 1), 
-                $lt: today 
-            };
+            startDate = new Date(today.getFullYear(), today.getMonth() - 5, 1); // Last 6 months
+            groupByFormat = { year: { $year: "$createdAt" }, month: { $month: "$createdAt" } };
         } else if (filter === "yearly") {
-            matchQuery.createdAt = { 
-                $gte: new Date(today.getFullYear(), 0, 1), 
-                $lt: today 
-            };
+            startDate = new Date(today.getFullYear() - 2, 0, 1); // Last 3 years
+            groupByFormat = { year: { $year: "$createdAt" } };
+        } else {
+            return res.status(400).json({ success: false, message: "Invalid filter type" });
         }
 
-        // Get Total Sales
-        const totalSalesData = await Order.aggregate([
-            { $match: matchQuery }, // Apply date filter
-            { $unwind: "$items" },   
-            {
-                $group: {
-                    _id: null,
-                    totalSales: { $sum: "$items.price" },
-                    totalDiscounts: { $sum: { $subtract: ["$items.price", "$items.salePrice"] } }
-                }
-            }
-        ]);
+        const matchQuery = { createdAt: { $gte: startDate, $lt: today } };
 
-        // Get Net Sales (Total Amount Before Delivery)
-        const totalAmountBeforeDeliveryData = await Order.aggregate([
-            { $match: { ...matchQuery, orderStatus: { $in: ["delivered", "pending"] } } }, 
-            { $group: { 
-                _id: "$_id", 
-                totalAmountBeforeDelivery: { $sum: { $subtract: ["$amountBeforeDelivery", "$discountAmount"] } } 
-            }},
-            { $group: { 
-                _id: null, 
-                totalAmountBeforeDelivery: { $sum: "$totalAmountBeforeDelivery" } 
-            }}
-        ]);
-
-        // Get Total Refund (Cancelled & Returned Orders)
-        const totalRefundData = await Order.aggregate([
-            { $match: matchQuery }, // Apply date filter
+        // Aggregate sales data
+        const salesData = await Order.aggregate([
+            { $match: matchQuery },
             { $unwind: "$items" },
-            { $match: { "items.status": { $in: ["cancelled", "returned"] } } },
             {
                 $group: {
-                    _id: null,
-                    totalCancelledReturnedAmount: { $sum: "$items.salePrice" }
+                    _id: groupByFormat,
+                    totalSales: { $sum: "$items.price" },
+                    totalDiscounts: { $sum: { $subtract: ["$items.price", "$items.salePrice"] } },
+                    totalRefunds: {
+                        $sum: {
+                            $cond: {
+                                if: { $in: ["$items.status", ["cancelled", "returned"]] },
+                                then: "$items.salePrice",
+                                else: 0
+                            }
+                        }
+                    },
+                    netSales: {
+                        $sum: {
+                            $cond: {
+                                if: { $in: ["$items.status", ["cancelled", "returned"]] },
+                                then: 0,
+                                else: "$items.salePrice"
+                            }
+                        }
+                    }
                 }
-            }
+            },
+            { $sort: { "_id.year": 1, "_id.month": 1, "_id.day": 1, "_id.week": 1 } }
         ]);
 
-        // Extract values safely
-        const totalSales = totalSalesData.length > 0 ? totalSalesData[0].totalSales : 0;
-        const totalDiscounts = totalSalesData.length > 0 ? totalSalesData[0].totalDiscounts : 0;
-        const totalAmountBeforeDelivery = totalAmountBeforeDeliveryData.length > 0 
-            ? totalAmountBeforeDeliveryData[0].totalAmountBeforeDelivery 
-            : 0;
-        const totalRefunds = totalRefundData.length > 0 ? totalRefundData[0].totalCancelledReturnedAmount : 0;
-
-        return res.status(200).json({
-            success: true,
-            totalSales,
-            totalDiscounts,
-            totalAmountBeforeDelivery,  // Net Sales
-            totalRefunds // Refund Amount
-        });
+        return res.status(200).json({ success: true, data: salesData });
 
     } catch (error) {
         console.error("Error generating sales report:", error);
@@ -887,4 +684,5 @@ const getSalesChart = async (req, res) => {
     }
 };
 
-module.exports={getDashboardSummary,calculateTotalSales,getSalesCount,downloadSalesReport,getSalesReport,getSalesChart}
+
+module.exports={getDashboardSummary,getTotalSales,getSalesData,downloadSalesReport,	getTopSales,getSalesChart}

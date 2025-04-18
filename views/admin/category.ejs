@@ -11,7 +11,7 @@
 
     <!-- Search Bar -->
     <div class="text-center mb-3">
-      <form action="/admin/category/" method="get" class="d-inline">
+      <form action="/admin/categories/" method="get" class="d-inline">
         <div class="input-group input-group-sm border border-1 border-grey rounded-pill" style="max-width: 500px; margin: auto;">
           <input type="text" class="form-control border-0 rounded-pill mt-3" placeholder="Search categories" name="search"/>
           <button class="btn btn-primary" type="submit">Search</button>
@@ -24,7 +24,7 @@
       <div class="col-md-4">
         <div class="card p-4">
           <h3 class="add-category-title text-center mb-3">Add Category</h3>
-          <form method="post" action="/admin/addCategory" onsubmit="return handleFormSubmit(event)">
+          <form method="post" action="/admin/categories" onsubmit="return handleFormSubmit(event)">
             <div class="mb-3">
               <label for="product_name" class="form-label">Name</label>
               <input type="text" name="name" id="product_name" class="form-control" required/>
@@ -64,7 +64,7 @@
                       <td><%= category.description %></td>
                       <td><%= category.status %></td>
                       <td>
-                        <a href="/admin/editCategory?id=<%= category._id %>" class="btn btn-info btn-sm text-white">Edit</a>
+                        <a href="/admin/categories/edit?id=<%= category._id %>" class="btn btn-info btn-sm text-white">Edit</a>
                         <button class="btn btn-danger btn-sm text-white" onclick="confirmDelete('<%= category._id %>')">Delete</button>
                       </td>
                     </tr>
@@ -136,7 +136,7 @@
         };
 
         try {
-            const response = await fetch("/admin/addCategory", {
+            const response = await fetch("/admin/categories", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"
@@ -174,7 +174,7 @@
             confirmButtonText: "Yes, delete it!"
         }).then((result) => {
             if (result.isConfirmed) {
-                fetch(`/admin/deleteCategory/${categoryId}`, {
+                fetch(`/admin/deleteCategories/${categoryId}`, {
                     method: "DELETE",
                     headers: { "Content-Type": "application/json" }
                 })

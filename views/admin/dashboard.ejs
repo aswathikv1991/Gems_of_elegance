@@ -101,14 +101,14 @@
     document.addEventListener("DOMContentLoaded", async () => {
       try {
       
-        const ordersResponse = await fetch("/admin/dashboard-summary");
+        const ordersResponse = await fetch("/admin/dashboard/summary");
         const ordersData = await ordersResponse.json();
 
         if (ordersData.success) {
             document.getElementById("totalOrders").textContent = ordersData.totalOrders;
             document.getElementById("totalCustomers").textContent = ordersData.totalCustomers;
             document.getElementById("pendingOrders").textContent = ordersData.pendingOrders;
-            document.getElementById("totalRefund").textContent = ordersData.totalRefundAmount;
+            document.getElementById("totalRefund").textContent = `₹${ordersData.totalRefundAmount.toFixed(2)}`;
         }
         const codOrders = ordersData.totalCODOrders;
         const onlinePayments = ordersData.totalOnlinePayments;
@@ -126,11 +126,11 @@
             });
         
         
-        const salesResponse = await fetch("/admin/total-sales");
+        const salesResponse = await fetch("/admin/dashboard/sales/total");
         const salesData = await salesResponse.json();
 
         if (salesData.success) {
-            document.getElementById("totalSales").textContent = `$${salesData.totalSales.toFixed(2)}`;
+            document.getElementById("totalSales").textContent = `₹${salesData.totalSales.toFixed(2)}`;
             document.getElementById("totalDiscounts").textContent = `₹${salesData.totalDiscounts.toFixed(2)}`;
             document.getElementById("netSale").textContent = `₹${salesData.totalAmountBeforeDelivery.toFixed(2)}`;
         }
@@ -143,7 +143,7 @@
       
 
     try {
-        const response = await fetch("/admin/dashboard-sales");
+        const response = await fetch("/admin/dashboard/top-sales");
         const data = await response.json();
 
         if (data.success) {
@@ -204,59 +204,87 @@
         console.error("Error fetching sales data:", error);
     }
     const salesFilter = document.getElementById("salesFilter");
-    const salesChartCanvas = document.getElementById("salesChart");
-    let salesChart;
+const salesChartCanvas = document.getElementById("salesChart");
+let salesChart;
 
-    // Fetch and update sales data
-    async function fetchSalesData(filter = "daily") {
-        try {
-            const response = await fetch(`/admin/sales-chart?filter=${filter}`);
-            const data = await response.json();
+// Fetch and update sales data
+async function fetchSalesData(filter = "daily") {
+    try {
+        const response = await fetch(`/admin/sales-chart?filter=${filter}`);
+        const result = await response.json();
 
-            if (data.success) {
-                updateSalesChart(data);
-            }
-        } catch (error) {
-            console.error("Error fetching sales data:", error);
+        if (result.success) {
+            const { data } = result;
+            const labels = data.map(item => {
+                if (filter === "daily") {
+                    return `${item._id.year}-${item._id.month}-${item._id.day}`;
+                } else if (filter === "weekly") {
+                    return `Week ${item._id.week}, ${item._id.year}`;
+                } else if (filter === "monthly") {
+                    return `${item._id.year}-${item._id.month}`;
+                } else if (filter === "yearly") {
+                    return `${item._id.year}`;
+                }
+            });
+
+            const totalSales = data.map(item => item.totalSales);
+            const totalDiscounts = data.map(item => item.totalDiscounts);
+            const totalRefunds = data.map(item => item.totalRefunds);
+            const netSales=data.map(item => item.netSales);
+            updateSalesChart(labels,totalSales,netSales, totalDiscounts, totalRefunds);
         }
+    } catch (error) {
+        console.error("Error fetching sales data:", error);
+    }
+}
+
+function updateSalesChart(labels, totalSales,netSales, totalDiscounts, totalRefunds) {
+    if (salesChart) {
+        salesChart.destroy(); // Destroy previous chart instance
     }
 
-    function updateSalesChart(data) {
-        const labels = ["Total Sales", "Total Discounts", "Net Sales", "Refunds"];
-        const values = [
-            data.totalSales,
-            data.totalDiscounts,
-            data.totalAmountBeforeDelivery,
-            data.totalRefunds
-        ];
+    salesChart = new Chart(salesChartCanvas, {
+        type: "bar",
+        data: {
+            labels: labels,
+            datasets: [
+                {
+                    label: "Total Sales (₹)",
+                    data: totalSales,
+                    backgroundColor: "#36A2EB"
+                },
+                {
+                    label: "Netsale (₹)",
+                    data: netSales,
+                    backgroundColor: "#4BC0C0"
+                },
+                {
+                    label: "Total Discounts (₹)",
+                    data: totalDiscounts,
+                    backgroundColor: "#FFCE56"
+                },
+                {
+                    label: "Total Refunds (₹)",
+                    data: totalRefunds,
+                    backgroundColor: "#FF6384"
+                },
+               
+            ]
+        },
+        options: { responsive: true }
+    });
+}
 
-        if (salesChart) {
-            salesChart.destroy(); // Destroy previous chart instance
-        }
+// Fetch initial data when page loads
+fetchSalesData("daily");
 
-        salesChart = new Chart(salesChartCanvas, {
-            type: "bar",
-            data: {
-                labels: labels,
-                datasets: [{
-                    label: "Amount (₹)",
-                    data: values,
-                    backgroundColor: ["#36A2EB", "#FFCE56", "#4BC0C0", "#FF6384"]
-                }]
-            },
-            options: { responsive: true }
-        });
-    }
+// Add event listener if salesFilter exists
+if (salesFilter) {
+    salesFilter.addEventListener("change", (e) => {
+        fetchSalesData(e.target.value);
+    });
+}
 
-    // Fetch initial data when page loads
-    await fetchSalesData("daily");
-
-    // Add event listener only if salesFilter exists
-    if (salesFilter) {
-        salesFilter.addEventListener("change", async (e) => {
-            await fetchSalesData(e.target.value);
-        });
-    }
 
 
     });

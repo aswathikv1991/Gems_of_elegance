@@ -68,7 +68,7 @@ function updateAddress() {
     // Prepare JSON data
     let formData = { houseNumber, street, city, state, pincode };
 
-    fetch(`/updateaddress/${addressId}`, {
+    fetch(`/addresses/${addressId}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),

@@ -77,13 +77,7 @@
 
 
 
-<!-- Reviews Section 
-<div class="reviews-section">
-    <h3>Customer Reviews</h3>
-    <div id="reviews-container">
-        <p>Loading reviews...</p>
-    </div>
-</div>-->
+
 
 <script>
     document.addEventListener("DOMContentLoaded", function () {
@@ -130,7 +124,7 @@
                 //console.log("Wishlist button clicked!");
                 const productId = event.target.getAttribute("data-product-id");
 
-                fetch("/check-login-status")
+                fetch("/auth/status")
                     .then(response => response.json())
                     .then(data => {
                         if (!data.loggedIn) {
@@ -147,7 +141,7 @@
                                 }
                             });
                         } else {
-                            fetch("/wishlist/add", {
+                            fetch("/wishlist", {
                                 method: "POST",
                                 headers: { "Content-Type": "application/json" },
                                 body: JSON.stringify({ productId })
@@ -175,7 +169,7 @@
         if (addToCartBtn) {
             addToCartBtn.addEventListener("click", function () {
                 const quantity = 1; 
-                fetch("/check-login-status")
+                fetch("/auth/status")
                     .then(response => response.json())
                     .then(data => {
                         if (!data.loggedIn) {
@@ -192,7 +186,7 @@
                                 }
                             });
                         } else {
-                            fetch("/cart/add", {
+                            fetch("/cart", {
                                 method: "POST",
                                 headers: { "Content-Type": "application/json" },
                                 body: JSON.stringify({ productId, quantity })
@@ -219,43 +213,9 @@
             });
         }
 
-        // Load Reviews
-      /*  const reviewsContainer = document.getElementById("reviews-container");
-        function loadReviews() {
-            reviewsContainer.innerHTML = "<p>Loading reviews...</p>";
-            fetch(`/reviews/${productId}`)
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        reviewsContainer.innerHTML = "";
-                        if (data.reviews.length > 0) {
-                            data.reviews.forEach(review => {
-                                const reviewElement = document.createElement("div");
-                                reviewElement.classList.add("review");
-                                reviewElement.innerHTML = `
-                                    <p><strong>${review.user.name}</strong> (${new Date(review.createdAt).toLocaleDateString()})</p>
-                                    <p>Rating: ⭐${review.rating}</p>
-                                    <p>${review.comment}</p>
-                                `;
-                                reviewsContainer.appendChild(reviewElement);
-                            });
-                        } else {
-                            reviewsContainer.innerHTML = "<p>No reviews yet.</p>";
-                        }
-                    } else {
-                        reviewsContainer.innerHTML = "<p>Failed to load reviews.</p>";
-                    }
-                })
-                .catch(error => {
-                    console.error("Error fetching reviews:", error);
-                    reviewsContainer.innerHTML = "<p>Error loading reviews.</p>";
-                });
-        }
-
-        loadReviews();
-   */
+        
     async function checkReviewEligibility(productId) {
-        const response = await fetch(`/can-review/${productId}`);
+        const response = await fetch(`/products/${productId}/review`);
         const data = await response.json();
 
         if (data.canReview) {
@@ -279,7 +239,7 @@ async function submitReview() {
     }
 
     try {
-        const response = await fetch("/submit-review", {
+        const response = await fetch("/reviews", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ productId, comment, rating }),

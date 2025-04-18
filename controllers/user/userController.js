@@ -20,19 +20,16 @@ const loadHomepage = async (req, res,next) => {
 };
 
 
-const loadSignup = async (req, res,next) => {
+const getSignup = async (req, res,next) => {
     try {
-        //console.log("Signup page requested.");
-        //console.log("Referral token received in query:", req.query.ref);
+        
         if (req.session.user) {
-            // Fetch the full user object from the database
-            //const user = await User.findById(req.session.user);
+            
             return res.redirect("/"); 
         }
         return res.render("user/signup", { user: null, message: "" }); 
     } catch (error) {
-        //console.log("Signup page not loading", error);
-        //res.status(500).send("Server error");
+       
         next(error);
     }
 };
@@ -72,7 +69,7 @@ async function sendVerificationEmail(email, otp) {
 const sendReferralEmail=async (req, res,next) =>{
     try {
         const { email, referralLink } = req.body;
-       // console.log("email sentto",req.body)
+      
 
         if (!email || !referralLink) {
             return res.status(400).json({ message: "Email and referral link are required." });
@@ -104,8 +101,7 @@ const sendReferralEmail=async (req, res,next) =>{
         return res.status(200).json({ success: true, message: "Invitation email sent successfully!" });
 
     } catch (error) {
-        //console.error("Error sending referral email:", error);
-        //return res.status(500).json({ success: false, message: "Failed to send invitation email." });
+       
         next(error);
     }
 }
@@ -151,8 +147,7 @@ const signup = async (req, res,next) => {
 
         // Generate a unique referral token
         const referralID = uuidv4();
-        //console.log("Generated Referral Token for new user:", referralToken);
-        // Check if the user signed up using a referral link
+      
         let referredBy = null;
         if (referralToken) {
             const referringUser = await User.findOne({ referralToken });
@@ -180,8 +175,7 @@ const signup = async (req, res,next) => {
         res.render("user/verifyotp", { user: null }); 
         console.log("OTP stored in session", req.session.userOtp);
     } catch (error) {
-        //console.error("Signup error", error);
-        //res.redirect("/pageNotFound");
+      
         next(error);
     }
 };
@@ -205,8 +199,7 @@ const verifyOtp = async (req, res,next) => {
             const user = req.session.user;
             const passwordHash = await securePassword(user.password);
 
-            // Generate a unique referral token for the new user
-            //const referralToken = require("crypto").randomBytes(16).toString("hex");
+          
 
             const saveUserData = new User({
                 name: user.name,
@@ -252,8 +245,7 @@ const verifyOtp = async (req, res,next) => {
             res.status(400).json({ success: false, message: "Invalid OTP, please try again" });
         }
     } catch (error) {
-        //console.error("Error verifying OTP", error);
-        //res.status(500).json({ success: false, message: "An error occurred" });
+       
         next(error);
     }
 };
@@ -283,8 +275,7 @@ const resendOtp = async (req, res,next) => {
 
         res.json({ success: true, message: "New OTP sent successfully." });
     } catch (error) {
-        //console.error("Error resending OTP:", error);
-        //res.status(500).json({ success: false, message: "An error occurred. Please try again." });
+      
         next(error);
     }
 };
@@ -298,8 +289,7 @@ const loadLogin = async (req, res,next) => {
         req.session.successMessage = null;
         return res.render("user/login", { user: null, message: successMessage });
     } catch (error) {
-        //console.log("Login page not loading", error);
-        //res.status(500).send("Server error");
+      
         next(error);
     }
 };
@@ -326,8 +316,7 @@ const login = async (req, res,next) => {
 
         res.redirect("/");
     } catch (error) {
-       // console.error("Login error", error);
-        //res.render("user/login", {user:null, message: "Login failed, please try again later" });
+      
         next(error)
     }
 };
@@ -341,8 +330,7 @@ const logout = async (req, res,next) => {
             res.redirect("/login");
         });
     } catch (error) {
-       // console.error("Error logging out", error);
-       // res.redirect("/pageNotFound");
+      
        next(error);
     }
 };
@@ -364,10 +352,7 @@ const getContactPage = (req, res) => {
     res.render("user/contactus");
 };
 
-
-;
-
-const sendContactMessage=async(req, res) =>{
+const sendContactMessage=async(req, res,next) =>{
     try {
         const { name, email, message } = req.body;
         if (!name || !email || !message) {
@@ -375,12 +360,16 @@ const sendContactMessage=async(req, res) =>{
             error.statusCode = 400; // Custom status code for middleware
             return next(error); // Pass to Express error handler
         }
-        
+
+
         const transporter = nodemailer.createTransport({
             service: "gmail",
             auth: {
                 user: process.env.NODEMAILER_EMAIL, // Your email (receiving messages)
                 pass: process.env.NODEMAILER_PASSWORD
+            },
+            tls: {
+                rejectUnauthorized: false
             }
         });
 
@@ -394,7 +383,7 @@ const sendContactMessage=async(req, res) =>{
                    <p><strong>Message:</strong> ${message}</p>`
         });
 
-        console.log("Contact message sent:", info.response);
+       
         res.status(200).json({ success: true, message: "Message sent successfully!" });
     } catch (error) {
         console.error("Error sending contact message:", error.message);
@@ -402,12 +391,12 @@ const sendContactMessage=async(req, res) =>{
     }
 }
 
-;
+
 
 module.exports = {
     loadHomepage,
     pageNotFound,
-    loadSignup,
+    getSignup,
     signup,
     verifyOtp,
     resendOtp,

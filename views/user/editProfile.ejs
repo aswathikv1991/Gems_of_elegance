@@ -4,7 +4,7 @@
 <div class="container">
     <div class="edit-profile-container">
         <h2>Edit Profile</h2>
-        <form id="editProfileForm" action="/editprofile" method="POST" class="edit-profile-form">
+        <form id="editProfileForm" action="/profile/edit" method="POST" class="edit-profile-form">
             
             <!-- Name Field -->
             <label for="name">Full Name:</label>
@@ -160,7 +160,7 @@ function enableSaveButton() {
             showError("emailError", "Email is unchanged.");
             return;
         }
-        fetch("/sendotp", {
+        fetch("/profile/otp", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ email: newEmail })
@@ -181,7 +181,7 @@ function enableSaveButton() {
 
     verifyOtpBtn.addEventListener("click", function () {
         let otp = document.getElementById("otp").value.trim();
-        fetch("/verify_profile_otp", {
+        fetch("/profile/otp/verify", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ otp })
@@ -221,7 +221,7 @@ for (let [key, value] of formData.entries()) {
     console.log(`${key}: ${value}`);
 }
     try {
-        const response = await fetch("/editprofile", {
+        const response = await fetch("/profile/edit", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",

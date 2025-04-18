@@ -74,7 +74,7 @@
                         
                             <!-- Wishlist Button -->
                                
-                            <a href="/productdetail/<%= product._id %>" class="btn btn-primary">View Details</a>
+                            <a href="/products/<%= product._id %>" class="btn btn-primary">View Details</a>
                             <button class="wishlist-btn <%= wishlistItems.includes(product._id.toString()) ? 'active' : '' %>" 
                                 data-id="<%= product._id %>">
                                 <i class="fa fa-heart"></i> 
@@ -114,7 +114,7 @@
 });
 
 const wishlistButtons = document.querySelectorAll(".wishlist-btn");
-console.log("Wishlist buttons found:", wishlistButtons.length);
+
 
 wishlistButtons.forEach(button => {
     button.addEventListener("click", function () {
@@ -126,7 +126,7 @@ wishlistButtons.forEach(button => {
             return;
         }
 
-        fetch("/check-login-status")
+        fetch("/auth/status")
             .then(response => response.json())
             .then(data => {
                 if (!data.loggedIn) {
@@ -147,8 +147,8 @@ wishlistButtons.forEach(button => {
                     const isInWishlist = button.classList.contains("active");
                     console.log(`Product ID: ${productId}, isInWishlist: ${isInWishlist}`);
 
-                    fetch(`/wishlist/${isInWishlist ? "delete" : "add"}`, {
-                        method: "POST",
+                    fetch("/wishlist", {
+                        method: isInWishlist ? 'DELETE' : 'POST',
                         headers: { "Content-Type": "application/json" },
                         body: JSON.stringify({ productId })
                     })

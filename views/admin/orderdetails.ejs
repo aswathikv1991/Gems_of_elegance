@@ -1,15 +1,16 @@
 <%- include("../../views/partials/admin/header") %>
 <link href="/css/adminorder.css" rel="stylesheet" type="text/css" />
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <div class="container">
     <h1>Order Details</h1>
 
     <!-- Alert Message -->
-    <% if (statusUpdated) { %>
+    <!--<% if (statusUpdated) { %>
         <div class="alert alert-success">
             <strong>Success!</strong> The order status has been updated.
         </div>
-    <% } %>
+    <% } %>-->
 
     <!-- Order Information -->
     <div class="order-info">
@@ -133,8 +134,8 @@
     <!-- Order Status Dropdown (to change status) -->
     <div class="order-status">
         <h3>Change Order Status</h3>
-        <form action="/admin/order/status/<%= order._id %>" method="POST">
-            <select name="orderStatus" required>
+        <form id="orderStatusForm">
+            <select name="orderStatus" id="orderStatus" required>
                 <option value="pending" <%= order.orderStatus === 'pending' ? 'selected' : '' %>>Pending</option>
                 <option value="processing" <%= order.orderStatus === 'processing' ? 'selected' : '' %>>Processing</option>
                 <option value="shipped" <%= order.orderStatus === 'shipped' ? 'selected' : '' %>>Shipped</option>
@@ -146,7 +147,7 @@
     </div>
 
     <div class="back-button">
-        <a href="/admin/getorders" class="btn btn-primary">Back to Orders</a>
+        <a href="/admin/orders" class="btn btn-primary">Back to Orders</a>
     </div>
 </div>
 
@@ -187,6 +188,48 @@ function handleReturnSubmit(event, orderId, productId) {
     }
 })
 }
+document.getElementById('orderStatusForm').addEventListener('submit', async function(e) {
+    e.preventDefault(); // Prevent default form submission
+
+    const orderId = "<%= order._id %>";
+    const newStatus = document.getElementById('orderStatus').value;
+
+    try {
+        const response = await fetch(`/admin/order/status/${orderId}`, {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ orderStatus: newStatus })
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+            Swal.fire({
+                icon: 'success',
+                title: 'Success!',
+                text: 'Order status updated successfully.',
+                confirmButtonText: 'OK'
+            }).then(() => {
+                location.reload(); // Refresh page to reflect new status
+            });
+        } else {
+            Swal.fire({
+                icon: 'error',
+                title: 'Update Failed',
+                text: data.message || 'Something went wrong.'
+            });
+        }
+    } catch (err) {
+        console.error(err);
+        Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'An unexpected error occurred.'
+        });
+    }
+});
 </script>
 
 <%- include("../../views/partials/admin/footer") %>

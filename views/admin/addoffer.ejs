@@ -65,7 +65,7 @@
             </div>
 
             <div class="text-center d-flex gap-3 justify-content-center">
-                <a href="/admin/getoffers" class="btn btn-danger"><i class="fas fa-times"></i> Exit</a>
+                <a href="/admin/offers" class="btn btn-danger"><i class="fas fa-times"></i> Exit</a>
                 <button type="submit" class="btn btn-success"><i class="fas fa-save"></i> Save Offer</button>
             </div>
         </form>
@@ -129,7 +129,7 @@
         formData.forEach((value, key) => formObject[key] = value);
 
         try {
-            let response = await fetch("/admin/addoffer", {
+            let response = await fetch("/admin/offers/add", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(formObject)
@@ -144,7 +144,7 @@
                     icon: "success",
                     confirmButtonText: "OK"
                 }).then(() => {
-                    window.location.href = "/admin/getoffers";
+                    window.location.href = "/admin/offers";
                 });
             } else {
                 showError(result.message || "Something went wrong!");

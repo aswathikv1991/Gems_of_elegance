@@ -35,7 +35,7 @@
                     <td><%= coupon.appliesTo === "cart" ? "Entire Cart" : coupon.category?.name || "N/A" %></td>
                     <td><%= new Date(coupon.expiryDate).toLocaleDateString() %></td>
                     <td>
-                        <a href="/admin/editcoupon/<%= coupon._id %>" class="btn edit">Edit</a>
+                        <a href="/admin/coupons/<%= coupon._id %>/edit" class="btn edit">Edit</a>
 
                         <button class="btn delete-coupon" data-id="<%= coupon._id %>">Delete</button>
                     </td>

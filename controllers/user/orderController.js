@@ -18,8 +18,7 @@ const orderSuccess = async (req, res,next) => {
 
         res.render("user/ordersuccess", { order,message });
     } catch (error) {
-        //console.error("Error loading order success page:", error);
-        //res.render("page404", { message: "Something went wrong!" });
+        
         next(error)
     }
 };
@@ -101,7 +100,7 @@ const getOrderDetails = async (req, res,next) => {
         res.render("user/orderDetails", { order });
     } catch (error) {
         console.error("Error fetching order details:", error);
-        //res.status(500).send("Internal Server Error");
+        
         next(error)
     }
 };
@@ -288,7 +287,7 @@ const requestReturn = async (req, res,next) => {
         next(error);
     }
 };
-const getWallet = async (req, res,next) => {
+const getWalletBalance = async (req, res,next) => {
     try {
         const userId = req.session.user;
         if (!userId) {
@@ -339,8 +338,7 @@ async function getWalletTransactions(req, res,next){
         transactions,
       });
     } catch (error) {
-      //console.error("Error fetching wallet transactions:", error);
-      //res.status(500).json({ success: false, message: "Error fetching transactions" });
+     
       next(error); 
     }
   }
@@ -461,8 +459,7 @@ doc.end();
           stream.on("finish", () => {
               res.download(filePath, fileName, (err) => {
                   if (err) {
-                      //console.error(err);
-                      //res.status(500).send("Error generating invoice");
+                   
                       return next(err);
                     }
                   fs.unlinkSync(filePath); // Delete the file after download
@@ -470,8 +467,7 @@ doc.end();
           });
   
       } catch (error) {
-          //console.error(error);
-          //res.status(500).send("Internal Server Error");
+         
           next(error);
       }
   };
@@ -480,4 +476,4 @@ doc.end();
   
 
 
-  module.exports={orderSuccess,getOrders,getOrderDetails,cancelOrder,requestReturn,getWallet,getWalletTransactions,dowloadInvoice}
+  module.exports={orderSuccess,getOrders,getOrderDetails,cancelOrder,requestReturn,getWalletBalance,getWalletTransactions,dowloadInvoice}

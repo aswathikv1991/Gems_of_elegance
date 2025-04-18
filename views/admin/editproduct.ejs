@@ -1,12 +1,12 @@
 <%- include("../../views/partials/admin/header") %>
 <link href="/css/editproduct.css" rel="stylesheet" type="text/css">
-
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <section class="content-main">
     <div class="content-header">
         <h2 class="content-title">Edit Product</h2>
     </div>
 
-    <form action="/admin/editproduct/<%= product._id %>" method="POST" enctype="multipart/form-data">
+    <form action="/admin/products/<%= product._id %>/edit" method="POST" enctype="multipart/form-data">
         <label>Product Name:</label>
         <input type="text" name="name" value="<%= product.name %>" required>
 
@@ -59,20 +59,38 @@
         <input type="file" name="newImages" multiple>
 
         <button type="submit">Update Product</button>
-        <button type="button" onclick="window.location.href='/admin/getproduct'">Cancel</button>
+        <button type="button" onclick="window.location.href='/admin/products'">Cancel</button>
     </form>
 </section>
-
-<script>
+<% if (successMessage) { %>
+    <script>
+        Swal.fire({
+            icon: 'success',
+            title: 'Success',
+            text: '<%= successMessage %>'
+        });
+    </script>
+    <% } %>
     
-    if (window.location.search.includes("updated=true")) {
-        setTimeout(() => {
-            alert("Product updated successfully!");
-            window.location.href = "/admin/getproduct"; 
-        }, 100); 
-    }
-</script>
+    <% if (errorMessage) { %>
+    <script>
+        Swal.fire({
+            icon: 'error',
+            title: 'Oops!',
+            text: '<%= errorMessage %>'
+        });
+    </script>
+    <% } %>
+    
 
 
 
-<%- include("../../views/partials/admin/footer") %>
+
+
+
+
+
+
+
+
+

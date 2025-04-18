@@ -50,7 +50,7 @@
                         Total Amount: <strong>₹<%=order.totalAmount %></strong>
                     </div>
                     <% } %>
-                        <a href="/order/<%= order._id %>" class="btn btn-primary">📦 View Order Details</a>
+                        <a href="/orders/<%= order._id %>" class="btn btn-primary">📦 View Order Details</a>
 
                         <a href="/products " class="btn btn-secondary">🛍️ Continue Shopping</a>
         </div>
@@ -102,7 +102,7 @@
                 let keyData = await keyResponse.json();
 
                 // Step 1: Create a Razorpay order
-                let response = await fetch("/create-razorpay-order", {
+                let response = await fetch("/razorpay/orders", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ amount: orderDetails.totalAmount }) // Send total amount to backend
@@ -165,7 +165,7 @@
                 razorpayInstance.on("payment.failed", function (response) {
                     alert("Payment failed. Please try again.");
                     console.log(response);
-                    location.href = `/order-success/${orderDetails.orderId}?message=PAYMENT_ERROR`;
+                    location.href = `/orders-success/${orderDetails.orderId}?message=PAYMENT_ERROR`;
                 });
 
             } catch (error) {
@@ -190,11 +190,11 @@
                     icon: "success",
                     confirmButtonText: "OK"
                 }).then(() => {
-                    location.href = `/order-success/${paymentDetails.orderId}`;
+                    location.href = `/orders-success/${paymentDetails.orderId}`;
                 });
             } else {
               
-                    location.href = `/order-success/${paymentDetails.orderId}?message=${result.message}`;
+                    location.href = `/orders-success/${paymentDetails.orderId}?message=${result.message}`;
                 }
                 
             }
