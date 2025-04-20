@@ -57,6 +57,7 @@ const getOrders = async (req, res,next) => {
         if (req.xhr) {
             // Return only the order list (without header/footer)
             return res.render("partials/user/ordersList", {
+          
                 orders,
                 currentPage: page,
                 totalPages,
@@ -219,9 +220,7 @@ if (order.paymentMethod !== "cod") {
 }
     }
     catch (error) {
-        //console.error("Error cancelling order:", error);
        
-        // res.status(500).json({ message: "Internal Server Error" });
         next(error);
     }
 };
@@ -323,25 +322,42 @@ const getWalletBalance = async (req, res,next) => {
 };
 
 
-async function getWalletTransactions(req, res,next){
-    try {
-      // Fetch all transactions for the given userId, sorted by most recent first
-      const transactions = await Wallet.find({ userId: req.session.user })
-        .sort({ createdAt: -1 })
-        .populate('orderId', '_id orderID')
 
-        .lean();
-  
-      // Return the transactions without pagination info
-      res.json({
-        success: true,
-        transactions,
-      });
-    } catch (error) {
-     
-      next(error); 
+    async function getWalletTransactions(req, res, next) {
+        try {
+            // Get pagination parameters from query string (default to page 1 with 10 items per page)
+            const page = parseInt(req.query.page) || 1;
+            const limit = parseInt(req.query.limit) || 5;
+            
+            // Calculate the number of documents to skip
+            const skip = (page - 1) * limit;
+    
+            // Get total count of transactions for pagination info
+            const total = await Wallet.countDocuments({ userId: req.session.user });
+    
+            // Fetch paginated transactions
+            const transactions = await Wallet.find({ userId: req.session.user })
+                .sort({ createdAt: -1 })
+                .skip(skip)
+                .limit(limit)
+                .populate('orderId', '_id orderID')
+                .lean();
+    
+            // Return transactions with pagination metadata
+            res.json({
+                success: true,
+                transactions,
+                pagination: {
+                    currentPage: page,
+                    totalPages: Math.ceil(total / limit),
+                    totalTransactions: total,
+                    transactionsPerPage: limit
+                }
+            });
+        } catch (error) {
+            next(error);
+        }
     }
-  }
 
   
  const dowloadInvoice=async (req, res,next) => {

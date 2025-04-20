@@ -37,12 +37,26 @@
                         <td>₹<%= (item.salePrice).toFixed(2) %></td>
                         
                         <td>
-                            <% if (item.status === "cancelled") { %>
-                                <span class="text-danger">Cancelled</span> <!-- 🚨 Display cancelled status -->
+                            <% if (
+                                (order.paymentStatus === "pending" || order.paymentStatus === "failed") &&
+                                item.status === "ordered"
+                                    ) { %>
+                            <span class="text-warning">Awaiting Payment</span>
+                            <% } else if (item.status === "cancelled") { %>
+                                <span class="text-danger">Cancelled</span>
+                            <% } else if (item.status === "ordered") { %>
+                                <span class="text-primary">Ordered</span>
+                            <% } else if (item.status === "shipped") { %>
+                                <span class="text-info">Shipped</span>
+                            <% } else if (item.status === "delivered") { %>
+                                <span class="text-success">Delivered</span>
+                            <% } else if (item.status === "returned") { %>
+                                <span class="text-warning">Returned</span>
                             <% } else { %>
-                                <span class="text-success">Confirmed</span> <!-- Show "Confirmed" -->
+                                <span class="text-muted">Unknown</span>
                             <% } %>
                         </td>
+                        
                         <% if (order.orderStatus === "pending" || order.orderStatus === "processing") { %>
                             <td>
                                 <% if (item.status !== "cancelled") { %>
@@ -81,8 +95,10 @@
                     Cancel Selected Items</button>
             </div>
         <% } %>
-
-        <a href="/orders" class="btn btn-secondary">⬅ Back to Orders</a>
+    <!--<a href="/orders" class="btn btn-secondary">⬅ Back to Orders</a>-->
+    <a href="/myaccount" class="btn btn-secondary" onclick="localStorage.setItem('openOrdersSection', 'true');">
+        ⬅ Back to Orders
+      </a>
         <a href="/download-invoice/<%= order._id %>" class="btn btn-primary">
 
             📄 Download Invoice

@@ -1,12 +1,13 @@
 <title>My Orders</title>
 <link rel="stylesheet" href="/css/order.css"> <!-- Add your CSS file -->
 
+<!-- partials/user/ordersList.ejs -->
 <div class="order-page">
     <div class="container">
         <h2>My Orders</h2>
 
         <!-- Search & Filter Form -->
-        <form method="GET" action="/orders" class="search-filter-form">
+        <form id="ordersFilterForm" class="search-filter-form">
             <input 
                 type="text" 
                 name="search" 
@@ -57,12 +58,12 @@
         <!-- Pagination -->
         <div class="pagination">
             <% if (currentPage > 1) { %>
-                <a href="?search=<%= search || '' %>&status=<%= status || 'All' %>&page=<%= currentPage - 1 %>">Previous</a>
+                <a href="#" class="page-link" data-page="<%= currentPage - 1 %>">Previous</a>
             <% } %>
             <span>Page <%= currentPage %> of <%= totalPages %></span>
             <% if (currentPage < totalPages) { %>
-                <a href="?search=<%= search || '' %>&status=<%= status || 'All' %>&page=<%= currentPage + 1 %>">Next</a>
+                <a href="#" class="page-link" data-page="<%= currentPage + 1 %>">Next</a>
             <% } %>
         </div>
     </div>
-</div> <!-- Closing .order-page -->
+</div>

@@ -159,77 +159,158 @@ async function loadWalletBalance() {
 }
 
 
-async function loadTransactions() {
-  try {
-    const response = await fetch("/wallet/transactions");  // Fetch all transactions without pagination
-    const data = await response.json();
 
-    const walletSection = document.getElementById("wallet");
+async function loadTransactions(page = 1, limit = 5) {
+    try {
+        const response = await fetch(`/wallet/transactions?page=${page}&limit=${limit}`);
+        const data = await response.json();
+        
+        const walletSection = document.getElementById("wallet");
+        if (!walletSection) return;
 
-    if (data.success) {
-      // Build the transaction table
-      let tableHTML = `
-        <h3>Transaction History</h3>
-        <table>
-          <thead>
-            <tr>
-              <th>Date</th>
-              <th>Amount</th>
-              <th>Type</th>
-              <th>Source</th>
-              <th>Order ID</th>
-              <th>Action</th>
-            </tr>
-          </thead>
-          <tbody>
-      `;
-
-      data.transactions.forEach(transaction => {
-        let orderLink = 'N/A'; // Default value when no order is associated
-        let actionButton = ''; // Default empty button
-
-        // If the transaction is a "Credit" and has an associated orderId, create a button
-        if (transaction.type === 'Credit' && transaction.orderId) {
-          orderLink = transaction.orderId._id;
-          actionButton = `<button onclick="window.location.href='/orders/${orderLink}'">View Order</button>`;
+        // Clear ALL previous transaction content
+        const existingContent = walletSection.querySelector('.transactions-content');
+        if (existingContent) {
+            existingContent.remove();
         }
 
-        tableHTML += `
-          <tr>
-            <td>${new Date(transaction.createdAt).toLocaleDateString()}</td>
-            <td>₹${transaction.amount.toFixed(2)}</td>
-            <td>${transaction.type}</td>
-            <td>${transaction.source}</td>
-           <td>${transaction.orderId ? transaction.orderId.orderID : 'N/A'}</td>
-            <td>${actionButton}</td>
-          </tr>
-        `;
-      });
+        // Create new container for all transaction content
+        const contentDiv = document.createElement('div');
+        contentDiv.className = 'transactions-content';
+        
+        // Build the transaction table
+        let tableHTML = `
+            <h3>Transaction History</h3>
+            <div class="table-responsive">
+                <table id="transactionsTable" class="transaction-table">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Amount</th>
+                            <th>Type</th>
+                            <th>Source</th>
+                            <th>Order ID</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>`;
 
-      tableHTML += `</tbody></table>`;
+        data.transactions.forEach(transaction => {
+            const orderLink = transaction.orderId?.orderID || 'N/A';
+            const actionButton = transaction.orderId ? 
+                `<button class="view-order-btn" onclick="window.location.href='/orders/${transaction.orderId._id}'">View Order</button>` : '';
+            
+            tableHTML += `
+                <tr>
+                    <td>${new Date(transaction.createdAt).toLocaleDateString()}</td>
+                    <td class="${transaction.type.toLowerCase()}">₹${transaction.amount.toFixed(2)}</td>
+                    <td>${transaction.type}</td>
+                    <td>${transaction.source}</td>
+                    <td>${orderLink}</td>
+                    <td>${actionButton}</td>
+                </tr>`;
+        });
 
-      walletSection.innerHTML += tableHTML; // Append the transaction table below wallet balance
-    } else {
-      walletSection.innerHTML += "<p>No transactions found.</p>";
+        tableHTML += `</tbody></table></div>`;
+
+        // Add pagination controls if needed
+        if (data.pagination && data.pagination.totalPages > 1) {
+            tableHTML += `
+                <div id="transactionsPagination" class="pagination-container">
+                    <div class="pagination-info">
+                        Showing ${((page - 1) * limit) + 1} 
+                        to ${Math.min(page * limit, data.pagination.totalTransactions)} 
+                        of ${data.pagination.totalTransactions} transactions
+                    </div>
+                    <div class="pagination-controls">
+                        ${page > 1 ? 
+                            `<button class="pagination-btn" onclick="loadTransactions(${page - 1}, ${limit})">
+                                &laquo; Previous
+                            </button>` : ''}
+                        
+                        ${Array.from({ length: Math.min(5, data.pagination.totalPages) }, (_, i) => {
+                            const pageNum = page <= 3 ? i + 1 : 
+                                page >= data.pagination.totalPages - 2 ? 
+                                data.pagination.totalPages - 4 + i : page - 2 + i;
+                            return pageNum >= 1 && pageNum <= data.pagination.totalPages ?
+                                `<button class="pagination-btn ${page === pageNum ? 'active' : ''}" 
+                                    onclick="loadTransactions(${pageNum}, ${limit})">
+                                    ${pageNum}
+                                </button>` : '';
+                        }).join('')}
+                        
+                        ${page < data.pagination.totalPages ? 
+                            `<button class="pagination-btn" onclick="loadTransactions(${page + 1}, ${limit})">
+                                Next &raquo;
+                            </button>` : ''}
+                    </div>
+                </div>`;
+        }
+
+        contentDiv.innerHTML = tableHTML;
+        walletSection.appendChild(contentDiv);
+
+    } catch (error) {
+        console.error("Error loading transactions:", error);
+        const walletSection = document.getElementById("wallet");
+        if (walletSection) {
+            walletSection.innerHTML += "<p>Error loading transactions.</p>";
+        }
     }
-  } catch (error) {
-    console.error("Error loading transactions:", error);
-    document.getElementById("wallet").innerHTML = "<p>Error loading transactions.</p>";
-  }
 }
+document.addEventListener("DOMContentLoaded", function() {
+  if (localStorage.getItem('openOrdersSection') === 'true') {
+    showSection('orders');
+    loadOrders();
+    localStorage.removeItem('openOrdersSection'); // Clear the flag
+  }
+});
 
-
-async function loadOrders() {
+async function loadOrders(page = 1, search = '', status = 'All') {
     try {
-        const response = await fetch("/orders", { headers: { "X-Requested-With": "XMLHttpRequest" } });
+        const params = new URLSearchParams({
+            page,
+            search,
+            status
+        });
+        
+        const response = await fetch(`/orders?${params.toString()}`, { 
+            headers: { "X-Requested-With": "XMLHttpRequest" } 
+        });
         const data = await response.text();
         document.getElementById("orders").innerHTML = data;
+        
+        // Add event listeners after loading
+        setupOrderEvents();
     } catch (error) {
         console.error("Error fetching orders:", error);
         document.getElementById("orders").innerHTML = "<p>Error loading orders.</p>";
     }
 }
 
+function setupOrderEvents() {
+    // Pagination click handler
+    document.querySelectorAll('.page-link').forEach(link => {
+        link.addEventListener('click', function(e) {
+            e.preventDefault();
+            const page = this.dataset.page;
+            const search = document.querySelector('#ordersFilterForm input[name="search"]')?.value || '';
+            const status = document.querySelector('#ordersFilterForm select[name="status"]')?.value || 'All';
+            loadOrders(page, search, status);
+        });
+    });
+
+    // Filter form submit handler
+    const filterForm = document.getElementById('ordersFilterForm');
+    if (filterForm) {
+        filterForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const search = this.querySelector('input[name="search"]').value;
+            const status = this.querySelector('select[name="status"]').value;
+            loadOrders(1, search, status);
+        });
+    }
+}
 
 function redirectToEdit(addressId) {
     window.location.href = `/addresses/${addressId}/edit`;
